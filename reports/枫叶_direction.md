@@ -1,6 +1,6 @@
 # 枫叶 方向预测评估（Direction）
 
-> 评估时间：2026-09-04 | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）
+> 评估时间：2026-09-04 | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）
 > 帖子总数：2916 条
 > 信号总数：813 条（计分 725 + 不计分 80 + 待验证 2 + 无效-过时 6 + 报错 0）
 > 评价口径：指标/排名样本仅 idx=上证指数（718 条）；上证以外计分 7 条（创业板指/科创50/上证50/双创 等）保留全量计数、不参与本次评价

@@ -1,6 +1,6 @@
 # 趋势为王 方向预测评估（Direction）
 
-> 评估时间：2026-09-04 | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）
+> 评估时间：2026-09-04 | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）
 > 帖子总数：816 条
 > 信号总数：461 条（计分 416 + 不计分 44 + 待验证 0 + 无效-过时 1 + 报错 0）
 > 评价口径：指标/排名样本仅 idx=上证指数（415 条）；上证以外计分 1 条（创业板指/科创50/上证50/双创 等）保留全量计数、不参与本次评价

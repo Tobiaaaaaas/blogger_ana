@@ -1,6 +1,6 @@
 # 知行合一 方向预测评估（Direction）
 
-> 评估时间：2026-09-04 | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）
+> 评估时间：2026-09-04 | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）
 > 帖子总数：299 条
 > 信号总数：77 条（计分 63 + 不计分 10 + 待验证 3 + 无效-过时 1 + 报错 0）
 

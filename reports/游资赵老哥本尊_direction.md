@@ -1,6 +1,6 @@
 # 游资赵老哥本尊 方向预测评估（Direction）
 
-> 评估时间：2026-09-04 | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）
+> 评估时间：2026-09-04 | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）
 > 帖子总数：696 条
 > 信号总数：290 条（计分 252 + 不计分 38 + 待验证 0 + 无效-过时 0 + 报错 0）
 > 评价口径：指标/排名样本仅 idx=上证指数（249 条）；上证以外计分 3 条（创业板指/科创50/上证50/双创 等）保留全量计数、不参与本次评价

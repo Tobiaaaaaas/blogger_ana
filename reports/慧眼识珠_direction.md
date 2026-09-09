@@ -1,6 +1,6 @@
 # 慧眼识珠 方向预测评估（Direction）
 
-> 评估时间：2026-09-04 | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）
+> 评估时间：2026-09-04 | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）
 > 帖子总数：635 条
 > 信号总数：362 条（计分 334 + 不计分 25 + 待验证 3 + 无效-过时 0 + 报错 0）
 
