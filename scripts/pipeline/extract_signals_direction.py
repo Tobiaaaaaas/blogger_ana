@@ -70,28 +70,27 @@ RETRY_DELAY = o_ds.RETRY_DELAY
 API_CALL_DEADLINE = o_ds.API_CALL_DEADLINE
 call_json = o_ds.call_json  # 签名 (client, system_prompt, user_message, label, thinking=) 不变
 
-VALID_IDX = o_schema.VALID_IDX
-VALID_CAT = o_schema.VALID_CAT
-SPEC_RE = o_schema.SPEC_RE
-
-
 # ── System Prompt（2026-09-08 起用单一共享逐帖标注 prompt，见 opinion/prompts.py——
 # SKILL.md §1~§8 规则精简版 + LAYER quote 纪律；输出键 rows（含 horizon 展示词），
 # 报告侧 normalize 只取 pub/d/s/idx/spec/summary/cat，horizon/quote 忽略）──
 SYSTEM_PROMPT = o_prompts.ANNOTATION_SYSTEM_PROMPT
 
 # 2026-09-09 报告链指令：周期交易日口径（D3）+ 发帖现值注记用法/指数识别（D5）+ target 语义收窄 +
-# 报告侧无方向教义 spec 口径。方向语义教义主体（条件式/先A后B形态归无方向、加减仓=方向同义）已按用户
-# 裁决上移进共享 ANNOTATION_SYSTEM_PROMPT（双链一致）——接受共享 prompt 指纹变更 = 推送 rows_cache 作废
-# 全量重抽一次；本后缀只补报告特有口径，不再承载共享教义。批间同文 → 利于 DeepSeek prompt 缓存。
-_REPORT_EXTRACT_SUFFIX = ("""
+# 报告侧无方向教义 spec 口径。无方向教义主体是单一同源常量 DOCTRINE_NO_DIRECTION（B3，见 opinion.prompts
+# ——与共享 ANNOTATION_SYSTEM_PROMPT 同一文本），本后缀插值它（改教义 → 标注指纹变 → 推送 rows_cache
+# 作废重抽，机制接受）；下方【加减仓…】段只补报告特有的 spec 落地口径。批间同文 → 利于 DeepSeek prompt 缓存。
+_REPORT_EXTRACT_SUFFIX = """
 【周期口径】spec 一律按**交易日**理解：t1=发帖后的第 1 个交易日（周末/假日发的"明天"仍记 t1，日历换算由系统做）；"后天/两日后"→t2；"N 天后/未来几天"这类自然日表述 → 填对应的 tN（系统按 N 个交易日计）。本周→week、下周→nweek（特指下周一才用 nweek_first）、月底前→month、下月→nmonth；今年/下半年/年度/长期/未来几个月 → long（unscored）。只填 spec 档位，不要写具体日期。
 
 【发帖时刻行情注记】每条帖子下方可能附一行「[行情@发帖 …]」，列出该帖**发帖时刻**各指数现值（上证指数/创业板指/沪深300/上证50/中证500/中证1000/科创50）。用它做两件事：① 指数识别——某点位/方向句提到哪个指数，按注记里的指数现值对照（帖内未点名指数的，默认上证指数）；② 定多空——「博主所说点位 vs 注记里该指数现值」：说涨到/站上 4250 而现值 3940 → d=1 看多；说跌向/破位 3900 而现值 3940 → d=-1 看空。**用注记现值判断，不要凭旧记忆**；注记缺失（如行情数据未覆盖）的帖按正文语境推断。
 
-【target 目标位（可选键，只加在 rows 的每条里）】系统标准键之外，你**可以在该行额外多输出一个 target 键**（值为数字，纯数值不带单位）——仅当该行是一句**方向性移动目标**，博主预测价格将**移动到**的具体点位（"站上4250""目标3500""跌至3880""反弹看到4000"）才填，且 d 与该移动方向一致（看多到高位 / 看空到低位）。**条件式/区间句 = 无方向、不产行（target 当然不填）**："守住3900看反弹""回踩3900企稳继续看多""3900是多空分水岭""在3900-3950区间震荡"——这些是条件式前提或区间锚，博主并未无条件承诺涨/跌（2026-09-09 教义：**一切条件式无方向**，不再照取分支观点安 d）→ 该句**不进 rows、不给 d、不填 target**；该帖若仅此内容 → no_view"无明确方向"。只有**不依赖条件的净方向移动目标**（"站上4250""跌至3880""反弹目标4200"）才成行填 d 并 target。拿不准就不填；宁可少填，绝不把条件位当方向行或 target。示例行（其他标准键照常）：{"post_n":0,"d":1,"s":1,"idx":"上证指数","spec":"t2","cat":"scored","horizon":"近日","quote":"反弹看到4200点以上","summary":"看多，反弹目标4200","target":4200}。
+【target 目标位（可选键，只加在 rows 的每条里）】系统标准键之外，你**可以在该行额外多输出一个 target 键**（值为数字，纯数值不带单位）——仅当该行是一句**方向性移动目标**，博主预测价格将**移动到**的具体点位（"站上4250""目标3500""跌至3880""反弹看到4000"）才填，且 d 与该移动方向一致（看多到高位 / 看空到低位）。**条件式/区间句 = 无方向、不产行（target 当然不填）**："守住3900看反弹""回踩3900企稳继续看多""3900是多空分水岭""在3900-3950区间震荡"——这些是条件式前提或区间锚，博主并未无条件承诺涨/跌（2026-09-09 教义：**一切条件式无方向**，不再照取分支观点安 d）→ 该句**不进 rows、不给 d、不填 target**；该帖若仅此内容 → no_view"无明确方向"。只有**无条件净方向移动目标**（"站上4250""跌至3880""反弹目标4200"）才成行填 d 并 target。拿不准就不填；宁可少填，绝不把条件位当方向行或 target。示例行（其他标准键照常）：{"post_n":0,"d":1,"s":1,"idx":"上证指数","spec":"t2","cat":"scored","horizon":"近日","quote":"反弹看到4200点以上","summary":"看多，反弹目标4200","target":4200}。
 
-【条件式/形态与加减仓（与共享 prompt 同教义；报告侧补 spec 口径）】"破了…就…""守住…才能…""…是多空分水岭""放量就…否则…"等条件式，及"冲高回落/高开低走/探底回升"等只描述先A后B路径、无净方向的句子 → **无方向不产行**（整帖仅此则 no_view"无明确方向"）。形态句后若博主另给**无条件净方向/收法**（"冲高回落、反弹结束二次探底"→看空；"低开高走收大阳"→看多）→ 只提取该净方向句。**加减仓/清仓/止盈/重仓等操作动词 = 方向同义**（减/清/止盈→看空，加/重/补/抄底→看多）：给 d；有明确时间词 → 按周期计分；**无时间词 → 按既有"无明确周期有明确方向"口径 spec=t5 计分**（不要给 long/unscored，那是年度/中长期用）；持仓**状态**自述（还剩几成/满仓持股）不算方向。""")
+【无方向教义（单一同源，与共享 ANNOTATION prompt 同一文本，2026-09-09 B3）】
+__DOCTRINE_NO_DIRECTION__
+
+【加减仓与无时间词（报告侧 spec 落地口径，教义同上）】加减仓/清仓/止盈/重仓等**操作动词 = 方向同义**（减/清/止盈→看空，加/重/补/抄底→看多）：给 d；有明确时间词 → 按周期计分；**无时间词 → 按"无明确周期有方向"口径 spec=t5 计分**（不要给 long/unscored，那是年度/中长期用）；只有仓位**状态**自述不算方向。
+""".replace("__DOCTRINE_NO_DIRECTION__", o_prompts.DOCTRINE_NO_DIRECTION)
 
 # 报告批逐帖到案契约（L1 充分性门；同推送 DISPOSITION_SUFFIX 的结构，report 侧独立后缀）。
 # 枚举复用 opinion/schema.NO_VIEW_REASONS。
@@ -106,9 +105,12 @@ VERIFY_SYSTEM_PROMPT = """你是信号审查助手。你会收到「已提取信
 ## 第一步：判定主结论句
 先找到帖子的**主结论句**——形如「周三：大盘探底回升，我看涨」「明天：只卖不买」「下周一我看跌」等**带明确方向**的句子。主结论句是全帖最高优先级的预测：**任何条件句、风险提示、走势分类、点位预演都不能替代或覆盖主结论句**。若整帖唯一可提取内容就是条件句/先A后B形态（守/破/分水岭/冲高回落…）、并无带方向的独立无条件主结论 → 该帖无主结论（按第 2 条 drop，不把分支偏好当方向）。若提取信号与主结论句方向/周期不一致 → 必须 action=fix，改为主结论句的方向/周期。
 
+## 教义（单一同源，与推送复核同一文本，2026-09-09 B3；编号沿用推送复核判定要点 6/7）
+__DOCTRINE_REVIEW__
+
 ## 其他标准
-1. **周期支持**：spec 必须对应原文**明确出现**的周期词。**原文无明确周期但有明确方向**（"随时""大趋势向上""肯定涨但不知道什么时候""上涨没结束"等结构/无时限表述）→ 不能给 long 单列，fix 为 spec=t5、cat=scored（验证终点=信号日之后第 5 个交易日，正常计分）。**目标点位无时间承诺**（"目标是X点""背驰点在4423"）→ fix 为 spec=long、cat=unscored（不填 s）。**有明确点位 + 明确周期**（"明天站上4100""下周回踩3800"）→ fix 为 scored 按周期计分，点位高于参考价=看涨 d=1、低于=看跌 d=-1。**年度预测**（"今年/下半年/全年/2026"）与**中长期/远期**（"未来几个月""三年""长期来看"）→ fix 为 spec=long、cat=unscored。**加减仓/清仓/止盈/重仓等操作动作本身是方向**（减/清/止盈→空，加/重/补/抄底→多）：有明确周期 → 按周期 fix 为 scored；无明确周期 → fix 为 spec=t5、cat=scored（既有无周期口径，不给 long/unscored）；**只有仓位状态自述**（还剩几成/满仓持股）才 drop。
-2. **可打分性**：只有形态描述（震荡/筑底/洗盘/冲高回落/支撑位）而无明确方向态度 → drop（"震荡下跌/震荡上涨"除外，属明确方向）；**模棱两可/方向不明（"可能涨也可能跌""边走边看""不好说""即将变盘"）→ drop（连单列都不记）；纯复盘/对过去的分析（回顾行情、评价已发生走势、事后总结）→ drop；状态描述（"已经进入调整阶段""顶背离已出现"）→ drop**；仓位状态自述 → drop。**条件式硬凑的方向**（守/破/分水岭/"放量就…否则…"被压成 d）而帖无独立无条件主结论 → drop（帖有独立无条件主结论 → fix 到该部分）；形态句后的**无条件净方向句**（"反弹结束重新二次探底""低开高走收大阳"）属主结论，按第一步 keep/fix、不 drop。
+1. **周期支持**：spec 必须对应原文**明确出现**的周期词。**原文无明确周期但有明确方向**（"随时""大趋势向上""肯定涨但不知道什么时候""上涨没结束"等结构/无时限表述）→ 不能给 long 单列，fix 为 spec=t5、cat=scored（验证终点=信号日之后第 5 个交易日，正常计分）。**目标点位无时间承诺**（"目标是X点""背驰点在4423"）→ fix 为 spec=long、cat=unscored（不填 s）。**有明确点位 + 明确周期**（"明天站上4100""下周回踩3800"）→ fix 为 scored 按周期计分，点位高于参考价=看涨 d=1、低于=看跌 d=-1。**年度预测**（"今年/下半年/全年/2026"）与**中长期/远期**（"未来几个月""三年""长期来看"）→ fix 为 spec=long、cat=unscored。**加减仓等操作动作**（见教义节 7：操作=方向、仓位状态≠方向）：有明确周期 → 按周期 fix 为 scored；无明确周期 → fix 为 spec=t5、cat=scored（既有无周期口径，不给 long/unscored）；只有仓位状态自述才 drop。
+2. **可打分性**：只有形态描述（震荡/筑底/洗盘/冲高回落/支撑位）而无明确方向态度 → drop（"震荡下跌/震荡上涨"除外，属明确方向）；**模棱两可/方向不明（"可能涨也可能跌""边走边看""不好说""即将变盘"）→ drop（连单列都不记）；纯复盘/对过去的分析（回顾行情、评价已发生走势、事后总结）→ drop；状态描述（"已经进入调整阶段""顶背离已出现"）→ drop**；仓位状态自述 → drop。条件式/形态主句的硬凑 d 与形态句后的净方向句 → 一律按教义节 6/7 处置（硬凑 d 且帖无独立无条件主结论 → drop；有 → fix 到该部分；净方向句属主结论 → 按第一步 keep/fix、不 drop）。
 3. **盘中/盘前"今天"**："今天/今日/下午/午后/尾盘"预测 → spec=today、cat=scored（**无论盘前/盘中/盘后/非交易日发布都保持**，是否过时由打分引擎自动判定，审查阶段不做无效判断）。
 4. **补加**：原文有比已提取信号**更明确或被漏掉**的预测结论 → 放入 add。典型遗漏：① 同一帖子里还有**第二个观点**（不同方向或不同周期，如"短期看空、长期看多"只提取了短期看空 → add 长期看多那条：long/unscored）；② 应属 t5（无周期有方向）或 long/unscored 而未被提取。
 5. **保留**：信号方向与周期都有原文支持、且就是主结论句 → action=keep。
@@ -121,7 +123,8 @@ VERIFY_SYSTEM_PROMPT = """你是信号审查助手。你会收到「已提取信
 - action=fix：输出修正后的完整字段（d/s/spec/cat/summary）
 - action=drop：只输出 vidx/sig/action/reason
 - cat=scored 时 spec、s 必填；cat=unscored 时 spec=long、不填 s
-- 无修正 → verdicts 为空数组；无补加 → add 为空数组；都无 → {"verdicts":[],"add":[]}"""
+- 无修正 → verdicts 为空数组；无补加 → add 为空数组；都无 → {"verdicts":[],"add":[]}""".replace(
+    "__DOCTRINE_REVIEW__", o_prompts.DOCTRINE_REVIEW)  # B3：复核教义条同源，与推送 REVIEW 共享
 
 
 def load_posts_and_bodies(blogger):
@@ -203,64 +206,21 @@ def _parse_target(row):
 def normalize_signal(row, post):
     """把一条候选信号行归一化为 Direction schema。返回 (sig, None) 或 (None, 原因)。
 
-    2026-09-09 复核加固：① scored spec 在 SPEC_RE 语法之上再过 spec_sane 语义域（拒
-    t0/t99/d:2026-13-99 之类"自洽但荒谬"——语料已见 8 条域外，域外会让打分端点崩溃，D1）；
-    ② 收 target 可选字段（校验失败弃字段不弃行）。"""
+    2026-09-09 B1：核心校验/归一（d/cat/idx 别名/spec 语义域/spec=long→unscored/s/summary）
+    委派 opinion.schema.to_core——与推送侧 annotate.to_canonical **同判同改**（双链此前平行
+    实现行校验，含本文件内联的 idx 别名表，有漂移风险）；本函数只保留报告独有富化：发布日
+    ≥SIGNAL_START 过滤、target 可选字段（校验失败弃字段不弃行）、pub 全文回填。拒因标签来自
+    to_core（D1 spec_sane 语义域在此一并拒绝，拒因 console/统计用，行是否拒由 to_core 定）。"""
     pub = (post.get("publish_date") or "").strip()
     if not pub or pub[:10] < SIGNAL_START:
         return None, "非 2026"
-
-    d = row.get("d")
-    if isinstance(d, str):
-        try:
-            d = int(d)
-        except ValueError:
-            d = None
-    if d not in (1, -1):
-        return None, "d 非法"
-
-    cat = row.get("cat") or "scored"
-    if cat not in VALID_CAT:
-        return None, f"cat 非法: {cat}"
-
-    idx = row.get("idx") or "上证指数"
-    if idx in ("上证综指", "上证", "综指"):
-        idx = "上证指数"
-    if idx not in VALID_IDX:
-        return None, f"idx 非法: {idx}"
-
-    summary = (row.get("summary") or "").strip()
-    if not summary:
-        return None, "summary 缺失"
-    summary = summary[:50]
-
-    sig = {"pub": pub, "d": d, "idx": idx, "summary": summary}
-    if cat == "scored":
-        spec = str(row.get("spec") or "")
-        if spec == "long":
-            # spec=long 恒不计分（SKILL §3：目标点位/年度/中长期）→ 强制转 unscored
-            sig["spec"] = "long"
-            sig["cat"] = "unscored"
-        else:
-            if not SPEC_RE.match(spec):
-                return None, f"spec 非法/缺失: {spec or '(空)'}"
-            if not o_schema.spec_sane(spec):
-                # D1：SPEC_RE 只查形状；语义域校验留给 spec_sane（语法与域分开记）
-                return None, f"spec 语义域外: {spec}"
-            s = row.get("s", 1)
-            try:
-                s = int(s)
-            except (TypeError, ValueError):
-                s = 1
-            if s not in (1, 2):
-                s = 1
-            sig["s"] = s
-            sig["spec"] = spec
-            sig["cat"] = "scored"
-    else:
-        # unscored：spec 统一归一为 long（供报告展示"长期/不计分"）
-        sig["spec"] = "long"
-        sig["cat"] = "unscored"
+    core, reason = o_schema.to_core(row)
+    if core is None:
+        return None, reason
+    sig = {"pub": pub, "d": core["d"], "idx": core["idx"],
+           "summary": core["summary"], "spec": core["spec"], "cat": core["cat"]}
+    if core["cat"] == "scored":
+        sig["s"] = core["s"]
     target = _parse_target(row)
     if target is not None:
         sig["target"] = target

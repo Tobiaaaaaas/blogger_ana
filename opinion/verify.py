@@ -13,7 +13,7 @@ keep/fix/drop 结构与主结论句 doctrine，字段用 canonical（idx/spec/ho
 """
 import logging
 
-from . import ds, schema, text
+from . import ds, prompts, schema, text
 
 log = logging.getLogger("opinion.verify")
 
@@ -31,15 +31,15 @@ REVIEW_SYSTEM_PROMPT = """你是金融内容复核助手。你会收到「一条
 3. **周期/时间词**：horizon 与 quote 时间词须一致（明天→quote 含 明天/明日 或明确次日；本周→本周；近日→未来几天等）。quote 丢时间词却标 明天 → 能逐字补成载时间词的原文句则 **fix quote**（补原话勿改写）；无法逐字补 → **drop**。
 4. **quote 逐字**：quote 必须逐字来自帖子（可 … 跨段）；改写/润色/拼凑/编造 → **fix** 为原文逐字片段；fix 后仍非逐字 → **drop**。
 5. summary ≤50 字、忠于主结论。
-6. **条件式与先A后B形态不硬凑 d（2026-09-09）**：行的方向若是从条件式（守/破/分水岭/"放量就…否则…"）或先A后B路径形态（冲高回落/高开低走/探底回升…）里压出来的 ±1，而帖内无独立**无条件**主结论 → **drop**；帖内有独立无条件主结论 → **fix** 摘要/引文到那部分（条件/形态只是背景，不承载 d）。
-7. **净方向 vs 操作句 vs 状态句（2026-09-09）**：句首带形态词但后接**无条件净方向/收法承诺**（"反弹结束重新二次探底"→空、"低开高走收大阳"→多、"冲高回落不改波段向上"→波段向上）→ 属明确主结论，按主结论句 doctrine keep/fix，d 取净方向。原文是加减仓/清仓/止盈/重仓等**操作动作**（减/清/止盈→空，加/重/补/抄底→多）→ 方向成立，keep（无时间词的按无明确周期口径：horizon=未提 归波段）；原文只是仓位**状态**自述（"还剩4成""满仓持股"）却产了 d 行 → **drop**。
+__DOCTRINE_REVIEW__
 
 ## 输出
 只返回一个 JSON 对象：
 {"verdict": {"action": "keep"|"fix"|"drop", "d": 1|-1, "s": 1|2, "idx": "...", "spec": "...", "horizon": "...", "quote": "(fix 时必填，逐字)", "summary": "(fix 时必填)", "reason": "一句话"}}
 - action=keep：d/s/idx/spec/horizon 回填原值即可，quote/summary 可不给。
 - action=drop：只给 action/reason。
-无任何其他文字。"""
+无任何其他文字。""".replace(
+    "__DOCTRINE_REVIEW__", prompts.DOCTRINE_REVIEW)  # B3：复核教义条(6/7)同源，与报告 VERIFY 共享
 
 
 def _int(v, default=None):

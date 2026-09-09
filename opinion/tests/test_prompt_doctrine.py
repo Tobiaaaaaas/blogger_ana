@@ -89,4 +89,16 @@ _has(V_REPORT,
      "仓位状态自述", "还剩几成/满仓持股",
      label="报告 verify 新教义")
 
+# ── B3 教义单一同源：标注/报告后缀嵌 DOCTRINE_NO_DIRECTION，双复核嵌 DOCTRINE_REVIEW，
+#    哨兵零泄漏（改 prompts 常量一处 → 四处文本同变，杜绝逐地手改漂移）──
+D_NO = o_prompts.DOCTRINE_NO_DIRECTION
+D_REV = o_prompts.DOCTRINE_REVIEW
+assert D_NO in P, "共享 ANNOTATION prompt 必须内嵌 DOCTRINE_NO_DIRECTION"
+assert D_NO in SUFFIX, "报告 extract 后缀必须插值 DOCTRINE_NO_DIRECTION"
+assert D_REV in V_PUSH and D_REV in V_REPORT, "推送 REVIEW 与报告 VERIFY 必须同嵌 DOCTRINE_REVIEW"
+for _t, _n in [(P, "共享 prompt"), (V_PUSH, "推送 verify"), (V_REPORT, "报告 verify"), (SUFFIX, "报告后缀")]:
+    assert "__DOCTRINE" not in _t, f"{_n} 残留教义哨兵（replace 未生效）"
+assert o_prompts.ANNOTATION_SYSTEM_PROMPT.count("## 无方向：条件式与先A后B形态") == 1
+print("[PASS] B3 同源：DOCTRINE_NO_DIRECTION/REVIEW 插值四处 + 哨兵零泄漏")
+
 print("\n全部方向教义文本回归通过 ✅")

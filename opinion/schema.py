@@ -55,6 +55,57 @@ def spec_sane(spec):
     return True  # today/week/nweek/nweek_first/month/nmonth/long 等具名词汇
 
 
+def to_core(row):
+    """行核心字段校验/归一（2026-09-09 B1 单源）——推送 to_canonical 与报告 normalize_signal 共用。
+
+    判定并归一 d/s/idx/spec/cat/summary：双链对同一模型行必须**同判同改**（此前两处平行实现
+    校验，有漂移风险）。规则与旧两路逐字对齐：spec=long→unscored 恒转化；scored spec 过
+    SPEC_RE+spec_sane 语义域；unscored 不校验 spec（行归一为 long）；idx 走 IDX_ALIAS；
+    summary 截 50。返回 (core, None) 或 (None, 拒因标签)——拒因仅诊断（console/统计用），
+    **是否接受行的唯一权威**是本函数返 None（两路都不带原因直通拒行）。
+    core = {"d", "s"(仅 scored), "idx", "spec", "cat", "summary"}。
+    """
+    d = row.get("d")
+    if not isinstance(d, int):
+        try:
+            d = int(d) if d is not None and str(d).strip() else None
+        except (TypeError, ValueError):
+            d = None
+    if d not in (1, -1):
+        return None, "d 非法"
+    cat = row.get("cat") or "scored"
+    if cat not in VALID_CAT:
+        return None, f"cat 非法: {cat}"
+    idx = str(row.get("idx") or "上证指数").strip()
+    idx = IDX_ALIAS.get(idx, idx)
+    if idx not in VALID_IDX:
+        return None, f"idx 非法: {idx}"
+    summary = (row.get("summary") or "").strip()
+    if not summary:
+        return None, "summary 缺失"
+    spec = str(row.get("spec") or "").strip()
+    if spec == "long":
+        cat = "unscored"          # spec=long 恒不计分 → 强制转 unscored（与旧两路同向）
+    if cat == "scored":
+        if not SPEC_RE.match(spec):
+            return None, f"spec 非法/缺失: {spec or '(空)'}"
+        if not spec_sane(spec):
+            return None, f"spec 语义域外: {spec}"
+        s = row.get("s", 1)
+        if not isinstance(s, int):
+            try:
+                s = int(s)
+            except (TypeError, ValueError):
+                s = 1
+        if s not in (1, 2):
+            s = 1
+    else:
+        s = None
+        spec = "long"
+    return {"d": d, "s": s, "idx": idx, "spec": spec, "cat": cat,
+            "summary": summary[:50]}, None
+
+
 PANEL_KEYS = ("short", "swing")
 
 # 各层 horizon 白名单（坍缩按词判层，取代 v16 LAYER prompt 的 LLM 判层散文）

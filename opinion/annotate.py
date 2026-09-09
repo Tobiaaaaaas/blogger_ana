@@ -158,42 +158,20 @@ def render_batch(blogger, posts, bodies=None, style="head", limit=1200, notes=No
 
 
 def to_canonical(row, post, blogger, post_n):
-    """模型行 → 规范行（系统回填身份/时间；字段校验同报告侧 normalize_signal 同向）。
+    """模型行 → 规范行（系统回填身份/时间；核心字段校验/归一委派 schema.to_core——2026-09-09
+    B1 单源，与报告侧 normalize_signal 同判同改，改动须过 test_chain_alignment / 两路直测）。
 
     返回规范行 dict；非法返回 None（d 非 ±1、idx 非法、spec 缺失/非法、summary 缺失、
     spec=long 强制转 unscored）。pub/quote_ts 以帖子为准——模型不写时间（坑：引文时间错位）。
     """
     if not isinstance(row, dict):
         return None
-    d = _int(row.get("d"))
-    if d not in (1, -1):
+    core, _ = schema.to_core(row)
+    if core is None:
         return None
-    cat = row.get("cat") or "scored"
-    if cat not in schema.VALID_CAT:
-        return None
-    spec = str(row.get("spec") or "").strip()
-    summary = (row.get("summary") or "").strip()
-    if not summary:
-        return None
-    idx = str(row.get("idx") or "上证指数").strip()
-    idx = schema.IDX_ALIAS.get(idx, idx)
-    if idx not in schema.VALID_IDX:
-        return None
-    # spec=long 恒不计分（SKILL §3：目标点位/年度/中长期）→ 强制转 unscored（同 normalize）
-    if spec == "long" and cat == "scored":
-        cat = "unscored"
-    # spec 语法 + 语义域双关（SPEC_RE 之外再 reject t0/t99/d:2026-13-99 之类"自洽但荒谬"）
-    if cat == "scored" and not (schema.SPEC_RE.match(spec) and schema.spec_sane(spec)):
-        return None
-    s = _int(row.get("s"))
-    if cat == "scored":
-        if s not in (1, 2):
-            s = 1
-    else:
-        s = None
     horizon = str(row.get("horizon") or "").strip()
-    if cat == "scored" and not horizon:
-        horizon = schema.default_horizon(spec)  # 无歧义档兜底；t5→未提(A4-2)、t6 留空（仅报告）
+    if core["cat"] == "scored" and not horizon:
+        horizon = schema.default_horizon(core["spec"])  # 无歧义档兜底；t5→未提(A4-2)、t6 留空（仅报告）
     # quote 存储上限 60→90：逐字保真后上限只是缓存预算；卡面展示截断由 collapse 单独做——
     # 展示截断不再反噬缓存原文（#J 根子：模型输出端把时间词截掉）
     return {
@@ -202,14 +180,14 @@ def to_canonical(row, post, blogger, post_n):
         "post_id": str(post.get("post_id") or ""),
         "pub": (post.get("publish_date") or "").strip(),
         "quote_ts": _int(post.get("publish_time"), 0),
-        "d": d,
-        "s": s,
-        "idx": idx,
-        "spec": spec if cat == "scored" else "long",
-        "cat": cat,
-        "horizon": horizon if cat == "scored" else "",
-        "quote": (row.get("quote") or "").strip()[:90] if cat == "scored" else "",
-        "summary": summary[:50],
+        "d": core["d"],
+        "s": core["s"],
+        "idx": core["idx"],
+        "spec": core["spec"],
+        "cat": core["cat"],
+        "horizon": horizon if core["cat"] == "scored" else "",
+        "quote": (row.get("quote") or "").strip()[:90] if core["cat"] == "scored" else "",
+        "summary": core["summary"],
     }
 
 
