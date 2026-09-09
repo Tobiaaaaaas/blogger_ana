@@ -141,15 +141,3 @@ def market_line(quotes: dict) -> str:
     if total_wan:
         parts.append(f"两市 {_fmt_amount(total_wan)}")
     return " · ".join(parts) if parts else "行情数据获取失败"
-
-
-def heartbeat_line(quotes: dict) -> str:
-    """心跳消息行情部分：上证 3979.89 -0.16% · 深成 13872 -1.02%"""
-    parts = []
-    for name in ["上证指数", "深证成指"]:
-        q = quotes.get(name)
-        if not q:
-            continue
-        sign = "+" if q["pct"] >= 0 else ""
-        parts.append(f"{q['name'].replace('指数', '')} {q['price']:.2f} {sign}{q['pct']:.2f}%")
-    return " | ".join(parts) if parts else "行情数据获取失败"

@@ -210,7 +210,8 @@ def _collect_layer_work(now, boards):
 
 
 def _migrate_state_v2(st):
-    """旧 v8 state（recent_views/board_prev/previous）→ 新形状：只留 last_run/last_slot/seen。
+    """旧 v8 state（recent_views/board_prev/previous）→ 新形状：只留 last_run/last_slot（seen 只写不读，
+    2026-09-09 C1 起 state 不再读写它，旧文件残留键自然过期）。
 
     幂等，仅改内存态；落地由 _run 末尾统一原子写。
     """

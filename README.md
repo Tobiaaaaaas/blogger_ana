@@ -19,19 +19,25 @@ ana/
 │
 ├── data/
 │   ├── posts/                      爬取的原始帖子
-│   ├── direction_signals/          Direction 信号标注（LLM 逐条标注，41 位博主）
+│   ├── direction_signals/          Direction 信号标注（LLM 逐条标注，125 位博主）
 │   ├── market/                     日线行情数据（7 指数）
 │   └── (scores/signals/minute/positions/simulations 已随旧体系归档至 archive/20260817-pre-direction/)
 │
 ├── scripts/
 │   ├── eval/                       Direction 评估引擎（run_direction + comparison_all）
-│   ├── pipeline/                   scrape_toutiao.py（爬虫，唯一流水线脚本）
+│   ├── pipeline/                   scrape_toutiao.py（爬虫）+ extract_signals_direction.py（DeepSeek 信号提取）
 │   └── utils/                      行情获取、正文分片抓取等工具
 │
+├── opinion/                        共享「读帖/清洗/DeepSeek 标注」模块——prompts.py 为标注契约单一同源
+│                                   （09-09 方向教义，briefing 推送与 extract 报告共用），另有
+│                                   schema（规范行）/ annotate / verify / cache / ds / ref_price
+│
+├── briefing/                       推送卡片流水线（summarize/render/state…，独立短/波段面板，VSCode/Windows 定时跑）
+│
 ├── reports/
-│   ├── *_direction.md              41 位博主逐条方向验证报告
+│   ├── *_direction.md              125 位博主逐条方向验证报告
 │   ├── comparison_direction.md     横向对比总榜
-│   └── Direction_结论报告.md        41 位博主横向结论
+│   └── Direction_结论报告.md        125 位博主横向结论
 │
 └── archive/                        历史快照 & 临时文件
     ├── scratch/                    一次性调试输出
@@ -56,7 +62,7 @@ ana/
 /analyze-blogger <博主名称> <帖子链接>
 ```
 
-Skill 定义见 `.claude/skills/analyze-blogger/SKILL.md`（Direction 方向预测评估，主技能）。
+Skill 定义见 `.claude/skills/analyze-blogger/SKILL.md`（博主画像 / 评估背景）。**标注契约（逐条判层 prompt、schema、09-09 教义）以 `opinion/prompts.py` 为单一同源**，推送（briefing）与报告（extract）共用——判层请读 opinion/prompts.py，勿照 SKILL.md 旧文。
 
 ### 后台脚本流水线
 
@@ -72,8 +78,8 @@ python scripts/utils/fetch_market_data.py --start 20240601
 # 3. DeepSeek 自动提取信号 → data/direction_signals/<博主名>.json
 export DEEPSEEK_API_KEY="sk-..."   # 只经环境变量，绝不写入文件/提交
 python scripts/pipeline/extract_signals_direction.py <博主名> --runs 3
-#    （DeepSeek flash 按 SKILL.md §1~§8 自动逐条标注 + 格式强校验 + 信号自查；
-#      --runs 3 多次运行共识合并，保证聚合指标稳定；schema 见 SKILL.md §3）
+#    （DeepSeek flash 按 opinion/prompts.py 共享标注契约逐条标注 + 格式强校验 + 信号自查；
+#      --runs 3 多次运行共识合并，保证聚合指标稳定；schema 见 opinion/schema.py）
 
 # 4. Direction 验证打分并生成报告
 python scripts/eval/run_direction.py <博主名>        # 单个博主
@@ -93,7 +99,7 @@ scrape_toutiao.py ──► data/posts/<name>.json
     │
     ▼
 extract_signals_direction.py（DeepSeek flash）
-按 SKILL.md §1~§8 自动逐条标注
+按 opinion/prompts.py 共享标注契约逐条标注
 （pub/d/s/idx/spec/summary/cat，语义理解 + 板块→指数映射 + 格式强校验 + 信号自查）
     │
     ▼
@@ -101,7 +107,7 @@ data/direction_signals/<name>.json
     │
     ▼
 run_direction.py ──► reports/<name>_direction.md
-（按 §4 验证终点逐条打分，score = direction × return）
+（逐条验证打分，score = direction × return；域外 spec 读库守卫 → unscored long / skip）
     │
     ▼
 comparison_all.py ──► reports/comparison_direction.md
@@ -110,8 +116,8 @@ comparison_all.py ──► reports/comparison_direction.md
 
 ## 当前博主
 
-> 41 位博主已完成 Direction 逐条方向评估（`reports/*_direction.md`），横向结论见 `reports/Direction_结论报告.md` 与 `reports/comparison_direction.md`。
-> 另有 6 位博主（实盘指龙、小工匠说股市v、时间合伙人、时间轨迹、梦若神机、股市求是）已爬取帖子，但尚未完成 Direction 信号标注，未纳入评估。
+> 125 位博主已完成 Direction 逐条方向评估（`reports/*_direction.md`），横向结论见 `reports/Direction_结论报告.md` 与 `reports/comparison_direction.md`。
+> 评估口径：2026-09-09 起方向教义（条件式/先A后B形态无方向、操作动词=方向同义）与 schema 以 `opinion/prompts.py` / `opinion/schema.py` 为准；curated `data/direction_signals/*.json` 为 09-09 前抽取的既有数据，个别域外 spec 行（t0/t34/t60/t90）在读库守卫下归 unscored、不入分（全量 125 博主 LLM 重抽按 09-09 口径仍门控后置）。
 
 ## 依赖
 
@@ -126,4 +132,4 @@ comparison_all.py ──► reports/comparison_direction.md
 - **API Key 安全**：DeepSeek API Key 通过环境变量传入，不要写入脚本或上传到 GitHub
 - **今日头条反爬**：爬虫使用 Playwright 浏览器内 API 调用，自带签名；风控与重爬校验见 SKILL.md §前置条件
 - **拐点知识库**：所有拐点以 `knowledge/market_analysis.md` 为准，不重新识别
-- **代码与文档一致性**：SKILL.md §1~§8 与 `run_direction.py` 一一对应，修改任一规则需同步另一方（引擎自测：`python scripts/eval/run_direction.py --selftest`）
+- **标注契约单一同源**：逐条判层以 `opinion/prompts.py` 为准（共享 prompt + 09-09 教义，改动会作废标注缓存指纹）；字段/spec 合法域以 `opinion/schema.py` 为准；SKILL.md §1~§8 只作背景。推送与报告共用同源，改判层规则勿只改一侧

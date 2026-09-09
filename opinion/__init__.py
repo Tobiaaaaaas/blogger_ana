@@ -11,8 +11,8 @@
 后 `import opinion` 干净使用；briefing 以 `from opinion import …` 同源接线。
 
 公开 API：posts（读帖）/ text（清洗截断）/ ds（DeepSeek 网关）/ prompts（共享 prompt）/
-schema（规范行 + spec↔horizon 映射）/ cache（推送标注缓存 v4）/ annotate（render_batch /
-annotate_blogger / collapse_board）。
+schema（规范行 + spec↔horizon 映射）/ cache（推送标注缓存，逐帖粒度，版本随调用方
+_ROWS_CACHE_VERSION，2026-09-09 v6）/ annotate（render_batch / annotate_blogger / collapse_board）。
 """
 from . import annotate, cache, ds, posts, prompts, schema, text  # noqa: F401
 from .annotate import annotate_blogger, collapse_board, render_batch  # noqa: F401

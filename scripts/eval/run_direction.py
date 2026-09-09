@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Direction 评估引擎 v6 — 严格按 SKILL.md 最新规则实现（nd 并入 t5、周期两档归类、总榜按夏普排序）
+Direction 评估引擎 v6 — 报告侧打分/验证语义（无预测周期有方向→t5、周期两档归类、总榜按夏普排序、域外 spec 读库守卫）
 
-规则要点（与 .claude/skills/analyze-blogger/SKILL.md §1~§8 一一对应）：
+规则要点（引擎实际语义；标注契约/字段 schema 单一同源已迁 opinion/{prompts,schema}.py——2026-09-08 起推送与报告共用，本文件不再以 .claude/skills/analyze-blogger/SKILL.md §1~§8 为判层权威）：
   §2 cat      : 仅 scored / unscored（spec=long 恒 unscored，不计分）
   §3 验证终点 : 以"信号日"（帖子发布自然日）为基准推算；非交易日发布"今天"→ 报错单列不计分
                 （"明天/下周"等非 today 周期周末发布仍正常顺延）；
@@ -545,7 +545,7 @@ def generate(blogger):
     L = []
     L.append(f'# {blogger} 方向预测评估（Direction）')
     L.append('')
-    L.append(f'> 评估时间：{EVAL_DATE} | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）')
+    L.append(f'> 评估时间：{EVAL_DATE} | 方法论：opinion/prompts.py 标注契约 + run_direction 逐条验证（score = direction × return）')
     L.append(f'> 帖子总数：{n_posts} 条' if n_posts is not None else '> 帖子总数：未知（posts 文件缺失或不可读）')
     L.append(f'> 信号总数：{len(rows)} 条（计分 {len(scored_all)} + 不计分 {n_unc} + 待验证 {n_pend} + 无效-过时 {n_stale} + 报错 {n_err}）')
     if n_off_sh:

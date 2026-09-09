@@ -9,7 +9,7 @@ v15（2026-09-07）：推送节奏**两板块统一**（用户指示）：
   - 波段板块（30）：扫 WINDOW_TRADING_DAYS["swing"]=5 → 前 5 个交易日 00:00 起至现在的
     帖子内的**可计分**波段表态（近日/本周/下周/更长/未提；口径同打分引擎——年度/跨年/超远期、
     中长期/长期趋势断言、无时间承诺点位等 spec=long/unscored 不计分观点直接判无表态，见
-    summarize.SWING_ROW_SYSTEM_PROMPT），本周/下周 锚定发帖日所在周一~五周、目标周已过剔除；
+    summarize_board 单板块口径），本周/下周 锚定发帖日所在周一~五周、目标周已过剔除；
     无明确周期的表态（近日/更长/未提）如实标注、不编造目标日期。
   - 交易日**两板块同节奏**：09:00–15:00 每 30 分钟（含午休与盘前，13 档）+ 16:00–22:00
     每整点（7 档）→ 每档两卡都推；**非交易日只推波段**：09:00–21:00 每 3 小时
@@ -65,8 +65,6 @@ BOARD_META = {
 
 # 抓取/读帖全集：两板块去重（超短板块原序 + 波段板块新增第 9 位起）
 ALL_BLOGGERS = PANEL_SHORT + [b for b in PANEL_SWING if b not in PANEL_SHORT]
-
-TRACKED = ALL_BLOGGERS  # LEGACY：旧 v8 共识卡/画像曾引用 config.TRACKED，泛指"跟踪名单"
 
 # ── 展示窗口（v14 交易日口径；v15 波段 3→5）：交易日回看天数 → 窗口起点 = 前一/前N个交易日 00:00 ──
 # 窗口内容面 = 前 N 个交易日的全天帖 + 今日盘中至 now；now 非交易日按最近交易日取参考日。
@@ -130,11 +128,3 @@ def format_board_count(board_key: str, c: dict) -> str:
             f"（{c.get('shown', 0)}/{c.get('members', 0)} 表态）")
 
 
-def format_board_counts(counts: dict) -> str:
-    """LEGACY：v12 双板块合并一行计数（超短…/波段…），v13 单板块卡不再用（保留供历史复刻）。"""
-    s = (counts or {}).get("short") or {}
-    w = (counts or {}).get("swing") or {}
-    return (f"超短(0-1日) {s.get('bull', 0)}多/{s.get('bear', 0)}空"
-            f"（{s.get('shown', 0)}/{s.get('members', 0)} 表态） · "
-            f"波段(2日+) {w.get('bull', 0)}多/{w.get('bear', 0)}空"
-            f"（{w.get('shown', 0)}/{w.get('members', 0)} 表态）")

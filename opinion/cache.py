@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""推送标注缓存（rows_cache.json v5，DeepSeek 增量复用，**逐帖粒度**）。
+"""推送标注缓存（rows_cache.json，DeepSeek 增量复用，**逐帖粒度**）。
 
+版本常量在调用方（briefing summarize._ROWS_CACHE_VERSION，2026-09-09 A3 bump 至 v6）。
 v4（2026-09-08，整博主规范行 + 窗口帖集合指纹）→ v5（逐帖）：每博主缓存从其窗口帖集合的
 "一把指纹"细化为**单帖一行缓存项**——键 = (post_id, 内容 hash)，值 = 该帖自己的规范行
 （schema.py 规范行，quote_ts/pub 已系统回填）。每档只把窗口内"新帖 / 正文回填变 content"

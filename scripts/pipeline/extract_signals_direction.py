@@ -4,7 +4,7 @@
 DeepSeek 自动提取 Direction 方向信号（替代 Claude 人工逐条标注）。
 
 流程：读 data/posts/<博主>.json 的帖子 + <博主>_bodies_s*.json 的正文
-      → 分批调 DeepSeek flash 按 SKILL.md §1~§8 规则逐条判断
+      → 分批调 DeepSeek flash 按 opinion/prompts.py 共享标注契约（单一同源，09-09 教义）逐条判断
       → 脚本强校验（spec/idx/cat/日期/去重，非法条目丢弃）
       → 自查：把「已提取信号 + 原文」回喂 DeepSeek 做独立审查（keep/fix/drop/补加）
       → 写 data/direction_signals/<博主>.json
@@ -71,7 +71,7 @@ API_CALL_DEADLINE = o_ds.API_CALL_DEADLINE
 call_json = o_ds.call_json  # 签名 (client, system_prompt, user_message, label, thinking=) 不变
 
 # ── System Prompt（2026-09-08 起用单一共享逐帖标注 prompt，见 opinion/prompts.py——
-# SKILL.md §1~§8 规则精简版 + LAYER quote 纪律；输出键 rows（含 horizon 展示词），
+# 单一共享标注契约 + LAYER quote 纪律；输出键 rows（含 horizon 展示词），
 # 报告侧 normalize 只取 pub/d/s/idx/spec/summary/cat，horizon/quote 忽略）──
 SYSTEM_PROMPT = o_prompts.ANNOTATION_SYSTEM_PROMPT
 

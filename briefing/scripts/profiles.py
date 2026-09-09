@@ -49,9 +49,7 @@ def _horizon_of(spec):
         return "本周"
     if spec == "nweek" or spec == "nweek_first":
         return "下周"
-    if spec == "nd":
-        return "无周期"
-    return "更长"  # t6+ / month / nmonth / long / d:YYYY-MM-DD
+    return "更长"  # t6+ / month / nmonth / long / d:YYYY-MM-DD（nd「无周期」档已随 09 迁移退役）
 
 
 def _signal_stats(name):
@@ -112,11 +110,11 @@ def _recent_summaries(name, limit):
 
 
 def _all_bloggers():
-    """data/posts 下所有博主 + config.TRACKED 并集（随时新增博主也能自动纳入画像）。
+    """data/posts 下所有博主 + config.ALL_BLOGGERS（双板块名单）并集（随时新增博主自动纳入画像）。
 
     排除：_backup 目录、_bodies_s*.json（正文分片）、*_feed_check.json（抓取校验文件）。
     """
-    names = set(config.TRACKED)
+    names = set(config.ALL_BLOGGERS)
     try:
         for fn in os.listdir(paths.POSTS_DIR):
             if (fn.endswith(".json") and "_feed_check" not in fn
