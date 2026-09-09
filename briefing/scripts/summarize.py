@@ -1,31 +1,72 @@
 # -*- coding: utf-8 -*-
 """简报生成：DeepSeek 抽取与收敛。
 
-复用父仓库 scripts/pipeline/extract_signals_direction.py 的 DeepSeek 调用底座
-（call_json / parse_response / watchdog 硬超时），保证与信号提取同一套稳定链路。
+DeepSeek 调用底座（call_json / parse_response / watchdog 硬超时）2026-09-08 起委派顶层
+opinion/ds——推送、报告、画像三场景同源（撤除对父脚本 extract_signals_direction.py 的
+importlib file-load，_extract 已删）。分层判定由 LAYER prompt 散文迁进 opinion：单一共享逐帖
+标注出规范行（rows）+ collapse_board 确定性坍缩（见 v17 节，extract_layers 签名不变）。
 
-v13（2026-09-03 redesign：超短/波段拆两群两卡 + 盘中 30 分档）→ v14（2026-09-04 交易日窗口）：
-  1. extract_board_rows(board_key, by_member, window_start_ts)：按板块抽取——超短只认
-     今天/明天（窗口=前一交易日 00:00 至 now）、波段只认 近日/本周/下周/更长
-     （窗口=前 3 个交易日 00:00 至 now，v14 交易日口径）。
-     带 rows_cache 增量：窗口帖集合（含正文指纹）未变 → 跳过 DeepSeek 复用缓存行。
+v13（2026-09-03 redesign：超短/波段拆两群两卡 + 盘中 30 分档）→ v14（2026-09-04 交易日窗口）→
+v15（波段窗口 3→5 交易日）→ **v16（2026-09-08 分层分解单趟化，对齐 analyze-blogger skill §3 spec 口径）**：
+  1. extract_layers(work, starts)：一位博主一窗帖**一次 DeepSeek 调用**，模型先按每条方向
+     预测的**预测周期**（skill §3 spec 语义，非关键词）判层——周期=今天/明天 → 超短层、
+     =2日+ 可计分波段周期（后天/未来几天/本周/下周/月底前/下月/具体日期…）→ 波段层、
+     年度/远期/中长期/无时间承诺点位（spec=long/unscored 不计分）→ 丢弃。
+     **预测周期只到 明天 的判断永不成波段**（口径同波段委员会 spec≠today/t1，卡 label
+     波段(2日+)），根治 2026-09-08 子房论市"明天帖被 LLM 归成波段·近日"的误归。
+     同一帖可同时产超短+波段两行，quote/summary 各引各层原句；混合帖/转述由 LLM 语义
+     分解归位，不设内容正则闸门。带 rows_cache v3 增量：窗口帖集合（含正文指纹）未变
+     且各所属层行未过期 → 跳过 DeepSeek 复用缓存行（row=None 也缓存省档）。
   2. resolve_anchors：按引文发帖日锚定绝对目标（超短剔已过/未指今明，波段剔目标周已过）。
   3. board_counts：单板块多空计数。
   4. summarize_board(board_key, …)：单板块快照 + 本板块计数 → 一段本板块收敛总结。
+  rows_cache v2→v3：{"boards":{board:{博主:{row}}} → {"bloggers":{博主:{posts:[指纹],
+     short:row|null, swing:row|null}}}；博主某所属层行过期 → 整博主同趟重抽（保口径一致）。
+**v17（2026-09-08 共享模块委派）**：LAYER_SYSTEM_PROMPT / _row_from_layer / _fmt_window_posts
+  / cache v3 移除——判层收敛为 opinion 单一共享逐帖标注（ANNOTATION_SYSTEM_PROMPT，输出 rows
+  规范行：每帖每条方向预测一行，spec+horizon 双字段）+ opinion.annotate.collapse_board 确定性
+  坍缩（窗口下界门 / 路过不抹旧行 / 层白名单 / spec↔horizon 自洽全部代码化）；rows_cache v4
+  改存整博主规范行（opinion.cache）。extract_layers 签名与下游行形状不变，run_briefing 调用点不动。
+**v18（2026-09-08 逐帖缓存）**：rows_cache v4（整博主规范行 + 窗口帖集合指纹：集合任一变化 →
+  整博主含旧帖全量重抽）→ v5 **逐帖**——每帖按 (post_id, 内容hash) 键存各自规范行，每档只把
+  窗口里新出现/正文回填变 content 的帖送一次标注（该博主新帖合成一个子批调用），旧帖（含跨
+  交易日窗口滑动重叠帖）永不重评分；坍缩每档确定性重算、只取本次窗口帖的行。
+**v19（2026-09-09 交易日相对再分类）**：v16"字面 今天/明天 永不成波段"只拦自然历法同词；
+  周五~周日发帖的"下周一/下周首个交易日"（spec=nweek_first）实指**下一交易日**（预测周期=1）
+  却带 swing 词下周 → 曾漏进波段卡（孙万林 09-04 案例）。extract_layers 现向 collapse_board
+  传 cal=calendar，行归属板别由 _row_layer 按 horizon 词 + spec 单日钉解出的首个目标交易日
+  判定：目标 == 发帖后首个交易日 → 降级超短；nweek（整周）观点不降级。行缓存/标注不变。
+  **v20（2026-09-09 主结论对象门：纠错重抽而非弃推）**：衡山/诸葛复盘确认"idx=上证 但摘要/
+  引文点名他指且无上证指向"的自相矛盾行是**标注指错**，不是该帖无观点——直接弃推会把两类失败
+  混为一谈（idx 标错 / 摘要漏选帖内真实存在的上证观点）。恢复分三层：annotate_blogger 拒收矛盾
+  行入缓存 + 带方向纠错重试（有上证观点 → 重选上证句；只谈他指 → idx 改真实指数）；extract_layers
+  对本文件 v20 上线前已缓存进 rows_cache 的矛盾旧帖**作废整帖重抽**（自愈，见 extract_layers）；
+  collapse_board 只留**渲染底限**——矛盾行永不上上证卡，但不越权修复（坍缩无帖子全文）。
 v12 跨板块 summarize_boards / SUMMARY_SYSTEM_PROMPT 保留作 LEGACY（不再接线，供历史复刻）。
 旧 v8 全板共识路径（POINTS_SYSTEM_PROMPT / SYNTH_SYSTEM_PROMPT / extract_points / synthesize）
 亦 LEGACY；v9/v10 的 18 行名单路径已整段替换。
 """
-import hashlib
-import importlib.util
-import json
 import logging
 import os
-import re
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 from . import calendar, config, paths
+
+# 2026-09-08 共享模块重构：判层 prompt 收敛为 opinion 单一共享逐帖标注（ANNOTATION_SYSTEM_PROMPT），
+# 读帖/清洗/DeepSeek 网关/标注缓存一并委派顶层 opinion/ 包（推送、报告、画像三场景同源）。
+# briefing 是独立部署单元，兜底把父仓根（paths.REPO_ROOT）补进 sys.path 以便 `import opinion`。
+try:
+    from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
+    from opinion import prompts as o_prompts, schema as o_schema, text as o_text  # noqa: E402
+    from opinion import verify as o_verify  # noqa: E402
+except ImportError:
+    if not any(os.path.abspath(p) == os.path.abspath(paths.REPO_ROOT) for p in sys.path):
+        sys.path.insert(0, paths.REPO_ROOT)
+    from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
+    from opinion import prompts as o_prompts, schema as o_schema, text as o_text  # noqa: E402
+    from opinion import verify as o_verify  # noqa: E402
 
 log = logging.getLogger("briefing")
 
@@ -34,27 +75,17 @@ POINTS_BATCH = 8        # 抽点每批帖子数（LEGACY）
 SYNTH_MAX_ATTEMPTS = 3  # 综合最大尝试次数（LEGACY）
 
 ROW_MAX_ATTEMPTS = 3     # 行抽取 / 收敛总结最大尝试次数
-ROW_SUMMARY_MAX = 60     # summary ≤60 字
-ROW_QUOTE_MAX = 60       # 逐字原话 ≤60 字
 BEIJING = timezone(timedelta(hours=8))
 
-# 各板块接受的 horizon 词（v11 落档由固定名单决定，horizon 只作行内装饰；
-# 板块周期白名单外 → 判为该板块无表态，不显示不计数）
-PANEL_HORIZONS = {
-    "short": ("今天", "明天"),
-    "swing": ("近日", "本周", "下周", "更长", "未提"),
-}
+# 各层 horizon 展示/锚定词白名单：2026-09-08 收敛到 opinion.schema.PANEL_HORIZONS（与报告同源）。
+# swing 的 更长/未提 只代表"可计分的近月窗口/当前波段阶段"；年度/跨年/超远期、中长期/长期
+# 趋势断言、无时间承诺点位等 spec=long/unscored 不计分观点由共享 prompt 判 spec=long 不计分、
+# 推送坍缩不落板（口径同打分引擎 / Swing_Timing spec≠today/t1）。
+PANEL_HORIZONS = o_schema.PANEL_HORIZONS
 
-_extract_mod = None
-
-
-def _extract():
-    global _extract_mod
-    if _extract_mod is None:
-        spec = importlib.util.spec_from_file_location("extract_signals", paths.EXTRACT_MOD)
-        _extract_mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_extract_mod)
-    return _extract_mod
+# DeepSeek 网关单一共享（opinion.ds.call_json）；2026-09-08 撤除对父脚本 extract_signals_direction.py
+# 的 importlib file-load（_extract）——模块无缓存复用、sys.modules 键名易冲突的坑一并消除。
+call_json = o_ds.call_json
 
 
 # ── LEGACY（v8 全板共识卡；2026-09 redesign 后不再被 run_briefing 调用，仅保留供历史复刻/回退）──
@@ -138,7 +169,6 @@ def extract_points(blogger_posts, batch_size=POINTS_BATCH):
 
     跳过视频帖（无文字正文）。抽点调用 DeepSeek，失败批次重试后仍失败的帖子记中性。
     """
-    ext = _extract()
     clean = []
     for blogger, p in blogger_posts:
         content = (p.get("content") or "").strip()
@@ -152,7 +182,7 @@ def extract_points(blogger_posts, batch_size=POINTS_BATCH):
         chunk = clean[i:i + batch_size]
         user_msg = "\n\n----\n\n".join(
             f"[{j}] " + _fmt_post(b, p) for j, (b, p) in enumerate(chunk))
-        result, raw = ext.call_json(None, POINTS_SYSTEM_PROMPT, user_msg, "briefing:points")
+        result, raw = call_json(None, POINTS_SYSTEM_PROMPT, user_msg, "briefing:points")
         if result is None:
             log.warning("  抽点批次失败（%d 帖），按中性处理", len(chunk))
             for j, (b, p) in enumerate(chunk):
@@ -323,8 +353,6 @@ def synthesize(board, updated, market_text, board_prev, profiles, slot_label, da
     first_board: 首期建板（无上期基准，共识开头写"较上期：首期无基准"）。
     多空数字不在此定——由 run_briefing 按全板计数覆盖（全板口径，非本期增量）。
     """
-    ext = _extract()
-
     board_txt = _board_txt(board)
     updated_txt = "、".join(sorted(updated)) if updated else "（首期）"
 
@@ -341,7 +369,7 @@ def synthesize(board, updated, market_text, board_prev, profiles, slot_label, da
 
     card = None
     for attempt in range(SYNTH_MAX_ATTEMPTS):
-        result, raw = ext.call_json(None, SYNTH_SYSTEM_PROMPT, user_msg, "briefing:synthesize", thinking=True)
+        result, raw = call_json(None, SYNTH_SYSTEM_PROMPT, user_msg, "briefing:synthesize", thinking=True)
         if result is None:
             if attempt < SYNTH_MAX_ATTEMPTS - 1:
                 log.warning("综合调用无结果（attempt=%d），重试", attempt + 1)
@@ -402,245 +430,239 @@ def _norm_takeaways(items):
 
 
 # =====================================================================
-# v11：双板块行抽取（超短板块 / 波段板块 固定名单 × 各自窗口与周期口径）
+# v17（2026-09-08 共享模块委派）：判层从 LAYER prompt 散文迁进 opinion——单一共享逐帖标注
+# ANNOTATION_SYSTEM_PROMPT（推送/报告同源）出**规范行**（每帖每条方向预测一行，spec+horizon
+# 双字段、quote_ts/pub 由系统按帖回填），再由 opinion.annotate.collapse_board 确定性坍缩成
+# 每博主每层最新表态：quote_ts≥该层窗口下界 门 + 该层 horizon 白名单 + spec↔horizon 自洽，
+# 无观点帖只是路过、不抹旧行（子房/诸葛 12:00 类路过误判按规则意图纠正）。
 # =====================================================================
 
-# 每板块 system prompt：只认该板块周期——超短板块只认 今天/明天(0-1日)，
-# 波段板块只认 近日/本周/下周/更长/结构性中期。一条帖同含两层时只引本板块那层。
-# quote_post_n 只回帖子下标，发帖时间由系统按该帖真实 publish_time 回填（模型不誊写时间）。
-SHORT_ROW_SYSTEM_PROMPT = """你是财经观点摘要助手。给你若干位「超短板块」博主在**前一交易日 00:00 至现在**（交易日窗口，含今日盘中已发的帖）内的帖子：每位博主名下若干条，按发帖时间从新到旧排列，每条前有编号 [0][1]… 并带发帖时间。任务：判定每人在窗口内是否对 上证指数/大盘/主要指数 给出过 **超短(0-1日，今天/明天)** 的明确方向观点，若有则产出该人最新一条超短方向表态。
-
-时间口径（重要）：每条帖里的"今天/明天"都以**该帖自己的发帖日**为基准（帖子昨日发，则它说的"今天"=昨日、"明天"=今日）；目标日不在卡片当天/下一交易日的表态由系统自动剔除，你无需推算卡片是哪天，只按发帖日判断词义。
-
-判定"超短方向观点"（只采纳今天/明天）：
-- 对象必须是大盘/主要指数：只谈某个行业板块自身行情（科技/券商/房地产…）不算；行业消息需落到指数方向判断才算。
-- 看涨/看跌、收阳/收阴、今日/明日的点位或方向判断（"今天反抽目标4010""明天还有一跌""今日收红"）。
-- 带明确条件的今明倾向（"站稳4000今天就看多""明天不破X则反弹"）按条件倾向判多/空。
-- 周期在 近日/本周/下周/更长，或时间模糊的中期判断 → 不属于超短，忽略（归波段板块）。
-- 纯状态描述（"缩量震荡""进入调整"）、复盘已发生行情、仓位自述、只谈个股/与大盘无关 → has_view=false。
-- 一条帖可能同时含超短与波段两层（如"今天反弹但本周仍调整"）——只取**超短那层**，quote 引今天/明天 的关键原话。
-- 博主名下最新帖若不是超短表态、更早仍在窗口内的帖有 → 取更早那条超短表态（quote_post_n 指向它；发帖时间由系统标注，你不需要写时间）。
-
-输出规则：
-- 窗口内多次超短表态：取最新一次，无需交代更早翻转。
-- stance 只允许 "多"/"空"；没有方向 → has_view=false。
-- horizon 只从 {今天,明天} 选，按博主自己的时间词；原文不含今天/明天的超短表态 → has_view=false。
-- quote = 该表态的**原话关键句**，逐字引用 ≤60 字，不许改写/润色/拼凑/编造；quote_post_n = 该帖编号（[0] 即 0）。
-- summary = 1~2 句核心立场概括（≤60 字），写明方向与要点；**只写超短层**（今天/明天 怎么做），别把同一帖里 近日/本周/波段 的判断混进来。summary 里**禁用 今天/明天/今日/明日/昨日/昨天/后天 等相对日词**（各帖发帖日不同、词义会错位；目标日由系统在行头以绝对日期标注），只写方向/触发条件/目标位/应对。
-
-输出严格 JSON，rows 数量与输入博主数一致、顺序一一对应：
-{"rows":[{"blogger":"博主名","has_view":true,"stance":"多","horizon":"明天","summary":"概括(≤60字)","quote":"原话(≤60字)","quote_post_n":0}]}
-只输出 JSON，无其他文字。"""
+# ── 行标注缓存（rows_cache.json v5，opinion.cache，逐帖粒度）──
+# v4（整博主规范行 + 窗口帖集合指纹：集合任一变 → 整博主 ≤ROWS_MAX_POSTS 全量重抽，旧帖也
+# 重评分）→ v5（逐帖）：每博主按帖键 (post_id, 内容hash) 存各自规范行，每档只把窗口内
+# "新帖/正文回填变 content"的帖合并成一个子批送一次标注，旧帖（含跨交易日窗口滑动重叠帖）
+# 永不重评分。坍缩仍每 tick 确定性重算：参与坍缩的行 = 仅本次窗口各帖缓存行并集，窗口滑动
+# /行过期由 quote_ts≥该层窗口下界 门自动消化。版本或共享 prompt 指纹任一不符 → 整缓存作废
+# 全量重抽（首档按博主新帖合批一次调用，量级同 v4）。
+_ROWS_CACHE_VERSION = 5
 
 
-SWING_ROW_SYSTEM_PROMPT = """你是财经观点摘要助手。给你若干位「波段板块」博主在**前 3 个交易日 00:00 至现在**（交易日窗口，含今日盘中已发的帖）内的帖子：每位博主名下若干条，按发帖时间从新到旧排列，每条前有编号 [0][1]… 并带发帖时间。任务：判定每人在窗口内是否对 上证指数/大盘/主要指数 给出过 **波段(2日+)** 的明确方向观点，若有则产出该人最新一条波段表态。
+def _annotate_rows(name, posts):
+    """一位博主窗口帖 → 规范行（共享 ANNOTATION prompt）。None = 调用失败/结构异常（不缓存）。
 
-时间口径（重要）：每条帖里的 本周/下周 以**该帖自己的发帖日**为基准（本周=发帖日所在周（周一~周五），下周=其后一周）；目标周已整体过去的表态由系统自动剔除，你无需推算卡片是哪天，只按发帖日判断词义。
-
-判定"波段方向观点"（只采纳波段周期）：
-- 对象必须是大盘/主要指数（上证指数尤其）：某行业/板块自身的趋势（"房地产要走2.3年结构性牛""券商主升"）不算大盘表态，除非明确落到指数方向/点位（"券商带动上证攻4000"）。
-- 周期落在 近日/本周/下周/更长 的方向判断：看涨/看跌、某阶段收阳收阴、点位目标/支撑压力/顶底判断（"目标3900""本周调整""反弹见顶""回踩3800是波段底""下周还要寻底"）。
-- 没有日历时间词、但明确是**一轮波段/结构性中期判断**（如"反弹见顶，接下来漫漫熊途""这波反弹结束后还要回踩3800"）→ 算波段，horizon 给 未提。
-- 周期只在 今天/明天 → 不是波段表态，忽略（归超短板块）。
-- 纯状态描述（"缩量震荡""进入调整"）、复盘已发生行情、仓位自述、理念分享、只谈个股/与大盘无关 → has_view=false。
-- 一条帖可能同时含超短与波段两层（如"今天反弹但本周仍调整"）——只取**波段那层**，quote 引波段层关键原话。
-- 博主名下最新帖若不是波段表态、更早仍在窗口内的帖有 → 取更早那条波段表态（quote_post_n 指向它；发帖时间由系统标注，你不需要写时间）。
-
-输出规则：
-- 窗口内多次波段表态：取最新一次，无需交代更早翻转。
-- stance 只允许 "多"/"空"；没有方向 → has_view=false。
-- horizon 只从 {近日,本周,下周,更长,未提} 选，按博主自己的时间词（只说目标点位、没给时间 → 未提）。
-- quote = 该表态的**原话关键句**，逐字引用 ≤60 字，不许改写/润色/拼凑/编造；quote_post_n = 该帖编号（[0] 即 0）。
-- summary = 1~2 句核心立场概括（≤60 字），写明方向与要点；**只写波段层**（阶段趋势/目标位），别把同一帖里 今天/明天 的超短赌性混进来。summary 里**禁用 今天/明天/今日/明日/昨日/昨天/后天/本周/下周/近日 等相对时间词**（各帖发帖日/周不同、会错位；本周/下周 的目标周由系统在行头以绝对周日期标注），只写方向/趋势/目标位/应对。
-
-输出严格 JSON，rows 数量与输入博主数一致、顺序一一对应：
-{"rows":[{"blogger":"博主名","has_view":true,"stance":"空","horizon":"本周","summary":"概括(≤60字)","quote":"原话(≤60字)","quote_post_n":0}]}
-只输出 JSON，无其他文字。"""
-
-
-PANEL_ROW_PROMPT = {
-    "short": SHORT_ROW_SYSTEM_PROMPT,
-    "swing": SWING_ROW_SYSTEM_PROMPT,
-}
-
-
-def _fmt_window_posts(blogger, posts):
-    """窗口帖清单文本：[0] 发帖 MM-DD HH:MM ｜标题\n正文。posts 约定 新→旧。"""
-    lines = [f"【博主】{blogger}（{len(posts)} 条窗口帖，新→旧）"]
-    for i, p in enumerate(posts):
-        content = (p.get("content") or "").strip()
-        if len(content) > MAX_POST_CHARS:
-            content = content[:MAX_POST_CHARS] + "…（已截断）"
-        pub = (p.get("publish_date") or "")[:16]
-        title = (p.get("title") or "").strip()
-        head = f"[{i}] 发帖 {pub}"
-        if title:
-            head += f"｜{title}"
-        lines.append(head + "\n" + content)
-    return "\n".join(lines)
-
-
-def _row_from_board_llm(blogger, board_key, d, posts):
-    """把某博主某板块的单条 LLM 输出规整成板块行。
-
-    只接受本板块周期白名单内的 多/空；越界（如超短板块给出 本周）→ 返回 None
-    （该博主本板块不显示、不计数，log 提示）。quote_ts 由系统回填（引文时间权威
-    在帖子，模型不誊写时间）。
+    annotate_blogger 内部走 opinion.ds（3 次重试 + 硬超时）；外层 ROW_MAX_ATTEMPTS 兜底 JSON
+    反复解析失败的偶发（与 v16 _call_group 同量级最坏 3×3）。失败 → None → 记 errors 下档重试。
     """
-    d = d if isinstance(d, dict) else {}
-    has = bool(d.get("has_view")) and d.get("stance") in ("多", "空")
-    if not has:
-        return None
-    horizon = d.get("horizon")
-    if horizon not in PANEL_HORIZONS[board_key]:
-        log.warning("  %s [%s] horizon=%r 不在本板块周期内，判为无该周期观点",
-                    blogger, board_key, horizon)
-        return None
-    quote_ts = None
-    try:
-        ni = int(d.get("quote_post_n") or 0)
-    except (TypeError, ValueError):
-        ni = -1
-    if 0 <= ni < len(posts) and posts[ni].get("publish_time"):
-        quote_ts = int(posts[ni]["publish_time"])
-    elif posts and posts[0].get("publish_time"):
-        quote_ts = int(posts[0]["publish_time"])
-        log.warning("  %s [%s] quote_post_n=%r 越界，引文时间回退到其最新帖",
-                    blogger, board_key, d.get("quote_post_n"))
-    return {"blogger": blogger, "has_view": True, "stance": d["stance"],
-            "horizon": horizon,
-            "summary": _strip_rel_time((d.get("summary") or "").strip())[:ROW_SUMMARY_MAX],
-            "quote": (d.get("quote") or "").strip()[:ROW_QUOTE_MAX],
-            "quote_ts": quote_ts}
+    for _attempt in range(ROW_MAX_ATTEMPTS):
+        try:
+            rows, _raw = o_ann.annotate_blogger(name, posts, label=f"briefing:layers:{name}")
+        except Exception as e:
+            log.warning("  %s 标注调用异常（attempt=%d）：%s", name, _attempt + 1, e)
+            continue
+        if rows is not None:
+            return rows
+    return None
 
 
-# ── v13：行抽取缓存（rows_cache.json，DeepSeek 增量复用）──
-# 高频盘中档（30 分/档）若每档都把窗口帖重抽一遍 DeepSeek 太贵；某博主窗口帖
-# 集合（含正文指纹）与上次一致 → 直接复用缓存行。缓存 key=博主；指纹必须含正文
-# 内容（正文 done-dict 回填会让同 post_id 从标题帖变全文，只比 post_id 会命中
-# 过期缓存）。缓存的是"未锚定行"：目标日随卡片日变，引用侧每轮仍 resolve_anchors。
-_ROWS_CACHE_VERSION = 1
+def extract_layers(work, starts=None):
+    """单趟分层抽取（v5 逐帖缓存版）：{博主: {"posts": [窗口帖 新→旧], "boards": [层,…]}} → (rows_by_board, errors)。
 
-
-def _post_sig(p):
-    """单帖内容指纹：标题+正文的前 8 位 sha1（正文回填 = 同 post_id 内容变了）。"""
-    raw = ((p.get("title") or "") + "\n" + (p.get("content") or "")).encode("utf-8")
-    return hashlib.sha1(raw).hexdigest()[:8]
-
-
-def _fingerprint(posts):
-    """窗口帖集合指纹：每帖 f"{post_id}:{sig}"，顺序 = 喂给 LLM 的新→旧。"""
-    return [f"{p.get('post_id') or i}:{_post_sig(p)}" for i, p in enumerate(posts)]
-
-
-def _load_rows_cache():
-    """rows_cache.json → {"version":1,"boards":{...}}；缺失/损坏返回空结构。"""
-    try:
-        with open(paths.ROWS_CACHE_FILE, encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, dict) and isinstance(data.get("boards"), dict):
-            return data
-    except Exception:
-        pass
-    return {"version": _ROWS_CACHE_VERSION, "boards": {}}
-
-
-def _save_rows_cache(cache):
-    """原子写 rows_cache.json（先临时文件再 os.replace）。"""
-    paths.ensure_dirs()
-    tmp = paths.ROWS_CACHE_FILE + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, paths.ROWS_CACHE_FILE)
-
-
-def extract_board_rows(board_key, by_member, window_start_ts=None):
-    """某板块行抽取：{博主: [窗口内帖子 新→旧]} → (rows, errors)。
-
-    只保留 has_view 的板块行；无该周期观点 / 无帖 / 抽取失败 → 不入 rows
-    （板块不显示、不计数）。同一博主在 超短/波段 两板块各调一次、互不串扰。
-
-    v13 增量缓存：博主窗口帖集合指纹命中 → 跳过 DeepSeek 复用缓存行（含
-    has_view=false 的 null 缓存，省一档重抽）；LLM 失败不写缓存（下档重试）。
-    window_start_ts = 本板块窗口下界 epoch（北京时 now.date()-K 当天 00:00），
-    缓存行引文早于它 → 判失效重抽（防御；指纹一致时理论上恒不触发）。
+    每博主窗口内每帖已按 (post_id, 内容hash) 缓存其规范行（opinion.cache v5）——只有窗口里
+    新出现/正文回填变 content 的帖走一次 DeepSeek（共享 ANNOTATION prompt，该博主新帖合成
+    一个子批调用），旧帖永不重评分；每层 collapse_board 确定性坍缩。行为与 v16 同形：某博主
+    该层无观点 → 不入 rows_by_board（不显示不计数）；无观点帖只是路过、不抹旧行（v16 prompt
+    散文的意图落进代码）。Pillar C/D（2026-09-08 解析加固）：
+    - 标注失败博主（annotate 返 None）→ **回退窗口内已缓存旧帖行**续显（quote_ts≥窗口下界
+      门自动拦陈旧），不写缓存、记入 errors 下档重试——不再是失败即整档置空；
+    - 坍缩后再对「本 tick 新标注帖产出、且真上卡」的少数行跑复核（opinion.verify
+      keep/fix/drop，主结论句 doctrine），fix 改展示字段、drop 剔帖重坍缩续显更早行。
+    同帖同层多行 → 目标日更近优先（collapse_board 内 HORIZON_RANK）。返回 rows_by_board =
+    {board_key: {博主: 行}}，行 = {blogger, post_id, has_view, stance, horizon,
+    summary(已剔相对词), quote, quote_ts}。
     """
-    ext = _extract()
-    system_prompt = PANEL_ROW_PROMPT[board_key]
-    rows, errors = {}, []
-    work = {}
-    for b, posts in by_member.items():
-        clean = []
-        for p in posts:
-            content = (p.get("content") or "").strip()
-            if content == "[视频帖]" or len(content) < 5:
-                continue
-            clean.append(p)
-        clean = clean[:config.ROWS_MAX_POSTS]
-        if clean:
-            work[b] = clean
     if not work:
-        return rows, errors
+        return {}, []
+    layers_of = [b for v in work.values() for b in (v.get("boards") or [])]
+    rows_by_board = {k: {} for k in dict.fromkeys(layers_of)}
+    errors = []
+    cache = o_cache.load(paths.ROWS_CACHE_FILE, _ROWS_CACHE_VERSION, o_prompts.ANNOTATION_SYSTEM_PROMPT)
+    bloggers = cache.setdefault("bloggers", {})
 
-    cache = _load_rows_cache()
-    bc = cache["boards"].setdefault(board_key, {})
-    fps = {}
-    hits, todo = 0, []
-    for b, posts in work.items():
-        fp = _fingerprint(posts)
-        fps[b] = fp
-        ent = bc.get(b)
-        if isinstance(ent, dict) and ent.get("posts") == fp:
-            crow = ent.get("row")
-            if crow is None:
-                hits += 1          # 缓存判定：该博主无本板块观点 → 命中跳过
-                continue
-            if isinstance(crow, dict) and crow.get("quote_ts"):
-                q = int(crow["quote_ts"])
-                if window_start_ts is None or q >= window_start_ts:
-                    rows[b] = crow  # 缓存行复用（resolve_anchors 每轮重锚）
-                    hits += 1
+    # ── 逐帖分类：窗口帖键命中即复用其缓存行；未命中 = 新帖/正文回填 → 只送该子批标注 ──
+    todo, hits = [], 0               # todo: (name, boards, 需标注的新帖子集)
+    win_rows = {}                    # name -> 本次窗口内各帖已缓存行的并集（供坍缩）
+    fresh_posts = {}                 # name -> {post_id: post}：本 tick 新标注成功帖（Pillar C 触发记账）
+    healed = False  # 主结论对象门（2026-09-09）缓存自愈：门上线前写入的矛盾旧帖作废重抽
+    for name, v in work.items():
+        posts = v.get("posts") or []
+        ent = bloggers.get(name)
+        have = {}
+        if isinstance(ent, dict) and isinstance(ent.get("posts"), dict):
+            # 快照键再判：逐帖自愈——缓存行里 idx=上证 但主结论点名他指的矛盾行是标注指错产物
+            # （新产出已由 annotate_blogger 对象门拒收纠正；这里只清门上线前留下的旧行）。
+            # 矛盾 ≠ 弃推：帖子可能真含被漏选的上证观点 → 作废整帖后下进 fresh 子批重抽恢复
+            # （annotate 纠错门会重选上证句 / 纠正 idx），缓存不留矛盾行。
+            for k in list(ent.get("posts") or {}):
+                e = ent["posts"].get(k)
+                if not (isinstance(e, dict) and isinstance(e.get("rows"), list)):
                     continue
-        todo.append(b)
+                obj = o_ann.conflict_rows(e["rows"])
+                if obj:
+                    tok = o_ann._idx_object_conflict(obj[0])
+                    log.warning("  %s 自愈作废缓存帖 %s：行 idx=上证 但主结论点名他指【%s】"
+                                "（%s）→ 重抽恢复", name, k, tok,
+                                (obj[0].get("summary") or "")[:24])
+                    del ent["posts"][k]
+                    healed = True
+                    continue
+                have[k] = e
+        rows, fresh = [], []
+        for p in posts:
+            key = o_cache.post_key(p)
+            e = have.get(key)
+            if e is None:
+                fresh.append(p)
+            else:
+                rows.extend(e["rows"])
+        win_rows[name] = rows
+        if fresh:
+            todo.append((name, v.get("boards") or [], fresh))
+        else:
+            hits += 1
     if not todo:
-        log.info("  [%s] 行缓存：%d 位博主全部命中，跳过 DeepSeek", board_key, hits)
-        return rows, errors
-    if hits:
-        log.info("  [%s] 行缓存：复用 %d / 需新抽 %d", board_key, hits, len(todo))
+        log.info("  行标注缓存：%d 位博主窗口帖全部命中（逐帖），跳过 DeepSeek", hits)
+    elif hits:
+        log.info("  行标注缓存：复用 %d / 需新抽（新增帖）%d", hits, len(todo))
 
-    items = [(b, work[b]) for b in sorted(todo)]  # 确定序，便于 batch 对齐
-    bsize = config.ROWS_BATCH_BLOGGERS
-    now_txt = datetime.now(BEIJING).strftime("%Y-%m-%d %H:%M")
+    wrote = healed
+    if todo:
+        now_txt = datetime.now(BEIJING).strftime("%Y-%m-%d %H:%M")
 
-    def _call_group(group):
-        user_msg = "\n\n----\n\n".join(_fmt_window_posts(b, posts) for b, posts in group)
-        label = f"briefing:{board_key}:" + "&".join(b for b, _ in group)
-        for _attempt in range(ROW_MAX_ATTEMPTS):
-            result, raw = ext.call_json(None, system_prompt, user_msg, label)
-            if result is not None:
-                return result, group
-        return None, group
+        def _worker(item):
+            name, _boards, new_posts = item
+            return name, new_posts, _annotate_rows(name, new_posts)
 
-    wrote = False
-    groups = [items[i:i + bsize] for i in range(0, len(items), bsize)]
-    with ThreadPoolExecutor(max_workers=config.ROWS_WORKERS) as pool:
-        for result, group in pool.map(_call_group, groups):
-            if result is None:
-                for b, _posts in group:
-                    errors.append(b)   # LLM 失败不写缓存，下档整组重试
-                continue
-            got = result.get("rows") or []
-            for j, (b, _posts) in enumerate(group):
-                d = got[j] if j < len(got) else {}
-                row = _row_from_board_llm(b, board_key, d, work[b])
-                if row:
-                    rows[b] = row
-                bc[b] = {"posts": fps[b], "row": row, "at": now_txt}  # row=None 也缓存（无观点）
+        with ThreadPoolExecutor(max_workers=config.ROWS_WORKERS) as pool:
+            for name, new_posts, rows in pool.map(_worker, sorted(todo, key=lambda x: x[0])):
+                if rows is None:
+                    # Pillar D（2026-09-08）：标注失败 ≠ 本博主无观点——不抹 win_rows，坍缩回退
+                    # 窗口内已缓存旧帖行续显（quote_ts≥窗口下界 门自动拦陈旧）；无缓存行则本档
+                    # 置空。失败不写缓存，下档新帖自然重试。
+                    errors.append(name)
+                    log.warning("  %s 本档标注失败：回退窗口内已缓存旧行续显（无旧行则本档置空），"
+                                "未写缓存下档重试", name)
+                    continue
+                # 拆回逐帖存储：rows[post_n] 指向 new_posts[post_n]（无观点帖存空列表防重抽）
+                fresh_posts[name] = {str(p.get("post_id") or ""): p for p in new_posts}
+                post_map = bloggers.setdefault(name, {}).setdefault("posts", {})
+                per_post = {i: [] for i in range(len(new_posts))}
+                for r in rows:
+                    n = r.get("post_n")
+                    if isinstance(n, int) and 0 <= n < len(new_posts):
+                        per_post[n].append(r)
+                for i, p in enumerate(new_posts):
+                    key = o_cache.post_key(p)
+                    post_map[key] = {"ts": o_cache.post_ts(p), "at": now_txt, "rows": per_post[i]}
+                win_rows[name].extend(r for sub in per_post.values() for r in sub)
                 wrote = True
+
+    # 每博主每层确定性坍缩（纯命中零调用；新帖并入 win_rows 后同趟坍缩）
+    for name, v in work.items():
+        for b in (v.get("boards") or []):
+            row = o_ann.collapse_board(b, name, win_rows.get(name) or [],
+                                       window_start=(starts or {}).get(b),
+                                       cal=calendar)  # 交易日相对再分类（2026-09-09）
+            if row:
+                rows_by_board[b][name] = row
+
+    # ── Pillar C：推送复核——只复核「本 tick 新标注帖产出、坍缩后真上卡」的少数行 ──
+    # 触发集 = 卡面某行 quote_ts/post_id 溯源到本 tick 新标注帖（fresh_ids）；纯缓存命中的
+    # 旧行、窗口滑动/过期等确定性变化不触发。quote 非逐字/主结论取错已由 annotate 层两道门
+    # 挡掉，这里只兜 idx 对象/周期与主结论句的一致性（报告侧 verify 同构 doctrine 轻量复核）。
+    fresh_ids = {nm: set(fresh_posts[nm]) for nm in fresh_posts}  # 键即 str(post_id)
+    candidates = []
+    if fresh_ids:
+        for b, m in rows_by_board.items():
+            for name, disp in m.items():
+                pid = str(disp.get("post_id") or "")
+                if pid not in fresh_ids.get(name, ()):
+                    continue                      # 出自旧帖缓存 → 非本 tick 新产出，不复核
+                post = (fresh_posts.get(name) or {}).get(pid)
+                if post is None:
+                    continue
+                # 定位坍缩选中的规范行（给复核方看 idx/spec/d/s/horizon/quote/summary 全字段）
+                origin = None
+                for r in (win_rows.get(name) or []):
+                    if (str(r.get("post_id") or "") != pid
+                            or r.get("quote_ts") != disp.get("quote_ts")
+                            or r.get("horizon") != disp.get("horizon")):
+                        continue
+                    if (r.get("idx") != "上证指数" or r.get("cat") != "scored"):
+                        continue
+                    if not o_schema.horizon_spec_ok(disp.get("horizon"), str(r.get("spec") or "")):
+                        continue
+                    origin = r
+                    break
+                if origin is None:
+                    continue                      # 溯源失败不硬复核（宁缺）
+                # full_text = 模型当时可见的该帖文本（标题 + head 截断正文；微帖只标题）——
+                # 复核 fix 的 quote 逐字校验用同一可见口径，防复核方拿截断外原文改卡
+                _t, _b = o_text.resolve_post(post)
+                full = (_t + "\n" + o_text.truncate(_b, limit=1200, style="head")
+                        if _t and _b else (_t or _b or ""))
+                candidates.append({"board": b, "blogger": name, "row": origin,
+                                   "post_text": o_verify.post_text(post), "full_text": full})
+    if candidates:
+        decisions, vstats = o_verify.review_candidates(candidates, label="briefing:card")
+        log.info("  推送复核 %d 条新帖上卡行 → keep=%d fix=%d drop=%d err=%d",
+                 len(candidates), vstats["keep"], vstats["fix"], vstats["drop"], vstats["err"])
+        drops = {}                                # (board, blogger) -> {post_id}
+        for dec, cand in zip(decisions, candidates):
+            b, nm, act = dec["board"], dec["blogger"], dec["action"]
+            if act == "keep" or act == "err":
+                log.info("    复核 %s/%s %s%s", b, nm, act,
+                         "" if act == "keep" else f"（保留原行）：{dec['reason']}")
+                continue
+            disp = rows_by_board.get(b, {}).get(nm)
+            if disp is None:
+                continue
+            if act == "fix" and dec.get("fix"):
+                fx = dec["fix"]
+                disp["stance"] = "多" if fx.get("d") == 1 else "空"
+                disp["horizon"] = fx.get("horizon")
+                disp["summary"] = o_text.strip_rel_time(fx.get("summary") or "")[:50]
+                disp["quote"] = (fx.get("quote") or "").strip()[:60]
+                log.info("    复核 fix %s/%s horizon→%s：%s", b, nm, disp["horizon"], dec["reason"])
+            elif act == "drop":
+                drops.setdefault((b, nm), set()).add(pid := str(cand["row"].get("post_id") or ""))
+                log.info("    复核 drop %s/%s post_id=%s：%s", b, nm, pid, dec["reason"])
+        # drop → 剔除该帖该板候选行后重坍缩，让更早仍在窗口的合格行按路过语义续显（无则置空）
+        for (b, nm), pids in drops.items():
+            kept = [r for r in (win_rows.get(nm) or [])
+                    if str(r.get("post_id") or "") not in pids]
+            alt = o_ann.collapse_board(b, nm, kept, window_start=(starts or {}).get(b),
+                                       cal=calendar)  # 交易日相对再分类（2026-09-09）
+            if alt:
+                rows_by_board[b][nm] = alt
+                log.info("    复核 drop 后 %s/%s 重坍缩续显更早窗口行 quote_ts=%s",
+                         b, nm, alt.get("quote_ts"))
+            else:
+                rows_by_board[b].pop(nm, None)
+                log.info("    复核 drop 后 %s/%s 无合格行，置空", b, nm)
+
     if wrote:
-        _save_rows_cache(cache)
-        log.info("  [%s] 行缓存已更新：共 %d 条", board_key, len(bc))
-    return rows, errors
+        # 安全修剪：含波段窗口的本档才做——早于波段窗口下界的帖永不回窗（窗口只前移），
+        # 防逐帖缓存随交易日无限膨胀；纯超短档不修剪（删了波段仍在用但本档没算的帖）。
+        swing_start = (starts or {}).get("swing")
+        if swing_start is not None:
+            for ent in bloggers.values():
+                pm = ent.get("posts") if isinstance(ent, dict) else None
+                if isinstance(pm, dict):
+                    for k in [k for k, e in pm.items() if (e.get("ts") or 0) < swing_start]:
+                        del pm[k]
+        o_cache.save(paths.ROWS_CACHE_FILE, cache, o_prompts.ANNOTATION_SYSTEM_PROMPT)
+        log.info("  行标注缓存已更新：共 %d 位博主", len(bloggers))
+    return rows_by_board, errors
 
 
 # =====================================================================
@@ -684,23 +706,9 @@ def next_trading_day(d):
     return calendar.next_trading_day(d)
 
 
-# 行摘要的相对时间词剥离（v12 系统侧兜底，不靠模型自觉）：头行 anchor 与引文
-# 绝对时间已把博主相对词锚定到具体日期，摘要再出现 今天/明天/本周 只会制造
-# "昨天说的明天"式错位 → 一律剔除。周X（周五）、周初/周中/周内等"锚定周内"表述
-# 与纯数字日期保留（周由头行 anchor 钉住）。
-_REL_TIME_RE = re.compile(
-    r"(今天|今日|明天|明日|昨天|昨日|后天|本周|下周|上周|近日|当周)"
-    r"(?![一二三四五六日末初内天])"
-)
-
-
-def _strip_rel_time(s):
-    if not s:
-        return s
-    s = _REL_TIME_RE.sub("", s)
-    s = s.lstrip("，。；、 ")
-    s = re.sub(r"[，。；]{2,}", lambda m: m.group(0)[0], s)  # 剔除后"，，"→"，"
-    return re.sub(r"\s+", " ", s).strip()
+# 行摘要的相对时间词剥离 2026-09-08 委派 opinion.text.strip_rel_time（坍缩在 collapse_board
+# 内系统侧兜底；见 v17 节与 v12 锚定注释：头行 anchor 与引文绝对时间已锚定博主相对词到具体
+# 日期，摘要再出现 今天/明天/本周 只会制造"昨天说的明天"式错位 → 一律剔除）。
 
 
 def _anchor_row(board_key, row, card):
@@ -772,7 +780,7 @@ def resolve_anchors(rows_by_board, now):
 def board_counts(rows_by_board):
     """双板块计数：每板块在成员名单内统计 多/空，shown=bull+bear，members=名单长度。
 
-    rows_by_board: {key: {博主: row}}（仅 has_view 行，见 extract_board_rows）。
+    rows_by_board: {key: {博主: row}}（仅 has_view 行，见 extract_layers）。
     未表态成员不计数（也不显示），无"合计=xx"断言。
     """
     out = {}
@@ -810,7 +818,7 @@ def summarize_boards(rows_by_board, counts, market_text, slot_label, date_str,
     本函数不再被 run_briefing 接线，仅保留供历史复刻/回退。
 
     两板块方向快照 + 系统计数 → 一段跨板块收敛总结（板块即两层）。
-    rows_by_board/counts 形状见 extract_board_rows/board_counts（rows 应已过
+    rows_by_board/counts 形状见 extract_layers/board_counts（rows 应已过
     resolve_anchors 日期锚定）；now 为北京时 datetime（决定卡片日与"今天/明日"措辞）。
     失败兜底返回双板块计数行。
     """
@@ -821,7 +829,6 @@ def summarize_boards(rows_by_board, counts, market_text, slot_label, date_str,
     wd = ("一", "二", "三", "四", "五", "六", "日")[card.weekday()]
     anchor_note = (f"卡片日={card:%m-%d}（周{wd}）｜下一交易日(明日)={nm:%m-%d}｜"
                    f"本周={_fmt_week_range(cw)}｜下周={_fmt_week_range(cw + timedelta(days=7))}")
-    ext = _extract()
     snap = []
     for key in config.PANEL_KEYS:
         c = counts.get(key) or {}
@@ -851,7 +858,7 @@ def summarize_boards(rows_by_board, counts, market_text, slot_label, date_str,
 【两板块方向快照】
 {snapshot_txt}"""
     for _attempt in range(ROW_MAX_ATTEMPTS):
-        result, raw = ext.call_json(None, SUMMARY_SYSTEM_PROMPT, user_msg, "briefing:summarize_boards")
+        result, raw = call_json(None, SUMMARY_SYSTEM_PROMPT, user_msg, "briefing:summarize_boards")
         if result is None:
             continue
         s = (result.get("summary") or "").strip()
@@ -948,10 +955,9 @@ def summarize_board(board_key, rows, counts, market_text, date_str,
 【系统统计（权威，勿重算）】{counts_txt}
 【{meta['label']}方向快照】
 {snapshot_txt}"""
-    ext = _extract()
     prompt = PANEL_SUMMARY_PROMPT[board_key]
     for _attempt in range(ROW_MAX_ATTEMPTS):
-        result, raw = ext.call_json(None, prompt, user_msg, f"briefing:summarize:{board_key}")
+        result, raw = call_json(None, prompt, user_msg, f"briefing:summarize:{board_key}")
         if result is None:
             continue
         s = (result.get("summary") or "").strip()

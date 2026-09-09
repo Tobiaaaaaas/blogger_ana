@@ -29,6 +29,8 @@ def band_rows(blogger):
     sigs = json.load(open(fp, encoding="utf-8")).get("signals", [])
     out = []
     for s in sigs:
+        if (s.get("idx") or "上证指数") != "上证指数":
+            continue  # 专项榜只认上证观点，与综合行（config.IDX_DEFAULT）同口径（2026-09-08）
         r = dr.calc(s)
         if r.get("score") is None:
             continue

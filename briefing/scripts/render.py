@@ -26,6 +26,10 @@ STANCE_EMOJI = {"多": "🔴", "空": "🟢", "中性": "⚪"}
 STANCE_TEXT = {"多": "看多", "空": "看空", "中性": "中性"}
 HORIZON_BADGE = {"今天": "今日", "明天": "明日", "近日": "近几日", "本周": "本周",
                  "下周": "下周", "更长": "长周期", "无周期": "无周期", "未提": "周期未提"}
+# 行级周期词（spec，SKILL §3 周期词的板块展示口径）：每个博主观点行固定显示，
+# 未提周期 → "周期未提"，绝不缺省。超短=今天/明天；波段=近日/本周/下周/更长/周期未提。
+PERIOD_WORD = {"今天": "今天", "明天": "明天", "近日": "近日", "本周": "本周",
+               "下周": "下周", "更长": "更长", "未提": "周期未提"}
 HEADER_TEMPLATE = "blue"
 KEY_BLOGGERS_TOP = 5   # 重点博主只挑排名最高的（用户要求"挑重点"，不展示全部有观点者）
 
@@ -282,17 +286,24 @@ def _fmt_board_row(name, row):
 
     row 字段见 summarize：blogger/has_view/stance/horizon/anchor/summary/quote/
     quote_ts（anchor 由 resolve_anchors 日期锚定：超短=目标日 MM-DD；波段=周词+
-    周日期段；未提=空 不打印）。旧行无 anchor 时回退 horizon 周期词。
+    周日期段）。行头固定显示**行级周期词 spec**（绝不缺省，见 PERIOD_WORD）：
+    超短行 = 今天/明天 并列锚定目标日（如 `看多 · 明天(09-04)`）；波段行 anchor 已
+    含周词/周期词（本周 09-07~09-11 / 近日 / 更长）→ 直接沿用；周期未提（horizon=
+    未提 / 无 anchor）→ 显示 `周期未提`，不再空着。
     """
     emoji = STANCE_EMOJI.get(row.get("stance"), "")
     stext = STANCE_TEXT.get(row.get("stance"), row.get("stance") or "")
     line1 = f"{emoji} **{name}** {stext}"
+    period = PERIOD_WORD.get(row.get("horizon")) or "周期未提"
     anchor = row.get("anchor")
-    if anchor is None:  # 兜底：未锚定的历史行退回周期词
-        horizon = row.get("horizon") or "未提"
-        anchor = "" if horizon == "未提" else horizon
     if anchor:
-        line1 += f" · {anchor}"
+        # 超短：anchor 只是目标日 MM-DD，词+日期并列；波段：anchor 已含周词/周期词
+        #（本周/下周/近日/更长）→ 直接用 anchor（避免“下周 · 本周 …”式重复/矛盾）
+        label = f"{period}({anchor})" if period in ("今天", "明天") else anchor
+    else:  # 周期未提 / 无 anchor 的历史行 → 固定给周期词，未提也给 周期未提
+        label = period
+    if label:
+        line1 += f" · {label}"
     lines = [line1]
     if row.get("quote"):
         t = fmt_post_time(row.get("quote_ts"))

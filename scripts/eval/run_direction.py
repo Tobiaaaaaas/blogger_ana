@@ -46,6 +46,13 @@ DATA_DIR = os.path.join(ROOT, 'data', 'direction_signals')
 REPORTS_DIR = os.path.join(ROOT, 'reports')
 INTRADAY_DIR = os.path.join(ROOT, 'data', 'market', 'intraday')
 
+# 2026-09-09 报告链复核：参考价取价委派共享 opinion.ref_price（与提取端注入模型的 pub_note
+# 同源同口径，含整点边界修正 D2）。本文件的 INTRADAY/日线全局仍供 _ep_close / check_intraday /
+# 日线降级等使用，仅 ref_price_at 一处委托。
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+from opinion import ref_price as _rp  # noqa: E402
+
 # ---------------- 行情数据 ----------------
 def _load_market():
     with open(os.path.join(ROOT, 'data', 'market', 'market_data.json'), encoding='utf-8') as f:
@@ -308,53 +315,16 @@ def _has_intraday(idx):
 
 
 def ref_price_at(idx, pub):
-    """SKILL §4 参考价：当前所能获取的最新价格。
+    """SKILL §4 参考价：当前所能获取的最新价格（委派 opinion.ref_price 共享实现）。
 
-    交易时间中（9:30~11:30、13:00~15:00）→ 所处 30 分钟 K 线开盘价（首根 t ≥ hhmm 的 bar 的 open，
-    bar 时间=收盘时间，如 10:20 → 10:30 bar open）；
+    交易时间中（9:30~11:30、13:00~15:00）→ 所处 30 分钟 K 线开盘价（首根 t **>** hhmm 的 bar 的
+    open——2026-09-09 整点边界修正 D2：恰 10:00 发帖取的是 10:00 刚开盘那根=10:00 现价，不再回落
+    09:30 价；非整点如 10:20 → 10:30 bar open 不变）；
     非交易时间（盘前 <9:30 / 午休 11:30~13:00 / 盘后 ≥15:00 / 周末假期）→ 上一根 30 分钟 K 线收盘价
     （午休→11:30 bar close；盘后→当日 15:00 bar close；盘前/非交易日→上一交易日 15:00 bar close）。
 
     返回 (price, ok)；找不到 bar → (None, False)。双创取两指数均值。"""
-    if idx == '双创':
-        p1, k1 = ref_price_at('创业板指', pub)
-        p2, k2 = ref_price_at('科创50', pub)
-        if k1 and k2:
-            return (p1 + p2) / 2, True
-        return None, False
-    days = INTRADAY.get(idx)
-    if not days:
-        return None, False
-    pd_, hhmm = pub[:10], pub[11:]
-    h, m = int(hhmm[:2]), int(hhmm[3:5])
-    hm = h * 60 + m
-    if pd_ not in CAL_SET or hm < 9 * 60 + 30:
-        # 盘前（<9:30）或非交易日 → 上一交易日 15:00 bar 收盘价
-        prev = prev_td(pd_)
-        if prev is None:
-            return None, False
-        for day, rows in days:
-            if day == prev:
-                return rows[-1][1]['close'], True
-        return None, False
-    for day, rows in days:
-        if day != pd_:
-            continue
-        if 9 * 60 + 30 <= hm < 11 * 60 + 30 or 13 * 60 <= hm < 15 * 60:
-            # 交易时间中 → 所处 bar 开盘价（首根 t ≥ hhmm 的 bar）
-            for t, b in rows:
-                if t >= hhmm:
-                    return b['open'], True
-            return None, False
-        if 11 * 60 + 30 <= hm < 13 * 60:
-            # 午休 → 11:30 bar 收盘价
-            for t, b in rows:
-                if t == '11:30':
-                    return b['close'], True
-            return None, False
-        # 盘后（≥15:00）→ 当日 15:00 bar 收盘价（末根）
-        return rows[-1][1]['close'], True
-    return None, False
+    return _rp.ref_price_at(idx, pub)
 
 
 def _ep_close(idx, ep):
@@ -506,9 +476,12 @@ def generate(blogger):
     with open(os.path.join(DATA_DIR, f'{blogger}.json'), encoding='utf-8') as f:
         data = json.load(f)
     rows = [calc(s) for s in data['signals']]
-    scored = [r for r in rows if r['score'] is not None]
+    scored_all = [r for r in rows if r['score'] is not None]
+    # 指标/排名样本只认 idx=上证指数（2026-09-08）；上证以外计分行（创业板指/科创50/上证50/双创…）保留计数展示、不入评价集
+    scored = [r for r in scored_all if (r.get('idx') or '上证指数') == '上证指数']
+    n_off_sh = len(scored_all) - len(scored)
     n_unc = sum(1 for r in rows if r['note'] == '不计分')
-    n_day_intra = sum(1 for r in scored if r['note'] == '日内')
+    n_day_intra = sum(1 for r in scored_all if r['note'] == '日内')
     n_pend = sum(1 for r in rows if r['note'] == '待验证')
     n_stale = sum(1 for r in rows if r['note'] == '无效-过时')
     n_err = sum(1 for r in rows if r['note'] == '报错')
@@ -540,7 +513,9 @@ def generate(blogger):
     L.append('')
     L.append(f'> 评估时间：{EVAL_DATE} | 方法论：SKILL.md（Direction，逐条验证，score = direction × return）')
     L.append(f'> 帖子总数：{n_posts} 条' if n_posts is not None else '> 帖子总数：未知（posts 文件缺失或不可读）')
-    L.append(f'> 信号总数：{len(rows)} 条（计分 {len(scored)} + 不计分 {n_unc} + 待验证 {n_pend} + 无效-过时 {n_stale} + 报错 {n_err}）')
+    L.append(f'> 信号总数：{len(rows)} 条（计分 {len(scored_all)} + 不计分 {n_unc} + 待验证 {n_pend} + 无效-过时 {n_stale} + 报错 {n_err}）')
+    if n_off_sh:
+        L.append(f'> 评价口径：指标/排名样本仅 idx=上证指数（{len(scored)} 条）；上证以外计分 {n_off_sh} 条（创业板指/科创50/上证50/双创 等）保留全量计数、不参与本次评价')
     L.append('')
     L.append('---')
     L.append('')
@@ -556,7 +531,10 @@ def generate(blogger):
         L.append('## 📊 汇总指标')
         L.append('')
         L.append('```')
-        L.append(f'信号总数：{len(scored)}')
+        if n_off_sh:
+            L.append(f'计分样本：{len(scored)} 条（idx=上证指数）　[上证以外计分 {n_off_sh} 条不参与本组指标/排名]')
+        else:
+            L.append(f'信号总数：{len(scored)}')
         L.append(f'  另有：unscored {n_unc} 条（spec=long）/ 无效-过时 {n_stale} 条 / 待验证 {n_pend} 条 / 报错 {n_err} 条（单列，不计分）')
         L.append(f'方向正确：{n_pos}（正确率 {acc:.1f}% = score>0 信号数 / {den}；score=0 计"平" {n_zero} 条，不计入分子分母）')
         L.append(f'  - strong 正确：{st[0]}/{st[1]}（正确率 {st[2]:.1f}%）' if st else '  - strong 正确：—')
@@ -675,6 +653,9 @@ def generate(blogger):
     L.append('')
     L.append('## 📋 逐条汇总表')
     L.append('')
+    if n_off_sh:
+        L.append(f'> 下表为全量信号记录（含上证以外 idx 行，逐条标注目标指数）；本次指标/排名只统计其中 {len(scored)} 条 idx=上证指数。')
+        L.append('')
     L.append('| # | 日期 | 内容(≤50字) | 方向 | 强度 | 预测周期 | 目标指数 | 参考价 | 终点日 | 终点收盘 | return | 分 | 备注 |')
     L.append('|:---|:---|:---|:---:|:---:|:---|:---|:---:|:---:|:---:|:---:|:---:|:---|')
     D_ICO = {1: '↑', -1: '↓'}

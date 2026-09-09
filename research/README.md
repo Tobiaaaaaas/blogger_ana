@@ -43,7 +43,8 @@ research/
 
 ## 为什么可回测：历史信号语料已成型
 
-`research/signals/` 是 40 位板块成员（short 17 ∪ swing 30）的方向信号**可复用标准语料**（一次性构建，后续所有研究读它）：
+`research/signals/` 是板块成员（现 roster = short 21 ∪ swing 30 = 47 人，但语料**尚未重建到新 roster**，
+当前仍是 40 人旧快照）的方向信号**可复用标准语料**（一次性构建，后续所有研究读它）：
 
 - 源 = 父仓库 `data/direction_signals/{昵称}.json`（DeepSeek 既有抽取，**未重跑**），只读不改。
 - 每条归一化补上 `board`（板块归属）与 `target/target_txt`（解析出的绝对目标日期 / 展示文案）。
@@ -59,12 +60,16 @@ research/
 
 | | short（超短） | swing（波段） |
 |---|---|---|
-| 板块名单 | PANEL_SHORT 17 人 | PANEL_SWING 30 人（40 人并集） |
+| 板块名单 | PANEL_SHORT 21 人（09-07 换名单） | PANEL_SWING 30 人（47 人并集） |
 | 决策档位 | 30 分一档 09:30~15:00 **10 档/日** | 09:30 / 11:00 / 14:30 **3 档/日** |
 | 回看窗口 | **前 1 个交易日** 00:00 → now | **前 3 个交易日** 00:00 → now |
 | spec 归属 | today / t1 | 其余（t2+… scored 或 unscored long） |
 
 窗口用**交易日**口径（v14，非自然日）：周一早晨能看到上周五发的"看周一"帖。周末/盘前按最近交易日算。
+
+> ⚠️ 短名单 2026-09-07 已换 21 人（旧 17 人注释保留在 `briefing/scripts/config.py`，波段 30 人未动）。
+> 本页 short 的干净窗/回测/quality 数字一律是**旧 17 人名单口径**；`research/signals/` 也仍是旧 40 人快照。
+> 重跑任何 short 研究前，先 `python -m research.corpus` 把语料重建到 roster 并集（21 ∪ 30 = 47 人），再复核干净窗。
 
 ## 逐档表态重建 poll.py（回测 = 简报当时会推什么）
 

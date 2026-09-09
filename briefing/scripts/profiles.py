@@ -7,15 +7,25 @@
 
 用法：python -m briefing.scripts.profiles
 """
-import importlib.util
 import json
 import logging
 import os
 import re
+import sys
 from collections import Counter
 
 from . import config, paths
-from .summarize import _extract
+
+# 2026-09-08 共享模块重构：DeepSeek 网关单一共享 opinion.ds（撤 from .summarize import _extract 的
+# file-load 依赖——模块无缓存复用、sys.modules 键名易冲突）。briefing 独立部署兜底补 REPO_ROOT。
+try:
+    from opinion import ds as o_ds  # noqa: E402
+except ImportError:
+    if not any(os.path.abspath(p) == os.path.abspath(paths.REPO_ROOT) for p in sys.path):
+        sys.path.insert(0, paths.REPO_ROOT)
+    from opinion import ds as o_ds  # noqa: E402
+
+call_json = o_ds.call_json
 
 log = logging.getLogger("briefing")
 
@@ -78,12 +88,11 @@ def _signal_stats(name):
 
 def _style_chunk(bloggers):
     """一批博主 → DeepSeek 生成风格一句话。"""
-    ext = _extract()
     user_msg = "\n\n".join(
         f"▍{b}：\n" + "\n".join(
             f"  - {s}" for s in _recent_summaries(b, 12))
         for b in bloggers)
-    result, raw = ext.call_json(None, STYLE_SYSTEM_PROMPT, user_msg, "profiles:style")
+    result, raw = call_json(None, STYLE_SYSTEM_PROMPT, user_msg, "profiles:style")
     if result is None:
         return {}
     out = {}

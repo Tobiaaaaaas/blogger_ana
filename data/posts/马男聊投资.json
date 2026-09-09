@@ -1,0 +1,3237 @@
+{
+  "scrape_time": "2026-09-08 10:10:02",
+  "source_url": "https://www.toutiao.com/c/user/token/Ciyyz0mo-1XRB4-lUJozfydfBrKkfwY3BtfpYkpCdnRw75JCXOCg3V6npwDKmRpJCjwAAAAAAAAAAAAAUN_hha5IfMyEPALr6iEYjF4s0bYxK9x2LYifxNohLWL4njZwqTVDPunk_3j8JP-KMDcQidabDhjDxYPqBCIBA0IyxGs=/",
+  "stop_reason": "since",
+  "user_info": {
+    "name": "马男聊投资",
+    "user_id": "MS4wLjABAAAAMQ3F_lzM3-zlt8gUcc6Z_dUgM7TNBCp9VYJFOyYoR61_Tb46Ffa59inKIu6yBZ8y",
+    "description": ""
+  },
+  "total_posts": 322,
+  "time_range": {
+    "earliest": "2023-08-07",
+    "latest": "2026-09-07"
+  },
+  "posts": [
+    {
+      "post_id": "7682745818340491818",
+      "content": "老黄吹AGI引爆股市？其实另有原因；非农爆表，加息和股灾要来吗",
+      "publish_time": 1788779065,
+      "publish_date": "2026-09-07 19:04",
+      "url": "http://toutiao.com/group/7682745818340491818/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 876
+    },
+    {
+      "post_id": "7682745337345245750",
+      "content": "两个重要信号！还不上车？",
+      "publish_time": 1788778588,
+      "publish_date": "2026-09-07 18:56",
+      "url": "http://toutiao.com/group/7682745337345245750/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 19,
+      "read_count": 13342
+    },
+    {
+      "post_id": "7682743040250741294",
+      "content": "老黄吹AGI引爆股市？其实另有原因；非农爆表，加息和股灾要来吗",
+      "publish_time": 1788778021,
+      "publish_date": "2026-09-07 18:47",
+      "url": "https://m.toutiaoimg.cn/a7682743040250741294",
+      "digg_count": 232,
+      "comment_count": 5,
+      "read_count": 7407
+    },
+    {
+      "post_id": "7681633097166684712",
+      "content": "美联储加息概率骤降12.8%！地缘局势集体缓和，小麦期货大跌4%",
+      "publish_time": 1788519870,
+      "publish_date": "2026-09-04 19:04",
+      "url": "http://toutiao.com/group/7681633097166684712/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 20,
+      "read_count": 27241
+    },
+    {
+      "post_id": "7681630880959316495",
+      "content": "俄乌局势有变，小麦大跌！美伊也开始互给台阶；消费大涨，啥信号",
+      "publish_time": 1788519079,
+      "publish_date": "2026-09-04 18:51",
+      "url": "https://m.toutiaoimg.cn/a7681630880959316495",
+      "digg_count": 343,
+      "comment_count": 6,
+      "read_count": 15650
+    },
+    {
+      "post_id": "1875392570514441",
+      "content": "最近，和行业内的朋友聊天，他透露的一个消息，让我非常震撼！\n\n朋友说，国内AI Agent市场格局可能发生巨变，企业已经释放出了非常强烈的信号。而他之所以得出这样一个结论，和杭州传出的一个最新消息有着离不开的关系。\n\n9月4日，来自杭州的一则新闻刷爆了AI圈，阿里旗下企业级通用Agent产品“千问办公”上线仅仅满一个月，用户数就突破3000万，直接成为AI办公赛道增长最快的产品之一。这个速度，哪怕放在整个国内AI行业里都罕见。\n\n时间拨回8月3日。阿里整合旗下几个Agent产品，正式推出千问办公。谁也没想到，短短一个月，这个新产品就跑出了3000万用户的成绩单。更关键的是，企业用户数量占比过半。\n\n这个细节值得反复咀嚼。过去一年，国内Agent赛道看似热闹，大量产品扎堆做个人助手，比拼的是谁的对话更花哨、谁的演示视频更惊艳。但真实的留存和付费，始终是行业不敢细看的账本。\n\n千问办公的打法完全不同，它直接切进企业核心业务流程。销售人员只需在钉钉中发起指令，Agent即可跨CRM、ERP等系统查询客户、库存和订单信息，并整理形成业务建议。这不是演示场景，是每天都在跑的生产力。\n\n技术底座也在快速加码。8月17日，千问办公开源上下文基础设施MyContext，把海量异构工作数据转化为Agent可直接调用的上下文，开源数周即在GitHub获得超过3000 Star。8月26日，阿里发布Qwen3.8-Flash模型，千问办公同步推出专属版，单任务生成速度提升约100%，Token消耗平均减少75%。\n\n外界的评价来得更直接。此前华尔街投行杰富瑞对八款全球主流AI Agent进行实测，千问办公综合得分排名第一。\n\n这也不免让我想起前段时间看到的一个来自斯坦福的调查，调查数据显示，中国民众对于AI的乐观度以及信任度都大幅高于美国，有84%的受访中国民众都对AI感到兴奋，而美国这一数字为38%。这一切的根源说到底还是因为中国的AI时刻都在进步，受益的不只是个人，还有企业。\n\n而当千问办公一个月3000万用户，企业占比过半，叠加投行实测第一，这三个信号放在一起时，自然也指向了同一个结论：国内Agent市场的格局已经变了。过去大家默认Agent是个人工具的延伸，现在，企业级Agent率先跑通了规模化落地的那道门。对于企业来说，使用agent已经不是个选择题，而是一个必答题了。",
+      "publish_time": 1788513727,
+      "publish_date": "2026-09-04 17:22",
+      "url": "https://m.toutiao.com/w/1875392570514441/?app=toutiao_web&timestamp=1788833364&use_new_style=1",
+      "digg_count": 221,
+      "comment_count": 56,
+      "read_count": 272479
+    },
+    {
+      "post_id": "7681255492765516331",
+      "content": "美联储和华尔街赢了！川普认怂，危机解除？G20暗流涌动，小心了",
+      "publish_time": 1788432249,
+      "publish_date": "2026-09-03 18:44",
+      "url": "http://toutiao.com/group/7681255492765516331/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 10,
+      "read_count": 45244
+    },
+    {
+      "post_id": "7681255328713671187",
+      "content": "大利好！特朗普认怂了",
+      "publish_time": 1788431654,
+      "publish_date": "2026-09-03 18:34",
+      "url": "http://toutiao.com/group/7681255328713671187/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 75431
+    },
+    {
+      "post_id": "7681255086462435891",
+      "content": "美联储和华尔街赢了！川普认怂，危机解除？G20暗流涌动，小心了",
+      "publish_time": 1788431572,
+      "publish_date": "2026-09-03 18:32",
+      "url": "https://m.toutiaoimg.cn/a7681255086462435891",
+      "digg_count": 521,
+      "comment_count": 11,
+      "read_count": 29816
+    },
+    {
+      "post_id": "7680883819112874542",
+      "content": "一夜变天！全球债市崩了，火会烧到股市吗？美俄较劲，股民惨了！",
+      "publish_time": 1788345595,
+      "publish_date": "2026-09-02 18:39",
+      "url": "http://toutiao.com/group/7680883819112874542/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 5,
+      "read_count": 13802
+    },
+    {
+      "post_id": "7680883449023955483",
+      "content": "全球债市崩了！下一个是股市？",
+      "publish_time": 1788345092,
+      "publish_date": "2026-09-02 18:31",
+      "url": "http://toutiao.com/group/7680883449023955483/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 25,
+      "read_count": 28099
+    },
+    {
+      "post_id": "7680882294382477858",
+      "content": "一夜变天！全球债市崩了，火会烧到股市吗？美俄较劲，股民惨了！",
+      "publish_time": 1788344772,
+      "publish_date": "2026-09-02 18:26",
+      "url": "https://m.toutiaoimg.cn/a7680882294382477858",
+      "digg_count": 1328,
+      "comment_count": 41,
+      "read_count": 89657
+    },
+    {
+      "post_id": "1875131349033995",
+      "content": "给大家说个事，可能刷新大家的认知。\n宝马5系，现在不到27万就能买到了。不是笔误。这款车官方指导价36.8万，如今部分地区裸车价已经跌到26万上下，个别门店的限时报价，甚至到了25万出头。往前推几年，5系530版本的落地价，在47万上下。\n宝马3系跌到了19万，奔驰E级、奥迪A6L的优惠普遍超过10万，部分高端车型直降20万以上。\n这意味着什么？豪华车的入场价，已经和普通家轿的价格带重叠了。以前买一台合资B级车的预算，现在够得着一台豪华轿车。\n但这组数字真正的冲击，不在车市。\n真正值得咂摸的，是一个价格共识塌了之后，会发生什么。\n5系这款车，过去是很多人心里的\"标尺\"。四十万级的豪华门槛，几十年没变过，大家都默认它就值这个数。结果有一天，这把标尺自己降到了27万，那人们自然会开始怀疑，其他那些默认\"值这个价\"的东西。\n那只一万块的包，真的值一万吗。\n那件三千块的大衣，真的值三千吗。\n那罐六百块的面霜，真的值六百吗。\n一个锚点塌了，所有的锚点都开始松动。\n而市场已经给出了回应。奥特莱斯人满为患，全国265个项目，一年2480亿的销售规模，还在增长。唯品会这类折扣平台上，常年买大牌衣服鞋子化妆品的SVIP突破了1000万，仅这一个群体，就撑起了平台一半以上的销售额。三五折的大牌，正在成为很多人日常购物的选项。\n你看，大家不是不愿意买大牌了，是不愿意再为\"共识价\"买单了。\n这就是降价潮最深远的影响：它改变的不是一件商品的价格，而是人们对待所有价格的态度。\n过去，价格是结论，你只能接受。现在，价格是问题，人人都会自己去找答案。",
+      "publish_time": 1788264607,
+      "publish_date": "2026-09-01 20:10",
+      "url": "https://m.toutiao.com/w/1875131349033995/?app=toutiao_web&timestamp=1788833365&use_new_style=1",
+      "digg_count": 401,
+      "comment_count": 227,
+      "read_count": 510377
+    },
+    {
+      "post_id": "7680511706115719720",
+      "content": "全球粮价飙升！但原因可能不是厄尔尼诺？AI长剧后西游，你看了吗",
+      "publish_time": 1788258493,
+      "publish_date": "2026-09-01 18:28",
+      "url": "https://m.toutiaoimg.cn/a7680511706115719720",
+      "digg_count": 297,
+      "comment_count": 4,
+      "read_count": 10150
+    },
+    {
+      "post_id": "7680139655806763555",
+      "content": "同一场合放硬话！股灾会重演吗？房地产新政，银行地产迎来利好？",
+      "publish_time": 1788171909,
+      "publish_date": "2026-08-31 18:25",
+      "url": "http://toutiao.com/group/7680139655806763555/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 3304
+    },
+    {
+      "post_id": "7680139166748443176",
+      "content": "同一场合放硬话！股灾会重演？",
+      "publish_time": 1788171837,
+      "publish_date": "2026-08-31 18:23",
+      "url": "http://toutiao.com/group/7680139166748443176/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 2070
+    },
+    {
+      "post_id": "7680138328246665762",
+      "content": "同一场合放硬话！股灾会重演吗？房地产新政，银行地产迎来利好？",
+      "publish_time": 1788171570,
+      "publish_date": "2026-08-31 18:19",
+      "url": "https://m.toutiaoimg.cn/a7680138328246665762",
+      "digg_count": 316,
+      "comment_count": 2,
+      "read_count": 12085
+    },
+    {
+      "post_id": "7679025786284524095",
+      "content": "CIA局长窜访俄国，如何影响股市？杰克逊霍尔开会，吓坏金融市场",
+      "publish_time": 1787912592,
+      "publish_date": "2026-08-28 18:23",
+      "url": "http://toutiao.com/group/7679025786284524095/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 1006
+    },
+    {
+      "post_id": "7679025565814374955",
+      "content": "社保重仓砸进“冷门”方向",
+      "publish_time": 1787912518,
+      "publish_date": "2026-08-28 18:21",
+      "url": "http://toutiao.com/group/7679025565814374955/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 5772
+    },
+    {
+      "post_id": "7679019841566556691",
+      "content": "CIA局长窜访俄国，如何影响股市？杰克逊霍尔开会，吓坏金融市场",
+      "publish_time": 1787911136,
+      "publish_date": "2026-08-28 17:58",
+      "url": "https://m.toutiaoimg.cn/a7679019841566556691",
+      "digg_count": 597,
+      "comment_count": 12,
+      "read_count": 32054
+    },
+    {
+      "post_id": "7678659793091035654",
+      "content": "惊世骇俗！美国要直接抹掉债务？英伟达财报靴子落地，股民浪起来",
+      "publish_time": 1787827532,
+      "publish_date": "2026-08-27 18:45",
+      "url": "http://toutiao.com/group/7678659793091035654/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 9,
+      "read_count": 5746
+    },
+    {
+      "post_id": "7678659317440053814",
+      "content": "美国直接抹掉债务？这也行？",
+      "publish_time": 1787827258,
+      "publish_date": "2026-08-27 18:40",
+      "url": "http://toutiao.com/group/7678659317440053814/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 0,
+      "read_count": 862
+    },
+    {
+      "post_id": "7678653101285081642",
+      "content": "惊世骇俗！美国要直接抹掉债务？英伟达财报靴子落地，股民浪起来",
+      "publish_time": 1787825752,
+      "publish_date": "2026-08-27 18:15",
+      "url": "https://m.toutiaoimg.cn/a7678653101285081642",
+      "digg_count": 1124,
+      "comment_count": 35,
+      "read_count": 65618
+    },
+    {
+      "post_id": "7678286893804519990",
+      "content": "大利好！美伊互放软话，股市见底？今晚两件大事，可能给出答案！",
+      "publish_time": 1787740576,
+      "publish_date": "2026-08-26 18:36",
+      "url": "http://toutiao.com/group/7678286893804519990/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 10,
+      "read_count": 9525
+    },
+    {
+      "post_id": "7678286608411427364",
+      "content": "全球股市即将迎来决定性一晚",
+      "publish_time": 1787740479,
+      "publish_date": "2026-08-26 18:34",
+      "url": "http://toutiao.com/group/7678286608411427364/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 22,
+      "read_count": 17871
+    },
+    {
+      "post_id": "7678285459667190314",
+      "content": "大利好！美伊互放软话，股市见底？今晚两件大事，可能给出答案！",
+      "publish_time": 1787740155,
+      "publish_date": "2026-08-26 18:29",
+      "url": "https://m.toutiaoimg.cn/a7678285459667190314",
+      "digg_count": 545,
+      "comment_count": 10,
+      "read_count": 29351
+    },
+    {
+      "post_id": "1874492311938377",
+      "content": "今年，消费市场上出现了一个明显的变化：捡漏，正在从\"抠门\"变成\"时髦\"。\n最直观的场景是奥特莱斯。以前，奥莱总是城市边缘一个不起眼的存在。今年，周末和节假日，停车场是满的，热门店前的队伍越排越长，客流同比涨了30%以上。很多年轻人去奥莱，不是为了买什么，就是为了\"捡漏\"。\n线上同样热闹。唯品会这类折扣平台上，今年大牌搜索量明显增长，COACH、Burberry的销量同比持续增长，安踏、凯乐石、骆驼这些国产鞋服增长明显，其中95后占了不小的比例。\n为什么捡漏突然香了？\n先看价格。一只以前四五千的COACH，现在一千多就能拎走。科颜氏保湿面霜，市场价600多，折扣渠道同款200多。科沃斯扫地机，旗舰店2000多，折扣渠道1400多。同一个品牌，同一个货号，官方自营。\n同样的钱，能买到的不是一件，是两三件。这笔账，谁都会算。\n再看人。这代年轻人是在信息里长大的，天生不信\"价签\"。他们买东西会问三个问题：是不是正品？品质行不行？价格合不合理？三个问题都有答案之后，标签就不重要了。\n他们不是不买大牌，是不想为标签买单。三五折的大牌，既能满足对品质的要求，又能把省下的钱留给生活本身。\n最后看渠道。折扣零售早就不是\"清库存\"的代名词了。品牌直供、官方自营、一物一鉴，让折扣渠道成了品牌的新阵地。越来越多品牌开始把折扣渠道当成正经生意来做，而不是处理尾货的地方。\n把这三件事放在一起，你会发现：捡漏，已经不是省钱的行为，而是一种被年轻人用真金白银验证过的消费方式。\n以前，谁在饭局上晒打折小票，多少有点不好意思。今天，能把大牌捡漏到手的人，才是桌上最被羡慕的那个。消费的潮水换了方向，它正在流向真正会过日子的人。",
+      "publish_time": 1787655174,
+      "publish_date": "2026-08-25 18:52",
+      "url": "https://m.toutiao.com/w/1874492311938377/?app=toutiao_web&timestamp=1788833367&use_new_style=1",
+      "digg_count": 76,
+      "comment_count": 3,
+      "read_count": 107715
+    },
+    {
+      "post_id": "7677917497861587494",
+      "content": "无语！美国制裁了个寂寞，股市已有反应；厄尔尼诺大热，但别上头",
+      "publish_time": 1787654653,
+      "publish_date": "2026-08-25 18:44",
+      "url": "http://toutiao.com/group/7677917497861587494/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 977
+    },
+    {
+      "post_id": "7677916882288083483",
+      "content": "利空落地！快到底了",
+      "publish_time": 1787654456,
+      "publish_date": "2026-08-25 18:40",
+      "url": "http://toutiao.com/group/7677916882288083483/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 16,
+      "read_count": 18673
+    },
+    {
+      "post_id": "7677916702541087232",
+      "content": "无语！美国制裁了个寂寞，股市已有反应；厄尔尼诺大热，但别上头",
+      "publish_time": 1787654296,
+      "publish_date": "2026-08-25 18:38",
+      "url": "https://m.toutiaoimg.cn/a7677916702541087232",
+      "digg_count": 350,
+      "comment_count": 7,
+      "read_count": 11212
+    },
+    {
+      "post_id": "7677556258680996352",
+      "content": "美国凌晨两点宣布大事，股市吓坏！用美军保美债？局势还会升级吗",
+      "publish_time": 1787570436,
+      "publish_date": "2026-08-24 19:20",
+      "url": "http://toutiao.com/group/7677556258680996352/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 6045
+    },
+    {
+      "post_id": "7677555842488500776",
+      "content": "明天凌晨两点，一决生死",
+      "publish_time": 1787570351,
+      "publish_date": "2026-08-24 19:19",
+      "url": "http://toutiao.com/group/7677555842488500776/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 10,
+      "read_count": 24620
+    },
+    {
+      "post_id": "7677555389579559451",
+      "content": "美国凌晨两点宣布大事，股市吓坏！用美军保美债？局势还会升级吗",
+      "publish_time": 1787570170,
+      "publish_date": "2026-08-24 19:16",
+      "url": "https://m.toutiaoimg.cn/a7677555389579559451",
+      "digg_count": 609,
+      "comment_count": 18,
+      "read_count": 33070
+    },
+    {
+      "post_id": "1874401145768067",
+      "content": "为了赌AI的未来，巨头们已经加杠杆加到眼红了。\n据媒体报道，微软、谷歌、亚马逊、Meta四大巨头2026年AI资本开支指引合计上调到约7250亿美元，同比猛增77%。钱不够就发债，光过去5个月，美股七巨头就合计发债1700亿美元，而2020到2024年，年均只有300亿。谷歌甚至单季自由现金流转负。\n说白了，谁都认定AI是下一场工业革命，算力就是石油，谁先加杠杆谁先抢到。\n但有个现实很多人没看清：这场全球AI军备赛里，阿里是估值最低的那个巨头。微软估值中枢23倍上下，亚马逊合理区间26到35倍，阿里的前瞻市盈率却只有十几倍。同样在做全栈AI，价格却打着折。\n不过，最聪明的人已经动手了。阿里800亿港元配售，近3倍超额认购，主权财富基金抢着上车；紧接着，就在今天，蔡崇信增持8000万港元，吴泳铭跟上4000万港元，管理层合计自掏1.2亿。\n这就是最直白的表态：他们看透了这层估值差，用行动说话，不用嘴。\n而且阿里不是纯烧钱，效果已经出来了，AI产品年化收入已突破495亿元，预计下季度达到100亿美元，管理层放话资本开支2到3年收回。别人加杠杆赌的是信仰，阿里加杠杆，挣的是已经落袋的钱。\n估值的洼地，从来都会被先看懂的人填平。",
+      "publish_time": 1787568231,
+      "publish_date": "2026-08-24 18:43",
+      "url": "https://m.toutiao.com/w/1874401145768067/?app=toutiao_web&timestamp=1788833367&use_new_style=1",
+      "digg_count": 40,
+      "comment_count": 4,
+      "read_count": 60689
+    },
+    {
+      "post_id": "7676438491546337832",
+      "content": "救市失败！贝森特和华尔街隔空互怼；黄金突然大涨，逻辑是什么？",
+      "publish_time": 1787310167,
+      "publish_date": "2026-08-21 19:02",
+      "url": "http://toutiao.com/group/7676438491546337832/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 20,
+      "read_count": 27423
+    },
+    {
+      "post_id": "7676438153632350755",
+      "content": "几个不妙的信号",
+      "publish_time": 1787310091,
+      "publish_date": "2026-08-21 19:01",
+      "url": "http://toutiao.com/group/7676438153632350755/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 5,
+      "read_count": 5434
+    },
+    {
+      "post_id": "7676437926787531304",
+      "content": "救市失败！贝森特和华尔街隔空互怼；黄金突然大涨，逻辑是什么？",
+      "publish_time": 1787309995,
+      "publish_date": "2026-08-21 18:59",
+      "url": "https://m.toutiaoimg.cn/a7676437926787531304",
+      "digg_count": 633,
+      "comment_count": 15,
+      "read_count": 43469
+    },
+    {
+      "post_id": "1874125998867531",
+      "content": "世界范围内出现了一个变化！\n过去十年乃至二十年的时间，世界上有一个特点，即，好东西，新产品都在欧美大陆发布。\n因为那个时候，世界的消费中心在那边。\n但现在风向已经变了，中国不仅拥有完备的制造业体系，让欧美那边抓耳挠腮，他们曾经引以为傲的市场影响力也在下降。\n有个事儿挺明显的，越来越多的海外品牌积极拥抱中国市场，数据显示，EightSleep poi、MardiMercredi、VERAWANG、Bang&Olufsen等超过100个海外品牌，选择中国市场，在天猫上线。\n为啥积极来中国？仔细想想有两方面的原因。\n第一：中国拥有庞大的消费市场，并且这些年对于大品牌，高质量的新品牌有浓厚的兴趣。\n第二：中国拥有像天猫、淘宝这样成熟稳定的电商平台，能为品牌提供更多的确定性和利润稳定性。\n第一个原因懂得人都懂，简单给大家解读一下第二个原因吧。\n时间进入到2026年，许多电商平台的玩法是流量租赁，说白了就是想要流量很简单，你花钱投就完了，没有钱没流量。\n但淘天则打破了这个怪圈，它通过”店铺+搜索推荐”的方式，直接让消费者能主动搜索进店并关注品牌，成为品牌的粉丝，有长期复购的可能。\n换句话来说，在淘宝天猫，品牌能成为自己的主阵地，通过长期的积累，生意会越来越好，压根不用焦虑流量问题。\n这一点，从过去的天猫618数据也能明显看到，在TOP100单品里，新品占了三分之一；破千万的新品，品类数从去年的26个扩大到53个，直接翻倍；有127个新品牌，从细分赛道挤进了行业前10。\n此外，不少在天猫淘宝卖的好的品牌。还通过线上的影响力，在线下开启了大量的店铺，比如南京德基、上海南京西路这些顶级商圈，UNICA、CHICJOC这样在线上起家、卖到千元级别的新锐女装，就在线下开出了店。\n只能说，用脚投票大家都不傻，大量品牌商家拥抱淘宝天猫，能很好的反映出当前中国的市场竞争力和电商平台能力。",
+      "publish_time": 1787305831,
+      "publish_date": "2026-08-21 17:50",
+      "url": "https://m.toutiao.com/w/1874125998867531/?app=toutiao_web&timestamp=1788833368&use_new_style=1",
+      "digg_count": 52,
+      "comment_count": 4,
+      "read_count": 102507
+    },
+    {
+      "post_id": "7676064346136379956",
+      "content": "癌症被攻克？暴涨177%！美财政部出手，特朗普放狠话，黄金嗷嗷涨",
+      "publish_time": 1787223053,
+      "publish_date": "2026-08-20 18:50",
+      "url": "http://toutiao.com/group/7676064346136379956/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 5761
+    },
+    {
+      "post_id": "7676064117890859554",
+      "content": "杯具了，特朗普没让步，局势升级！",
+      "publish_time": 1787222992,
+      "publish_date": "2026-08-20 18:49",
+      "url": "http://toutiao.com/group/7676064117890859554/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 17152
+    },
+    {
+      "post_id": "7676063998919311872",
+      "content": "癌症被攻克？暴涨177%！美财政部出手，特朗普放狠话，黄金嗷嗷涨",
+      "publish_time": 1787222926,
+      "publish_date": "2026-08-20 18:48",
+      "url": "https://m.toutiaoimg.cn/a7676063998919311872",
+      "digg_count": 376,
+      "comment_count": 2,
+      "read_count": 14633
+    },
+    {
+      "post_id": "1874005616568332",
+      "content": "消费市场上，正在出现一种普遍现象：你以为贵的东西，正在悄悄变得不贵了。\n先看最近刷屏的一条新闻。宝马5系，跌到了28万。这台车官方指导价36.8万，如今裸车28万就能拿下。不止宝马，奔驰E级、奥迪A6L的终端降幅都超过了10万，其中奔驰E300L最高降超20万，奥迪A6L指导价42.79万，现在裸车25.8万就能起步。\n高端车型更猛。宝马7系最高直降27万，奥迪Q7、奥迪A8、奔驰GLE的优惠全部超过20万。\n什么概念？前几年落地要40万的宝马3系，现在起售价只有25.8万。豪华车的门槛，正在被拉到几年前想都不敢想的位置。\n但问题来了：很多人并不知道。\n在不少人的印象里，BBA依然是四五十万的东西。他们的价格认知，停留在五年前，而市场早就翻篇了。这种信息差，不只存在于汽车上。\n看包包。COACH、GUCCI的印象是\"怎么也得大几千上万\"。现实是奥特莱斯天天排队，两三千就能拿下一只大牌包。唯品会这类折扣平台上，Burberry、COACH们今年销量持续增长，不少款式直接三到四折。\n看衣服。凯乐石一件冲锋衣，标价1899，折扣渠道700多。卡洛琳一条经典半身裙，市场价2380，折扣平台428就能搞定。同一个品牌，同一个型号，还都是自营。\n逻辑和BBA一模一样：很多人默认这些东西\"贵\"，然后停在了这个默认上，没有往下多核实一步。\n豪华车的门槛还在下探，包包衣服的折扣渠道还在扩容。这些变化指向同一件事：价格光环，正在各个品类里褪去。\n28万这个数字，五年前只够买一台合资B级车。今天，它能开走一台宝马5系。东西没有改姓。改的，是价签。而真正需要更换的价签，或许不在货架上，在人的脑子里。",
+      "publish_time": 1787191025,
+      "publish_date": "2026-08-20 09:57",
+      "url": "https://m.toutiao.com/w/1874005616568332/?app=toutiao_web&timestamp=1788833368&use_new_style=1",
+      "digg_count": 439,
+      "comment_count": 198,
+      "read_count": 645029
+    },
+    {
+      "post_id": "7675702211631940105",
+      "content": "美股微跌，亚太崩了！特朗普放狠话惹恼华尔街？淡定，没人掀桌子",
+      "publish_time": 1787138757,
+      "publish_date": "2026-08-19 19:25",
+      "url": "http://toutiao.com/group/7675702211631940105/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 6350
+    },
+    {
+      "post_id": "7675701904105685554",
+      "content": "别慌！华尔街砸盘是虚晃一枪",
+      "publish_time": 1787138681,
+      "publish_date": "2026-08-19 19:24",
+      "url": "http://toutiao.com/group/7675701904105685554/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 4275
+    },
+    {
+      "post_id": "7675701776842113574",
+      "content": "美股微跌，亚太崩了！特朗普放狠话惹恼华尔街？淡定，没人掀桌子",
+      "publish_time": 1787138598,
+      "publish_date": "2026-08-19 19:23",
+      "url": "https://m.toutiaoimg.cn/a7675701776842113574",
+      "digg_count": 639,
+      "comment_count": 9,
+      "read_count": 41045
+    },
+    {
+      "post_id": "7675338042877444644",
+      "content": "突发！美国国债遭集中抛售，美伊局势僵持，还有粮食危机！怎么办",
+      "publish_time": 1787053992,
+      "publish_date": "2026-08-18 19:53",
+      "url": "http://toutiao.com/group/7675338042877444644/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 16878
+    },
+    {
+      "post_id": "7675337842435899910",
+      "content": "惨！美债恐慌抛售、粮食危机...麻烦都挤一块了",
+      "publish_time": 1787053891,
+      "publish_date": "2026-08-18 19:51",
+      "url": "http://toutiao.com/group/7675337842435899910/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 13,
+      "read_count": 17579
+    },
+    {
+      "post_id": "7675335739513356815",
+      "content": "突发！美国国债遭集中抛售，美伊局势僵持，还有粮食危机！怎么办",
+      "publish_time": 1787053376,
+      "publish_date": "2026-08-18 19:42",
+      "url": "https://m.toutiaoimg.cn/a7675335739513356815",
+      "digg_count": 593,
+      "comment_count": 10,
+      "read_count": 31308
+    },
+    {
+      "post_id": "7674961540759568931",
+      "content": "大模型企业扭亏，存储股反转，牛回来了！7月经济数据偏弱，淡定",
+      "publish_time": 1786966289,
+      "publish_date": "2026-08-17 19:31",
+      "url": "http://toutiao.com/group/7674961540759568931/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 0,
+      "read_count": 1260
+    },
+    {
+      "post_id": "7674961264489103887",
+      "content": "利好太多！涨爆了！",
+      "publish_time": 1786966246,
+      "publish_date": "2026-08-17 19:30",
+      "url": "http://toutiao.com/group/7674961264489103887/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 9512
+    },
+    {
+      "post_id": "7674961148952707584",
+      "content": "大模型企业扭亏，存储股反转，牛回来了！7月经济数据偏弱，淡定",
+      "publish_time": 1786966153,
+      "publish_date": "2026-08-17 19:29",
+      "url": "https://m.toutiaoimg.cn/a7674961148952707584",
+      "digg_count": 745,
+      "comment_count": 15,
+      "read_count": 37431
+    },
+    {
+      "post_id": "1873572208078860",
+      "content": "豆包在没有被@的情况下自己跳出来回复网友的评论[捂脸]",
+      "publish_time": 1786777694,
+      "publish_date": "2026-08-15 15:08",
+      "url": "https://m.toutiao.com/w/1873572208078860/?app=toutiao_web&timestamp=1788833369&use_new_style=1",
+      "digg_count": 92,
+      "comment_count": 67,
+      "read_count": 145038
+    },
+    {
+      "post_id": "7673843202482242091",
+      "content": "PPI降温，存储大涨，股市稳了？美伊接近最终期限，会重启大战吗",
+      "publish_time": 1786705861,
+      "publish_date": "2026-08-14 19:11",
+      "url": "https://m.toutiaoimg.cn/a7673843202482242091",
+      "digg_count": 867,
+      "comment_count": 28,
+      "read_count": 54837
+    },
+    {
+      "post_id": "7673473704893874738",
+      "content": "美国赤字压力再次爆棚！股市能顶住吗？腾讯公布财报，现金流转负",
+      "publish_time": 1786619887,
+      "publish_date": "2026-08-13 19:18",
+      "url": "http://toutiao.com/group/7673473704893874738/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 0,
+      "read_count": 1414
+    },
+    {
+      "post_id": "7673473464337957426",
+      "content": "盘后突发！这一AI产业链环节加税！",
+      "publish_time": 1786619816,
+      "publish_date": "2026-08-13 19:16",
+      "url": "http://toutiao.com/group/7673473464337957426/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 4298
+    },
+    {
+      "post_id": "7673473311791546914",
+      "content": "美国赤字压力再次爆棚！股市能顶住吗？腾讯公布财报，现金流转负",
+      "publish_time": 1786619743,
+      "publish_date": "2026-08-13 19:15",
+      "url": "https://m.toutiaoimg.cn/a7673473311791546914",
+      "digg_count": 649,
+      "comment_count": 13,
+      "read_count": 35011
+    },
+    {
+      "post_id": "1873316205937728",
+      "content": "昨晚，老婆突然把手机怼到我脸上。\n\"你看这个。\"\n屏幕上是一件安踏女装防晒衣，吊牌价349元。她说她上周在专柜买的，一模一样的。\n然后她点开唯品会一个页面，同款同色同号，159元。\n她没说话，就看着我。\n我也不知道说什么。\n过了几秒，她说：\"你帮我算算，我这些年多花了多少钱。\"\n我说你冷静一下。\n她不冷静。\n打开购物车，开始翻历史记录。伊芙丽那条连衣裙，899，她买的时候觉得值。搜了一下同款，399。UR那件外套，599，上面239。\n她越翻越沉默。\n最后她说了一句：\"我以为是消费升级，结果是信息降级。\"",
+      "publish_time": 1786533552,
+      "publish_date": "2026-08-12 19:19",
+      "url": "https://m.toutiao.com/w/1873316205937728/?app=toutiao_web&timestamp=1788833369&use_new_style=1",
+      "digg_count": 160,
+      "comment_count": 55,
+      "read_count": 247063
+    },
+    {
+      "post_id": "7673100543208620596",
+      "content": "美国施压生效，韩国存储厂商扩产了！为啥选在中国？利好还是利空",
+      "publish_time": 1786533212,
+      "publish_date": "2026-08-12 19:13",
+      "url": "http://toutiao.com/group/7673100543208620596/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 2532
+    },
+    {
+      "post_id": "7673100132061168163",
+      "content": "麻烦来了，美国施压生效，韩国大扩产！",
+      "publish_time": 1786532935,
+      "publish_date": "2026-08-12 19:08",
+      "url": "http://toutiao.com/group/7673100132061168163/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 1753
+    },
+    {
+      "post_id": "7673099993745490484",
+      "content": "美国施压生效，韩国存储厂商扩产了！为啥选在中国？利好还是利空",
+      "publish_time": 1786532818,
+      "publish_date": "2026-08-12 19:06",
+      "url": "https://m.toutiaoimg.cn/a7673099993745490484",
+      "digg_count": 925,
+      "comment_count": 34,
+      "read_count": 47167
+    },
+    {
+      "post_id": "7672734996657947163",
+      "content": "豆包辟谣订酒店收费，烧的钱啥时回？英伟达又作妖，市场担忧蔓延",
+      "publish_time": 1786447840,
+      "publish_date": "2026-08-11 19:30",
+      "url": "https://m.toutiaoimg.cn/a7672734996657947163",
+      "digg_count": 386,
+      "comment_count": 7,
+      "read_count": 15970
+    },
+    {
+      "post_id": "7672367452055028224",
+      "content": "LOF全线退市！猪脚饭没了；非农爆冷，川普报仇，中国公布CPI",
+      "publish_time": 1786362584,
+      "publish_date": "2026-08-10 19:49",
+      "url": "http://toutiao.com/group/7672367452055028224/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 3962
+    },
+    {
+      "post_id": "7672367138828501544",
+      "content": "曼德海峡，空前升级！",
+      "publish_time": 1786362226,
+      "publish_date": "2026-08-10 19:43",
+      "url": "http://toutiao.com/group/7672367138828501544/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 4,
+      "read_count": 7802
+    },
+    {
+      "post_id": "7672363002913407498",
+      "content": "LOF全线退市！猪脚饭没了；非农爆冷，川普报仇，中国公布CPI",
+      "publish_time": 1786361224,
+      "publish_date": "2026-08-10 19:27",
+      "url": "https://m.toutiaoimg.cn/a7672363002913407498",
+      "digg_count": 598,
+      "comment_count": 7,
+      "read_count": 35207
+    },
+    {
+      "post_id": "1873114273965192",
+      "content": "预测一下，接下来的中国社会将会出现这两个明显的变化。\n一个明显的变化是，国内科技公司自研AI芯片的步伐会加快。\n根据中金公司的测算，2026到2030年，全球AI累计资本开支可能达到5.6万亿美元。但企业靠经营现金流，只能覆盖大约2.1万亿，还有超过一半的缺口要覆盖。\n成本这么高，其中很大一部分是要支付芯片的费用，而随着AI的发展芯片的价格不断增长，AI科技公司们为了对冲这种风险，必然会加快自研芯片的步伐。\n另外一个明显的变化，国内AI应用步伐会加快。普通人能更好的体验AI发展带来的技术便利。\n之所以这么说，是因为最近千问的动作指向已经很明确了。8月10日，千问开放平台上线之后，过去的一些生活方式会迎来一些新的变化。\n要知道这个千问开放平台，有面向生态伙伴和开发者开放AI智能体及Skill两类接入方式，不仅能覆盖手机、PC和AI眼镜三类终端。还能接入第三方AI服务之后，让普通人随时调用相关的功能。\n据悉，第一批接入千问开放平台的生态伙伴包括盈米基金、哈啰租车、彩云天气、顺丰速运、贝壳、找房闪送、天鹅到家、欧莱雅、Coach等。\n此外，菜鸟、夸克网盘、夸克扫描王等阿里生态产品也同步接入，在千问上为用户提供智能寄件、网盘整理、超清扫描、文件查询等能力。\n这也就意味着普通人可以通过各个原生AI入口实现租房买房、快递查询与下单，基金持仓投资优选，租车等多种复杂生活场景，一句话搞定。\n一个上班几年攒了点闲钱的打工人，风险承受能力不高，想配置一笔闲钱，但自己又不是很了解现在的基金情况，搁以前，你只能按分类和近期收益排行筛，适不适合自己、回撤能有多大，得自己挨个查。\n但在千问里你输入需求给盈米基金的agent，它结合你的风险偏好和资金期限综合权衡，就能推荐合适的基金和组合，连每只该怎么分配都讲清楚。你还能把自己的持仓丢给它做诊断：它会把你持有的基金全部汇总，指出哪只有风险、配置上缺了什么，再给出一步步的优化建议，比如合并同类基金、清理\"碎基\"，让持仓更聚焦。哪天行情跌了，问一句\"我的持仓受影响吗\"，它也能结合你的实际持仓，讲清楚影响有多大、该拿住还是该调整。\n要知道这还是千问刚刚开放，如果随着千问的技术不断发展，接入的第三方AI服务越来越多，那么接下来，千问势必会成为普通人AI时代新的生活入口！",
+      "publish_time": 1786340975,
+      "publish_date": "2026-08-10 13:49",
+      "url": "https://m.toutiao.com/w/1873114273965192/?app=toutiao_web&timestamp=1788833371&use_new_style=1",
+      "digg_count": 195,
+      "comment_count": 24,
+      "read_count": 266776
+    },
+    {
+      "post_id": "7671245385604399625",
+      "content": "美联储要加息？沃什都松口了！连亏十年转盈利，创新药要爆发？",
+      "publish_time": 1786101350,
+      "publish_date": "2026-08-07 19:15",
+      "url": "http://toutiao.com/group/7671245385604399625/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 12,
+      "read_count": 5482
+    },
+    {
+      "post_id": "7671244942177616422",
+      "content": "我去扩产了，老美这次玩真的？",
+      "publish_time": 1786100974,
+      "publish_date": "2026-08-07 19:09",
+      "url": "http://toutiao.com/group/7671244942177616422/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 10291
+    },
+    {
+      "post_id": "7671244777052783130",
+      "content": "美联储要加息？沃什都松口了！连亏十年转盈利，创新药要爆发？",
+      "publish_time": 1786100878,
+      "publish_date": "2026-08-07 19:07",
+      "url": "https://m.toutiaoimg.cn/a7671244777052783130",
+      "digg_count": 722,
+      "comment_count": 17,
+      "read_count": 42208
+    },
+    {
+      "post_id": "1872854401975308",
+      "content": "说个好玩的事，前几年我开始跑步，头两个月特上头，配速、步频、心率，天天研究数据想着怎突破，恨不得一周练七次。结果倒好，三个月后膝盖不舒服，歇几个月了。后来经常慢跑的朋友告诉我，想跑得远，先要慢下来。​\n\n后来我发现，这个道理同样适用于做企业。前两天看到2026年胡润全球独角兽榜单，杭州一家农业企业“认养一头牛”连续三年上榜，也印证了这一点。​\n\n我们都知道，浙江属于创新强省，比如光杭州就有25家企业上榜，像DeepSeek、宇树科技等企业我们耳熟能详了，唯独一家叫“认养一头牛”的企业，成为了杭州唯一上榜的农业及食品饮料领域独角兽，这就有点出人意料。​\n简单了解下这个企业，如果要找个形容词，用“慢功夫”就很贴切。​\n\n认养一头牛2014年建第一座牧场，到今天10座现代化牧场、2座乳制品智造基地，养了超11万头牛，规模是挺大，但我觉得真正让它脱颖而出的，是另外两件事。​\n​\n这家企业自己搞体外胚胎移植技术。体外胚胎移植技术是目前畜牧业（如奶牛、肉牛）中最快的遗传改良法之一。认养一头牛已经干到可年产约三万枚胚胎，行业前列，旗下牧场是“国家奶牛核心育种场”“奶牛标准化示范场”。这事投入是大，但也决定了牛群品质的上限。​\n\n2023年，它还牵头起草的国内首个公开的《A2 β-酪蛋白牛奶》团体标准，2025年拿到相关发明专利，还首次承担浙江省“尖兵领雁+X”科技专项，成为该重大项目中唯一的乳制品企业。​\n\n这两件事有一个共同点，都是慢功夫，但能决定一家企业跑多远。2025年认养一头牛成母牛年平均单产14.02吨，做到了全国第二，就是最好的证明。​\n\n打好牧场、育种和标准的地基，企业也没停下向消费端延伸的脚步。如今，它已经延展出奶粉、酸奶、冰淇淋等产品线，跻身中国农业企业500强；全国布局9个常温仓、7个低温仓，产品最快24小时内送达用户手中；线下渠道覆盖近30个省级行政区。算法、数据、电商运营，这些从杭州长出来的能力，正把分散在全国的节点串成一张高效运转的网。​\n​\n产业扎得深，数智化也跟得紧。这家企业也不忘搞数智化。​\n\n他家牧场的头牛戴上智能项圈，采食、反刍、产奶数据实时上传，AI系统自动分析健康状态，10个牧场全覆盖，24小时实时出数据，通过数据让人和牛完成“交流”，持续把底层能力做深。​\n\n时代需要那种愿意一步一个脚印、把根往下扎深的企业。这方面，浙江确实做的很不错，这块土地既能长出DeepSeek这样的硬核科技企业，也能培育出认养一头牛这样不断深耕的“新国民品牌”，妥妥的科技与产业创新双向奔赴。",
+      "publish_time": 1786093141,
+      "publish_date": "2026-08-07 16:59",
+      "url": "https://m.toutiao.com/w/1872854401975308/?app=toutiao_web&timestamp=1788833371&use_new_style=1",
+      "digg_count": 454,
+      "comment_count": 35,
+      "read_count": 620302
+    },
+    {
+      "post_id": "7670876379289846315",
+      "content": "余承东：所有手机都要大规模涨价！但美股存储股大跌，出什么事了",
+      "publish_time": 1786015183,
+      "publish_date": "2026-08-06 19:19",
+      "url": "http://toutiao.com/group/7670876379289846315/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 7208
+    },
+    {
+      "post_id": "7670875966633230854",
+      "content": "存储大事件！可能要到顶",
+      "publish_time": 1786015077,
+      "publish_date": "2026-08-06 19:17",
+      "url": "http://toutiao.com/group/7670875966633230854/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 12,
+      "read_count": 16092
+    },
+    {
+      "post_id": "7670875500873368114",
+      "content": "余承东：所有手机都要大规模涨价！但美股存储股大跌，出什么事了",
+      "publish_time": 1786014903,
+      "publish_date": "2026-08-06 19:15",
+      "url": "https://m.toutiaoimg.cn/a7670875500873368114",
+      "digg_count": 1011,
+      "comment_count": 17,
+      "read_count": 68686
+    },
+    {
+      "post_id": "7670505854248010278",
+      "content": "美国准备禁止进口中国光模块，中国闪电反击！局势还会升级吗？",
+      "publish_time": 1785928827,
+      "publish_date": "2026-08-05 19:20",
+      "url": "https://m.toutiaoimg.cn/a7670505854248010278",
+      "digg_count": 933,
+      "comment_count": 17,
+      "read_count": 55312
+    },
+    {
+      "post_id": "7670134882512699950",
+      "content": "美日财长唱双簧，股市大涨！英伟达量产CPO，要抢咱们的饭碗？",
+      "publish_time": 1785842550,
+      "publish_date": "2026-08-04 19:22",
+      "url": "http://toutiao.com/group/7670134882512699950/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 3865
+    },
+    {
+      "post_id": "7670134594087174706",
+      "content": "震惊！英伟达要下场抢咱们饭吃？",
+      "publish_time": 1785842452,
+      "publish_date": "2026-08-04 19:20",
+      "url": "http://toutiao.com/group/7670134594087174706/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 4071
+    },
+    {
+      "post_id": "7670132734953570857",
+      "content": "美日财长唱双簧，股市大涨！英伟达量产CPO，要抢咱们的饭碗？",
+      "publish_time": 1785841951,
+      "publish_date": "2026-08-04 19:12",
+      "url": "https://m.toutiaoimg.cn/a7670132734953570857",
+      "digg_count": 725,
+      "comment_count": 14,
+      "read_count": 37227
+    },
+    {
+      "post_id": "1872562471838784",
+      "content": "面对谣言，当事人不再沉默，王秋怡严正声明：报警了！\n现在造谣有多容易？几张活动合影就够了。\n蔡崇信离婚的事闹得沸沸扬扬，不知道哪位居心叵测之人，把王秋怡跟蔡崇信的同框照翻出来，拼一拼凑一凑，直接给人家安排上了。\n王秋怡是体育主持，跟蔡崇信有过业务往来，合照几张，到有些人嘴里就成了\"铁证\"。没人核实，没人求证，几张图配上几句推测，就有人开始写连续剧。\n面对这样的造谣当时人王秋怡没有再沉默，直接回应到：请大家擦亮眼睛，不要被谣言蒙蔽了。\n其实就这个事儿，一眼看过去就是假的，真搞不懂为啥能传起来。",
+      "publish_time": 1785814735,
+      "publish_date": "2026-08-04 11:38",
+      "url": "https://m.toutiao.com/w/1872562471838784/?app=toutiao_web&timestamp=1788833372&use_new_style=1",
+      "digg_count": 49,
+      "comment_count": 3,
+      "read_count": 103703
+    },
+    {
+      "post_id": "7669765695613305371",
+      "content": "利好！韩国开始抓人救市；特朗普承认干预日元，股市巨震，会怎样",
+      "publish_time": 1785756660,
+      "publish_date": "2026-08-03 19:31",
+      "url": "http://toutiao.com/group/7669765695613305371/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 19737
+    },
+    {
+      "post_id": "7669765539748659738",
+      "content": "特朗普承认出手干日元！股市惨了",
+      "publish_time": 1785756488,
+      "publish_date": "2026-08-03 19:28",
+      "url": "http://toutiao.com/group/7669765539748659738/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 24569
+    },
+    {
+      "post_id": "7669763875666985487",
+      "content": "利好！韩国开始抓人救市；特朗普承认干预日元，股市巨震，会怎样",
+      "publish_time": 1785756068,
+      "publish_date": "2026-08-03 19:21",
+      "url": "https://m.toutiaoimg.cn/a7669763875666985487",
+      "digg_count": 864,
+      "comment_count": 15,
+      "read_count": 59571
+    },
+    {
+      "post_id": "1872369090284556",
+      "content": "抖音搜索楚雄文旅试试[捂脸]",
+      "publish_time": 1785630312,
+      "publish_date": "2026-08-02 08:25",
+      "url": "https://m.toutiao.com/w/1872369090284556/?app=toutiao_web&timestamp=1788833372&use_new_style=1",
+      "digg_count": 119,
+      "comment_count": 16,
+      "read_count": 1053524
+    },
+    {
+      "post_id": "7668641136419881512",
+      "content": "微软业绩炸裂，韩国救市，科技股大反攻！之前的暴跌，有内情流出",
+      "publish_time": 1785494929,
+      "publish_date": "2026-07-31 18:48",
+      "url": "http://toutiao.com/group/7668641136419881512/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 8,
+      "read_count": 3639
+    },
+    {
+      "post_id": "7668640941091111458",
+      "content": "破了案了，原来砸盘的是他们",
+      "publish_time": 1785494660,
+      "publish_date": "2026-07-31 18:44",
+      "url": "http://toutiao.com/group/7668640941091111458/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 47,
+      "read_count": 65354
+    },
+    {
+      "post_id": "7668639988090700303",
+      "content": "微软业绩炸裂，韩国救市，科技股大反攻！水落石出，砸盘的是他们",
+      "publish_time": 1785494394,
+      "publish_date": "2026-07-31 18:39",
+      "url": "https://m.toutiaoimg.cn/a7668639988090700303",
+      "digg_count": 921,
+      "comment_count": 46,
+      "read_count": 51209
+    },
+    {
+      "post_id": "7668276213593260578",
+      "content": "中韩同救市！初见成效不能急；重磅经济会议，消费大涨，世道变了",
+      "publish_time": 1785409852,
+      "publish_date": "2026-07-30 19:10",
+      "url": "http://toutiao.com/group/7668276213593260578/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 18,
+      "read_count": 9604
+    },
+    {
+      "post_id": "7668276031627608610",
+      "content": "重磅会议！消费股大涨",
+      "publish_time": 1785409691,
+      "publish_date": "2026-07-30 19:08",
+      "url": "http://toutiao.com/group/7668276031627608610/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 10,
+      "read_count": 12026
+    },
+    {
+      "post_id": "7668273579809489450",
+      "content": "中韩同救市！初见成效不能急；重磅经济会议，消费大涨，世道变了",
+      "publish_time": 1785409092,
+      "publish_date": "2026-07-30 18:58",
+      "url": "https://m.toutiaoimg.cn/a7668273579809489450",
+      "digg_count": 989,
+      "comment_count": 20,
+      "read_count": 73469
+    },
+    {
+      "post_id": "1872048326329419",
+      "content": "上个月陪一个哥们去4S店看宝马5系。\n\n他预算卡得死死的，说最多三十五万，多了不考虑。他脑子里5系就是四五十万的东西，觉得自己这个预算进去就是看看，过过瘾。\n\n结果销售报了个裸车价，不到30万。他愣了好几秒，转头小声跟我说：\"是不是搞错了？\"。我说你再问问。\n\n他又问了一遍，销售笑着说，诚心定的话还能再聊聊。回去的路上他一直没说话。到了停车场才冒出一句：\"我脑子里那个价格，至少停留在五年前。\"\n\n我说你想想，你这五年有没有认真看过一次BBA的实际成交价？他摇了摇头。然后他突然转头问我：\"你嫂子买衣服是不是也一样？\"\n\n我说怎么了？\n\n他说他老婆一直买伊芙丽和UR，每次去商场看到吊牌价就刷卡，从来没想过去别的地方看一眼。上个月她闺蜜帮她搜了一下款式，UR一件外套吊牌599，唯品会这类折扣平台上239。伊芙丽一条裙子899，上面399。还有我最近喜欢的斯凯奇健步鞋699，结果那上面不到300。\n\n同一个牌子，同一个款式。\n\n我说这也不怪你们。以前信息不透明，你在哪买就只能看到那个价，自然觉得它就该值那个数。现在一下就知道了，但很多人压根没想过去搜。\n\n他点点头说：\"我卖车卖了十几年，天天跟客户解释价格已经降了，结果自己老婆买衣服也一样——不亲眼看到差价，根本不信。\"后来他跟我说了一句话，我觉得挺有道理的。\n\n\"其实不是东西贵不贵的问题。是你脑子里那个价格标签，该换一换了。\"",
+      "publish_time": 1785324408,
+      "publish_date": "2026-07-29 19:26",
+      "url": "https://m.toutiao.com/w/1872048326329419/?app=toutiao_web&timestamp=1788833373&use_new_style=1",
+      "digg_count": 485,
+      "comment_count": 157,
+      "read_count": 921833
+    },
+    {
+      "post_id": "7667901739245863450",
+      "content": "悲剧了！韩股继续暴跌，但政府不救市？祸不单行，美伊又打起来了",
+      "publish_time": 1785322586,
+      "publish_date": "2026-07-29 18:56",
+      "url": "http://toutiao.com/group/7667901739245863450/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 13,
+      "read_count": 11148
+    },
+    {
+      "post_id": "7667901517542752806",
+      "content": "惨了！韩国不救市？",
+      "publish_time": 1785322495,
+      "publish_date": "2026-07-29 18:54",
+      "url": "http://toutiao.com/group/7667901517542752806/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 30,
+      "read_count": 10190
+    },
+    {
+      "post_id": "7667899568092201507",
+      "content": "悲剧了！韩股继续暴跌，但政府不救市？祸不单行，美伊又打起来了",
+      "publish_time": 1785322000,
+      "publish_date": "2026-07-29 18:46",
+      "url": "https://m.toutiaoimg.cn/a7667899568092201507",
+      "digg_count": 1007,
+      "comment_count": 20,
+      "read_count": 64321
+    },
+    {
+      "post_id": "7667170098477580800",
+      "content": "长鑫暴涨466%！宁德创A股回购记录！市场情绪不错，但有笔账得算",
+      "publish_time": 1785152239,
+      "publish_date": "2026-07-27 19:37",
+      "url": "http://toutiao.com/group/7667170098477580800/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 4,
+      "read_count": 2638
+    },
+    {
+      "post_id": "7667169852813181492",
+      "content": "情绪沸点，别上头！",
+      "publish_time": 1785152145,
+      "publish_date": "2026-07-27 19:35",
+      "url": "http://toutiao.com/group/7667169852813181492/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 3312
+    },
+    {
+      "post_id": "7667168539450655283",
+      "content": "长鑫暴涨466%！宁德创A股回购记录！市场情绪不错，但有笔账得算",
+      "publish_time": 1785151798,
+      "publish_date": "2026-07-27 19:29",
+      "url": "https://m.toutiaoimg.cn/a7667168539450655283",
+      "digg_count": 997,
+      "comment_count": 46,
+      "read_count": 69325
+    },
+    {
+      "post_id": "1871772067500036",
+      "content": "对于两名刚刚获得大奖的中国数学家，除了某乎上的“数学严父”从专业角度对他们进行质疑之外，最让我震惊的是这个喷的角度：他们居然使用英文讲课和交流？分明是崇洋媚外！\n\n说起来，这几年互联网上很有一种思潮：英语不重要，大部分人工作后根本不用，应该从必修科目中剔除，或者大幅降低其总分数；这里面还有相当一部分人认为应该大力发展理工科，而非经济学文学社会学等文科，因为这对于国家更有用。\n\n然而，理工科的顶级人才，却几乎都有极强的外语尤其是英语能力。数学界的前辈大师陈景润和华罗庚，都能熟练阅读英文学术刊物，甚至用英文参加顶级学术交流。而钱学森、袁隆平这些科学家，就更不必说。\n\n他们当然不是闲来无事学外语玩儿，他们的时间非常宝贵，不可能浪费时间学习无用的学科；更加不是国家想省请翻译的钱。事实就是，每一个行业做到顶尖之后，其翻译需求都必须结合行业深度知识。\n\n这些翻译可不是今晚吃什么，人民商场怎么走之类的语句。没有相关行业知识的丰富储备，就算你在国外生活了十年，都做不来。十多年前PC端的翻译软件，就根本不知道金融行业的“long”“short”“slippage\"是什么意思。\n\n有了AI之后，这些问题得到了部分解决，但终究不如科学家个人懂外语更稳，不然人家老外和翻译串通起来胡说八道你都不知道。别拿宇树科技老板举例子，他的成功说明即使知识能力有欠缺，也有成功的可能，而不是不学外语会更好。这就像不上大学也能成功，但成功肯定不是因为没上大学一样。",
+      "publish_time": 1785060947,
+      "publish_date": "2026-07-26 18:15",
+      "url": "https://m.toutiao.com/w/1871772067500036/?app=toutiao_web&timestamp=1788833375&use_new_style=1",
+      "digg_count": 187,
+      "comment_count": 150,
+      "read_count": 175380
+    },
+    {
+      "post_id": "7666055803740963328",
+      "content": "美军增兵，部署重型轰炸机！股民实惨；仔细拆解，别重蹈覆辙",
+      "publish_time": 1784892930,
+      "publish_date": "2026-07-24 19:35",
+      "url": "http://toutiao.com/group/7666055803740963328/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 2116
+    },
+    {
+      "post_id": "7666054859913609780",
+      "content": "罕见！直接喊你买股票了",
+      "publish_time": 1784892577,
+      "publish_date": "2026-07-24 19:29",
+      "url": "http://toutiao.com/group/7666054859913609780/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 51,
+      "read_count": 38893
+    },
+    {
+      "post_id": "7666046064520200714",
+      "content": "美军增兵，部署重型轰炸机！股民实惨；仔细拆解，别重蹈覆辙",
+      "publish_time": 1784890455,
+      "publish_date": "2026-07-24 18:54",
+      "url": "https://m.toutiaoimg.cn/a7666046064520200714",
+      "digg_count": 789,
+      "comment_count": 19,
+      "read_count": 47261
+    },
+    {
+      "post_id": "1871507979515916",
+      "content": "家电补贴实施了一年多，最大的改变可能不是补了多少钱，而是改变了一代人的购物习惯。\n以前买家电，很少有人关心折扣。走进商场，看到标价，觉得差不多就买了。一台冰箱四五千，一台扫地机两三千，价格就钉在那，大家默认这就是\"正常价\"。\n\n国补打破了这个默认。20%的补贴力度，让很多人第一次认真算了一笔账：原来同一台机器，领了补贴能省这么多。这种\"捡漏快感\"一旦体验过，就再也回不去了。\n\n现在不少品类从20%降到了15%甚至更低。但消费者已经被\"训练\"出来了。他们开始主动找折扣，开始比价，开始关心\"这个东西别的地方卖多少\"。\n\n这个习惯，正在重塑整个家电消费的市场格局。\n\n以扫地机器人为例。科沃斯地宝双子星双机一体，线下专柜和旗舰店标价2000多。同一个型号、同一台机器，唯品会上1400多就能拿下。美的、小熊也一样。旗舰店两三千的旗舰款，折扣平台上经常一千出头。差价一倍，东西一模一样。\n\n也就是说，折扣渠道的价格，承接了现在消费的需求。 这道账一算明白，消费者的选择就变了。国补让大家去关心价格，却没想到大家顺着这条线，发现了新的通道。\n\n以前大家觉得\"贵的渠道才靠谱\"。现在越来越多人想明白了：靠谱不靠谱，跟渠道贵不贵，是两回事。扫码验出来一模一样的东西，你多花的那一倍，买的不是品质，是信息差。\n\n国补减少不是坏事。它只是把一层窗户纸捅破了——让你发现，精明消费这件事，也不是只能需要靠补贴。据统计，超过60%的消费者从未在购买前进行过跨平台比价。但当这个习惯被国补\"强制养成\"之后，剩下的40%只会越来越多。\n\n问题不是大家会不会变精明，而是这个转变，来得比你想象的更快。",
+      "publish_time": 1784809093,
+      "publish_date": "2026-07-23 20:18",
+      "url": "https://m.toutiao.com/w/1871507979515916/?app=toutiao_web&timestamp=1788833375&use_new_style=1",
+      "digg_count": 88,
+      "comment_count": 9,
+      "read_count": 147247
+    },
+    {
+      "post_id": "7665672494506607138",
+      "content": "谷歌现金流变负数，股价大跌！科技股危机？量化传言爆发，水很深",
+      "publish_time": 1784803704,
+      "publish_date": "2026-07-23 18:48",
+      "url": "http://toutiao.com/group/7665672494506607138/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 8,
+      "read_count": 3781
+    },
+    {
+      "post_id": "7665672082335744512",
+      "content": "利空！谷歌扛不住了？",
+      "publish_time": 1784803432,
+      "publish_date": "2026-07-23 18:43",
+      "url": "http://toutiao.com/group/7665672082335744512/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 3278
+    },
+    {
+      "post_id": "7665671553254523426",
+      "content": "谷歌现金流变负数，股价大跌！科技股危机？量化传言爆发，水很深",
+      "publish_time": 1784803248,
+      "publish_date": "2026-07-23 18:40",
+      "url": "https://m.toutiaoimg.cn/a7665671553254523426",
+      "digg_count": 987,
+      "comment_count": 28,
+      "read_count": 53086
+    },
+    {
+      "post_id": "7665305584933880326",
+      "content": "什么？特朗普又要炸伊朗地下核设施？还要加关税？股市能守住吗？",
+      "publish_time": 1784718043,
+      "publish_date": "2026-07-22 19:00",
+      "url": "https://m.toutiaoimg.cn/a7665305584933880326",
+      "digg_count": 986,
+      "comment_count": 13,
+      "read_count": 53664
+    },
+    {
+      "post_id": "7664930868791673387",
+      "content": "救市力度空前，A股暴涨！还有市场底吗？美伊局势有转机，把握好",
+      "publish_time": 1784630797,
+      "publish_date": "2026-07-21 18:46",
+      "url": "https://m.toutiaoimg.cn/a7664930868791673387",
+      "digg_count": 1505,
+      "comment_count": 17,
+      "read_count": 123422
+    },
+    {
+      "post_id": "7664571460735828514",
+      "content": "美伊冲突升级油价冲 85 美元，科技股大跌！KIMI赶超竟是捧杀？",
+      "publish_time": 1784547188,
+      "publish_date": "2026-07-20 19:33",
+      "url": "http://toutiao.com/group/7664571460735828514/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 1234
+    },
+    {
+      "post_id": "7664571201150370338",
+      "content": "局势升级！油价飙升、科技股大跌，这次有点麻烦...",
+      "publish_time": 1784547106,
+      "publish_date": "2026-07-20 19:31",
+      "url": "http://toutiao.com/group/7664571201150370338/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 2114
+    },
+    {
+      "post_id": "7664569750195487278",
+      "content": "美伊冲突升级油价冲 85 美元，科技股大跌！KIMI赶超竟是捧杀？",
+      "publish_time": 1784546716,
+      "publish_date": "2026-07-20 19:25",
+      "url": "https://m.toutiaoimg.cn/a7664569750195487278",
+      "digg_count": 828,
+      "comment_count": 6,
+      "read_count": 41534
+    },
+    {
+      "post_id": "7663458196002161194",
+      "content": "跌懵了！科技行业到顶？光模块大利空？梳理本轮股灾完整时间线！",
+      "publish_time": 1784287917,
+      "publish_date": "2026-07-17 19:31",
+      "url": "https://m.toutiaoimg.cn/a7663458196002161194",
+      "digg_count": 1426,
+      "comment_count": 58,
+      "read_count": 97711
+    },
+    {
+      "post_id": "7663080883078873646",
+      "content": "利润翻十几倍！股民不追光改养猴；科技股暴跌，华尔街赶紧救市？",
+      "publish_time": 1784200182,
+      "publish_date": "2026-07-16 19:09",
+      "url": "http://toutiao.com/group/7663080883078873646/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 2857
+    },
+    {
+      "post_id": "7663080561321296422",
+      "content": "短期缺大猴，未来缺小猴，永远缺母猴",
+      "publish_time": 1784200047,
+      "publish_date": "2026-07-16 19:07",
+      "url": "http://toutiao.com/group/7663080561321296422/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 4,
+      "read_count": 7022
+    },
+    {
+      "post_id": "7663078652921348662",
+      "content": "利润翻十几倍！股民不追光改养猴；科技股暴跌，华尔街赶紧救市？",
+      "publish_time": 1784199546,
+      "publish_date": "2026-07-16 18:59",
+      "url": "https://m.toutiaoimg.cn/a7663078652921348662",
+      "digg_count": 877,
+      "comment_count": 39,
+      "read_count": 51396
+    },
+    {
+      "post_id": "7662713466553238062",
+      "content": "央行放水1.4万亿，不怕长鑫抽血！美国CPI爆冷，沃什讲话有玄机？",
+      "publish_time": 1784114586,
+      "publish_date": "2026-07-15 19:23",
+      "url": "http://toutiao.com/group/7662713466553238062/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 1943
+    },
+    {
+      "post_id": "7662713082367558171",
+      "content": "1.4万亿！不用担心长鑫抽血了...",
+      "publish_time": 1784114507,
+      "publish_date": "2026-07-15 19:21",
+      "url": "http://toutiao.com/group/7662713082367558171/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 24,
+      "read_count": 37792
+    },
+    {
+      "post_id": "7662710198427861554",
+      "content": "央行放水1.4万亿，不怕长鑫抽血！美国CPI爆冷，沃什讲话有玄机？",
+      "publish_time": 1784113763,
+      "publish_date": "2026-07-15 19:09",
+      "url": "https://m.toutiaoimg.cn/a7662710198427861554",
+      "digg_count": 829,
+      "comment_count": 10,
+      "read_count": 46005
+    },
+    {
+      "post_id": "7661970015930925611",
+      "content": "啥？SK海力士暴雷？AI终于到顶了？华为新品碾压英伟达？咋回事？",
+      "publish_time": 1783941491,
+      "publish_date": "2026-07-13 19:18",
+      "url": "http://toutiao.com/group/7661970015930925611/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 3308
+    },
+    {
+      "post_id": "7661969604767466047",
+      "content": "懵了！SK海力士暴雷？周期到顶？",
+      "publish_time": 1783941383,
+      "publish_date": "2026-07-13 19:16",
+      "url": "http://toutiao.com/group/7661969604767466047/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 2,
+      "read_count": 1666
+    },
+    {
+      "post_id": "1870597877225544",
+      "content": "奔驰E260L，29万9。\n六年前同款，47万。差出来的钱，够再买一辆雅阁。\n宝马5系，指导价一刀砍掉7到9万。销售递名片时补了一句：确定买，还能再聊。\n26万买5系。几年前这个数，只够一台迈腾。\n你以为只有车在跌？\nBurberry打到两折，两三千拎走手袋。不是副线，就是你记忆里围巾三四千、风衣一万多的那个Burberry。\n咖啡从30跌到9块9。大牌口红被国货打到三分之一。迪卡侬羽绒服专柜1500，三个月后奥莱700，衣服一模一样。\n唯品会上不到200的凯乐石冲锋衣、500出头的萨洛蒙，把你记忆里\"中产运动\"的门槛直接踩碎。\n价格早就变了。是你没发现。\n你上一次认真看一个品类的价格，是什么时候？是你觉得自己买不起的那天。从此再没看过。不管后来跌了多少，你都不知道。\n这不叫消费降级。这叫认知时差。\n一个世界里，人们还在用五年前的价签衡量今天的东西。另一个世界里，知道价格的人已经在默默成交。\n这就是信息差最狠的地方——它不收割你的钱包，收割你的时间。你在信息这头多等一年，那头已经换了一整批用户。\n好消息是，跨过这道鸿沟不需要你变富。你只需要更新一次认知。更新之后你会发现，那些你以为很远的品牌、很贵的品类，早就降到你够得到的位置了。\n不是消费降级，是你终于跟上了，变得精明了。",
+      "publish_time": 1783941152,
+      "publish_date": "2026-07-13 19:12",
+      "url": "https://m.toutiao.com/w/1870597877225544/?app=toutiao_web&timestamp=1788833376&use_new_style=1",
+      "digg_count": 82,
+      "comment_count": 9,
+      "read_count": 201853
+    },
+    {
+      "post_id": "7661964037843878446",
+      "content": "啥？SK海力士暴雷？AI终于到顶了？华为新品碾压英伟达？咋回事？",
+      "publish_time": 1783940029,
+      "publish_date": "2026-07-13 18:53",
+      "url": "https://m.toutiaoimg.cn/a7661964037843878446",
+      "digg_count": 1138,
+      "comment_count": 28,
+      "read_count": 70709
+    },
+    {
+      "post_id": "1870480880213004",
+      "content": "用最通俗易懂的语言解释一下韬定律：\n\n房子越大，装的东西越多，按照规律，每18个月房子的面积翻一倍，这叫摩尔定律。\n\n由于规则限制，房子越来越大之后，面积翻倍的速度越来越慢，并且隐隐接近触及最大值，这叫摩尔定律失效。\n\n这个时候，不再跟别人拼房屋面积的大小，把重点转向在面积不变的前提下，通过设计改造，让房子有更多的储物空间，并把这个想法系统化理论化，这叫韬定律。\n\n除了系统化和理论化之外，还出了一些设计草图，并用一些试验证实了通过装修也可以让房子的储物空间变大，这是韬定律V2。\n\n首款使用韬定律的芯片是麒麟 2026（业内也俗称麒麟 9050 Pro），市场预期其综合性能接近安卓阵营上一代顶级旗舰（骁龙 8 Elite Gen5、天玑 9500）的水准；单核性能与苹果 A18 基本持平，与苹果同期高端的 A19 Pro、2026 年最新的 A20 系列仍有性能差距。\n\n不过也有观点指出，这款芯片的最大优势是功耗下降了41%，而不是性能参数。我觉得这对于笔记本电脑的意义更加重大，目前MacBook中度负载，使用电池可以工作一天。不知道未来能不能出现重度负载下可以工作一天的笔记本电脑。",
+      "publish_time": 1783829574,
+      "publish_date": "2026-07-12 12:12",
+      "url": "https://m.toutiao.com/w/1870480880213004/?app=toutiao_web&timestamp=1788833378&use_new_style=1",
+      "digg_count": 128,
+      "comment_count": 19,
+      "read_count": 220161
+    },
+    {
+      "post_id": "7660850618302546482",
+      "content": "小心了！美国对存储出手，要降价？A股航天消费大涨，出什么事了",
+      "publish_time": 1783680789,
+      "publish_date": "2026-07-10 18:53",
+      "url": "https://m.toutiaoimg.cn/a7660850618302546482",
+      "digg_count": 1184,
+      "comment_count": 71,
+      "read_count": 64692
+    },
+    {
+      "post_id": "1870243209940996",
+      "content": "股市不会骗人，中国AI产业正在经历一场前所未有的资本盛宴，而坐在主桌的正是阿里！\n7月9日凌晨，长鑫科技公布科创板IPO招股意向书。媒体披露，阿里巴巴累计向长鑫投入约76亿元，是持股比例最高的行业投资者。上市后，阿里所持股权对应价值约1300亿元，预计总收益倍数达17倍。\n76亿变1300亿，17倍回报，说白了，这就叫\"赢麻了\"。\n但长鑫只是冰山一角。据统计，至少24家AI创业公司在获得阿里投资后，快速成长为独角兽和赛道龙头。换句话说，阿里已经悄然成为中国AI产业的源头活水。\n先说钱。过去三年，阿里对外AI投资约360亿元，当前浮盈超过2100亿元。更关键的是，阿里战投的投资逻辑发生了重大转变——不再追求控股，而是聚焦AI，投早投小投前沿，不强控，追求共赢。结果呢？反而赚得更多了。\n除了钱，阿里还有一个杀手锏，那就是算力。大模型公司和具身智能公司对算力有刚需，而阿里云是中国最大的AI云厂商。有数据显示，月之暗面今年上半年在阿里云消费超2亿美元，阿里投资的具身智能公司们在阿里云年化消费也超1亿美元。给钱的同时还给算力，这对AI创业公司来说就是\"王炸\"组合。\n效果怎么样？看看这些被投企业就知道了。苏度科技2025年才成立，阿里早期就连续多轮下注，如今估值超25亿美元。原力灵机拿到阿里数亿元独家投资，估值突破百亿。自变量机器人获阿里领投后，直接和58同城合作落地家庭服务场景，估值突破200亿元。\n从长鑫的17倍回报，到24家独角兽集体起飞，阿里战投过去三年聚焦AI、投早投小投前沿，确实抓住了AI产业最大的风口。只能说，阿里已经成为中国AI产业名副其实的源头活水，这势头，才刚刚开始！",
+      "publish_time": 1783602915,
+      "publish_date": "2026-07-09 21:15",
+      "url": "https://m.toutiao.com/w/1870243209940996/?app=toutiao_web&timestamp=1788833378&use_new_style=1",
+      "digg_count": 242,
+      "comment_count": 58,
+      "read_count": 287407
+    },
+    {
+      "post_id": "1870237948076107",
+      "content": "以前的奔驰E，60万，现在能买2辆还多。以前的宝马5系，40多万，现在也能买两辆。专柜里的Burberry、GUCCI动不动一个包包上万，奥特莱斯四五千很正常。兰蔻、SK2一支补水或防晒，专柜一根的价格能在某品会买3根。人均300的豪华餐厅，在某团或者某音上可能300能吃到2-3人餐。所以这年头，为什么说，会消费跟本来就有钱，是一样重要的。",
+      "publish_time": 1783597896,
+      "publish_date": "2026-07-09 19:51",
+      "url": "https://m.toutiao.com/w/1870237948076107/?app=toutiao_web&timestamp=1788833378&use_new_style=1",
+      "digg_count": 138,
+      "comment_count": 27,
+      "read_count": 354668
+    },
+    {
+      "post_id": "7660493955611591218",
+      "content": "长鑫确定上市时间，上面出手救市！美伊也不打了，但韩国有点麻烦",
+      "publish_time": 1783597815,
+      "publish_date": "2026-07-09 19:50",
+      "url": "http://toutiao.com/group/7660493955611591218/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 23,
+      "read_count": 15816
+    },
+    {
+      "post_id": "7660493625845252659",
+      "content": "猝不及防，救市！内外都是利好",
+      "publish_time": 1783597736,
+      "publish_date": "2026-07-09 19:48",
+      "url": "http://toutiao.com/group/7660493625845252659/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 26,
+      "read_count": 20260
+    },
+    {
+      "post_id": "7660492100298867219",
+      "content": "长鑫确定上市时间，上面出手救市！美伊也不打了，但韩国有点麻烦",
+      "publish_time": 1783597316,
+      "publish_date": "2026-07-09 19:41",
+      "url": "https://m.toutiaoimg.cn/a7660492100298867219",
+      "digg_count": 1060,
+      "comment_count": 30,
+      "read_count": 64754
+    },
+    {
+      "post_id": "7660105841438769716",
+      "content": "美伊又打起来了！油价飙涨股市暴跌；海力士赴美上市，大宵警告！",
+      "publish_time": 1783507386,
+      "publish_date": "2026-07-08 18:43",
+      "url": "https://m.toutiaoimg.cn/a7660105841438769716",
+      "digg_count": 815,
+      "comment_count": 20,
+      "read_count": 55707
+    },
+    {
+      "post_id": "7659740743426179624",
+      "content": "三星财报炸裂，但股市崩了？美财政部内部报告流出，泡沫要破？",
+      "publish_time": 1783422385,
+      "publish_date": "2026-07-07 19:06",
+      "url": "https://m.toutiaoimg.cn/a7659740743426179624",
+      "digg_count": 1353,
+      "comment_count": 58,
+      "read_count": 82093
+    },
+    {
+      "post_id": "7658254531293151780",
+      "content": "美国非农如同过山车！怎么回事？三星涨价，大空头做空，全乱套了",
+      "publish_time": 1783076345,
+      "publish_date": "2026-07-03 18:59",
+      "url": "https://m.toutiaoimg.cn/a7658254531293151780",
+      "digg_count": 1072,
+      "comment_count": 45,
+      "read_count": 59301
+    },
+    {
+      "post_id": "7657506150778372649",
+      "content": "监管出手！资金从债市流入股市？养殖龙头业绩暴增，周期反转了吗",
+      "publish_time": 1782902156,
+      "publish_date": "2026-07-01 18:35",
+      "url": "http://toutiao.com/group/7657506150778372649/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 3061
+    },
+    {
+      "post_id": "7657505854484185641",
+      "content": "老登暴涨！这次有点不对劲...",
+      "publish_time": 1782902081,
+      "publish_date": "2026-07-01 18:34",
+      "url": "http://toutiao.com/group/7657505854484185641/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 96,
+      "read_count": 82244
+    },
+    {
+      "post_id": "7657505142593339945",
+      "content": "监管出手！资金从债市流入股市？养殖龙头业绩暴增，周期反转了吗",
+      "publish_time": 1782901861,
+      "publish_date": "2026-07-01 18:31",
+      "url": "https://m.toutiaoimg.cn/a7657505142593339945",
+      "digg_count": 1402,
+      "comment_count": 47,
+      "read_count": 98321
+    },
+    {
+      "post_id": "7657136575674892854",
+      "content": "太脏了！商战升级，苹果栽了个大跟头；康宁新消息，股市回到光里",
+      "publish_time": 1782816051,
+      "publish_date": "2026-06-30 18:40",
+      "url": "https://m.toutiaoimg.cn/a7657136575674892854",
+      "digg_count": 974,
+      "comment_count": 23,
+      "read_count": 52912
+    },
+    {
+      "post_id": "1869314783489100",
+      "content": "数学满分未来能干嘛？国内传来的这个消息指明了方向！\n最近高考成绩正式揭晓，浙江温州的徐可，数学拿到了满分150的成绩。根据学校的老师透露：150分是全国所有使用新高考一卷，唯一一个数学满分的同学。\n今年数学还是挺难的，之前刚刚高考完的时候很多人都觉得数学高考试题不按“套路”出牌，而人家能考150分的满分，实力不是一般牛。\n那么像这样的理工科人才，将来毕业之，可选择的范围会非常广，但感觉众多道路中，去阿里是一个不错的选择。\n因为像阿里这样的互联网科技公司，近些年投入了大量的人力、资源为中国科技发展培养人才，既让年轻人的才华能得到很好的展现，也能为中国科技的发展贡献一份力量。\n为了更好的培养人才，阿里也在6月23日的时候，面向2027届毕业生启动了阿里星顶尖人才招募培养计划。\n这个计划是面向全球顶尖人才而推出的招募培养计划，一旦入选该计划，阿里将会为他们提供全方位培养与支持，量身定制个性化成长路线。比如顶尖专家带教，技术导师1对1专属指导等各种顶尖行业资源统统都会给到。\n而通过阿里星入职阿里的人，有很多都为中国的科技事业做出了贡献。比如有位邱同学北京科技大学毕业，通过阿里星计划进入阿里智慧，成功研发了基于平扫CT的大规模胃癌筛查模型，相关成果发表在《Nature Medicine》上，推动了阿里医疗AI的发展，为患者带来新的希望。\n在6月29日，“阿里星·热爱之旅”线下活动在阿里巴巴杭州全球总部举办，到场报名的人非常多，有来自清华、北大、浙大中科大等40余所高校，160名学子参加。足以可见懂行的人都知道这个计划的含金量。\n从科技发展来看，这几年阿里在AI大模型、算力等前沿科技领域的发展有目共睹。数学天才做这方面的科技也属于是专业对口，能发挥自己的才能，为中国AI发展做贡献。\n所以按照这个逻辑来看，几年之后徐可有可能通过阿里星计划进入阿里，成为科技人才似乎也合情合理！",
+      "publish_time": 1782717498,
+      "publish_date": "2026-06-29 15:18",
+      "url": "https://m.toutiao.com/w/1869314783489100/?app=toutiao_web&timestamp=1788833379&use_new_style=1",
+      "digg_count": 102,
+      "comment_count": 13,
+      "read_count": 227238
+    },
+    {
+      "post_id": "7655655409402921506",
+      "content": "苹果美光隔空互怼，全球股市大跌！黄金跌了377元，还有牛市吗？",
+      "publish_time": 1782471190,
+      "publish_date": "2026-06-26 18:53",
+      "url": "https://m.toutiaoimg.cn/a7655655409402921506",
+      "digg_count": 1277,
+      "comment_count": 46,
+      "read_count": 75810
+    },
+    {
+      "post_id": "1868968345214986",
+      "content": "现在追求折扣都到什么程度了？\n买车，先问有没有折扣，以前买奔驰宝马奥迪，都是要越贵才越有面子，现在必须打折，据说奔驰E、宝马5系，相比三四年前已经打了5折。\n买包，以前也是认为越贵越好，奢侈品越贵才越有面子。明知道专柜更贵，也愿意去专柜，毕竟仪式感和情绪价值不一样，现在直接去城市周边的奥特莱斯，三五折的奢侈品性价比拉满。\n买房，现在也开始问折扣。以前买房都是要排队，甚至要摇号，现在直接不打折反而没兴趣，买房的市场也变成了买方市场。\n买化妆品，最近看到一堆年轻女生买防晒乳，兰蔻小白管在专柜常年600，结果在某品会200多，她们感叹专柜1支，可以在折扣平台买近3支，为什么不呢？\n可以感受到，大家开始进入一个“不打折就不消费”的时代，折扣化正蔓延到各个领域，这是我们应该看到变化！",
+      "publish_time": 1782387109,
+      "publish_date": "2026-06-25 19:31",
+      "url": "https://m.toutiao.com/w/1868968345214986/?app=toutiao_web&timestamp=1788833379&use_new_style=1",
+      "digg_count": 95,
+      "comment_count": 13,
+      "read_count": 242414
+    },
+    {
+      "post_id": "7655288792873484834",
+      "content": "网传2027存储价格将跳水！是否可信？康宁又发新品，CPO量产提速",
+      "publish_time": 1782385830,
+      "publish_date": "2026-06-25 19:10",
+      "url": "https://m.toutiaoimg.cn/a7655288792873484834",
+      "digg_count": 1043,
+      "comment_count": 19,
+      "read_count": 59166
+    },
+    {
+      "post_id": "7654543457230340623",
+      "content": "华尔街投行集体变脸、韩国监管层警告！股市大跌！他们看到了什么",
+      "publish_time": 1782212289,
+      "publish_date": "2026-06-23 18:58",
+      "url": "https://m.toutiaoimg.cn/a7654543457230340623",
+      "digg_count": 1455,
+      "comment_count": 65,
+      "read_count": 78742
+    },
+    {
+      "post_id": "7654179240258159123",
+      "content": "求是杂志刊文后续：不降息，预期落空；发生什么事了？",
+      "publish_time": 1782127500,
+      "publish_date": "2026-06-22 19:25",
+      "url": "https://m.toutiaoimg.cn/a7654179240258159123",
+      "digg_count": 1152,
+      "comment_count": 45,
+      "read_count": 55680
+    },
+    {
+      "post_id": "1868695775084612",
+      "content": "有意思，阿里和蚂蚁集团的核心管理层集体跑去杭州乡下种水稻了！\n哪些人呢？马云、吴泳铭、蒋凡、井贤栋。。。\n刘振飞后来写了篇内网文章，标题很有嚼头——《手里有秧，才能确保未来有粮》。\n我觉得这件事有意思的地方在于：一个组织选择什么样的隐喻来定义自己当下的状态，本身就是一种战略表达。\n阿里选的是\"种地\"。\n种地意味着什么？意味着接受\"投入和收获之间有一段看不见产出的时光\"。过去一年多阿里在AI上的投入有目共睹，基建、模型、芯片全面推进，成果总会缓缓来到。\n还有一层意思容易被忽略。能让阿里和蚂蚁这么多大佬同时出现在同一块稻田里，说明这些人之间的信任和共识已经不需要任何外部证明了。包括此前被传离职的周靖人也在场，谣言到此为止。\n说到底，真正自信的人从来不急着证明自己自信。他们只是该干嘛干嘛，比如种个地。",
+      "publish_time": 1782127166,
+      "publish_date": "2026-06-22 19:19",
+      "url": "https://m.toutiao.com/w/1868695775084612/?app=toutiao_web&timestamp=1788833379&use_new_style=1",
+      "digg_count": 1480,
+      "comment_count": 631,
+      "read_count": 3275471
+    },
+    {
+      "post_id": "7653688509676388914",
+      "content": "40年都没出现过的信号，社零转负！求是发文定调，老登股要反转？",
+      "publish_time": 1782013227,
+      "publish_date": "2026-06-21 11:40",
+      "url": "https://m.toutiaoimg.cn/a7653688509676388914",
+      "digg_count": 2876,
+      "comment_count": 169,
+      "read_count": 141727
+    },
+    {
+      "post_id": "7652688292227416617",
+      "content": "美联储全面转向加息，股市要到顶？误会大了；AI新宠！磷化铟是啥",
+      "publish_time": 1781780348,
+      "publish_date": "2026-06-18 18:59",
+      "url": "https://m.toutiaoimg.cn/a7652688292227416617",
+      "digg_count": 1140,
+      "comment_count": 28,
+      "read_count": 63171
+    },
+    {
+      "post_id": "7652318443408015907",
+      "content": "陆家嘴传来大消息！人工智能、还有新型基金；英伟达拉偏架，为啥",
+      "publish_time": 1781694252,
+      "publish_date": "2026-06-17 19:04",
+      "url": "https://m.toutiaoimg.cn/a7652318443408015907",
+      "digg_count": 987,
+      "comment_count": 47,
+      "read_count": 51902
+    },
+    {
+      "post_id": "7652000793171640882",
+      "content": "全网疯传！2026年内将爆发金融危机？达利欧和罗杰斯看到了什么？",
+      "publish_time": 1781620276,
+      "publish_date": "2026-06-16 22:31",
+      "url": "https://m.toutiaoimg.cn/a7652000793171640882",
+      "digg_count": 1712,
+      "comment_count": 194,
+      "read_count": 93549
+    },
+    {
+      "post_id": "7651944287105516042",
+      "content": "市场萎了，因为今晚会出大事",
+      "publish_time": 1781607187,
+      "publish_date": "2026-06-16 18:53",
+      "url": "http://toutiao.com/group/7651944287105516042/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 26,
+      "read_count": 28449
+    },
+    {
+      "post_id": "7651944133828821545",
+      "content": "美伊签约，股市却萎了，因为马上出大事；英伟达发债融资，啥信号",
+      "publish_time": 1781607091,
+      "publish_date": "2026-06-16 18:51",
+      "url": "https://m.toutiaoimg.cn/a7651944133828821545",
+      "digg_count": 1125,
+      "comment_count": 31,
+      "read_count": 61854
+    },
+    {
+      "post_id": "7651574295524557364",
+      "content": "美伊突然签协议停战，全球股市疯涨！还会生变？股民高兴太早了吗",
+      "publish_time": 1781521103,
+      "publish_date": "2026-06-15 18:58",
+      "url": "http://toutiao.com/group/7651574295524557364/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 4,
+      "read_count": 2443
+    },
+    {
+      "post_id": "7651574029463159330",
+      "content": "股民们高兴得太早了",
+      "publish_time": 1781520963,
+      "publish_date": "2026-06-15 18:56",
+      "url": "http://toutiao.com/group/7651574029463159330/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 6,
+      "read_count": 10910
+    },
+    {
+      "post_id": "7651561781186183715",
+      "content": "美伊突然签协议停战，全球股市疯涨！还会生变？股民高兴太早了吗",
+      "publish_time": 1781518071,
+      "publish_date": "2026-06-15 18:07",
+      "url": "https://m.toutiaoimg.cn/a7651561781186183715",
+      "digg_count": 940,
+      "comment_count": 39,
+      "read_count": 46273
+    },
+    {
+      "post_id": "1867870041638983",
+      "content": "传闻中的豆包收费，终于正式落地了。今天在使用豆包专家版的过程中，收到了提醒，称当月免费额度已经用完要付费升级，然后我开通了付费版本。\n\n很多人对豆包收费这件事抵触情绪很大，但是对于把ai视为生产力工具的人群，比如我，却恰恰相反。我们期待赶紧出付费版，用可以接受的支出，换取幻觉更少、知识更丰富、推理能力更强、算力更充足的ai工具。\n\n我现在担心的只是付费之后体验会不会比免费版本提升很多，毕竟豆包是在C端做得最好的产品，情绪价值给的最足，但是在更看重专业能力的B端场景，恐怕还得继续考察。如果这钱花得值，我再回来跟大家汇报。",
+      "publish_time": 1781339685,
+      "publish_date": "2026-06-13 16:34",
+      "url": "https://m.toutiao.com/w/1867870041638983/?app=toutiao_web&timestamp=1788833381&use_new_style=1",
+      "digg_count": 635,
+      "comment_count": 260,
+      "read_count": 1064941
+    },
+    {
+      "post_id": "1867801095016515",
+      "content": "刚看到有国内自媒体说韩国海力士工厂火灾可能是一名员工干的，原因是他想人为制造内存产品紧缺，进而保住股价，这样自己才能赚更多的钱。\n\n这种谣言当然离谱，但是按照现在韩国股市的疯狂程度，倒还真挺像真的的。在老登资产里挣扎的各位，这或许是一条路哦[奸笑]（开个玩笑）",
+      "publish_time": 1781273932,
+      "publish_date": "2026-06-12 22:18",
+      "url": "https://m.toutiao.com/w/1867801095016515/?app=toutiao_web&timestamp=1788833381&use_new_style=1",
+      "digg_count": 106,
+      "comment_count": 15,
+      "read_count": 198864
+    },
+    {
+      "post_id": "7650458987116184090",
+      "content": "伊朗官媒公布协议细节，打的什么算盘？",
+      "publish_time": 1781261348,
+      "publish_date": "2026-06-12 18:49",
+      "url": "http://toutiao.com/group/7650458987116184090/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 1277
+    },
+    {
+      "post_id": "1867666255484096",
+      "content": "谁能想到阿里合伙人委员会前脚在内网发了个帖子，后脚钉钉的管理层就做出了调整，这操作的速度，看得大伙儿都愣住了。\n\n事情是这样的，6月10日，阿里合伙人委员会在内网发了一篇文章，标题叫《有情有义有成长，才是阿里文化》，针对最近钉钉一位离职员工那篇刷屏的《置身钉内》表了态。合伙人委员会的态度非常鲜明，措辞也相当严厉，直接点明钉钉团队的某些管理方式\"不是阿里文化该有的样子\"。\n\n这话搁在大厂语境里，分量是相当重的。\n\n然后第二天，也就是6月11日，阿里宣布钉钉CEO陈航，也就是无招卸任，由92年的技术极客陈宇森接棒。\n\n从内网发帖到管理层调整，中间只隔了一天，这种执行速度，在大厂里非常罕见。\n\n更值得说道的是接班的这位陈宇森，履历非常漂亮。\n\n1992年出生，今年也就34岁，但人家22岁的时候就创办了网络安全公司长亭科技，后来被阿里云收购。年少成名的技术极客，福布斯亚洲\"30 Under 30\"上榜选手，国内外顶级计算机赛事拿过冠军。\n\n2025年他在阿里云内部创业，带队做出了AI Agent产品MuleRun。这次接任之后，他直接成了阿里巴巴最年轻的事业部CEO。\n\n简单来说，这不是论资排辈选出来的人，是真刀真枪打出来的少壮派。\n\n而且大家发现没有，这件事单独看是人事变动，连起来看就是阿里整个组织升级和迭代的一个缩影。\n\n这段时间阿里相继成立了Alibaba Token Hub也就是ATH、Token Foundry这些新型组织，效果也是肉眼可见，Happy Horse、Happy Oyster、MuleRun、Qoder这一系列新产品接连冒出来，一批年轻技术人才迅速站到了台前。\n\n合伙人委员会那篇帖子里有一句话讲得很好：\"人是最宝贵的财富\"，\"AI时代的创新依靠的是热爱和创造力，只有充分尊重个体价值，才能真正创造客户价值\"。\n\n陈宇森接棒钉钉，本质上就是这套新逻辑的延续。",
+      "publish_time": 1781145339,
+      "publish_date": "2026-06-11 10:35",
+      "url": "https://m.toutiao.com/w/1867666255484096/?app=toutiao_web&timestamp=1788833381&use_new_style=1",
+      "digg_count": 120,
+      "comment_count": 23,
+      "read_count": 209943
+    },
+    {
+      "post_id": "1867608263830537",
+      "content": "昨晚和一个电商专家聊，他透露，AI正在改变整个电商行业，让我醍醐灌顶！\n我当时想，AI确实能帮助电商行业的发展，但谈何改变？基础逻辑，还是商家、消费者和平台，这架构永远不会变。后来才后知后觉，原来是AI正在击穿电商平台之间的壁垒。\n以前，比如说618这种时候，各大平台都有自己的复杂规则，这就导致同一个商品你很难去对比，包括价格、服务和效率。但现在有了AI，很多年轻人直接问AI哪个更便宜，哪个送的更快，哪个还有货，一目了然。\n另一个习惯是，以前很多人买东西都养成了固定平台的消费习惯。但现在不一样了，因为AI开始在阿里、京东、唯品会等平台之间横跳，不需要消费者任何复杂思考和动作，AI替代了这一切流程。\n比如我要买一个COACH的包包，具体信号告诉AI，AI会自动在阿里、京东、唯品会之间去对比，并给出答案。而且不只是价格，还会告诉你其他附加价值。比如会告诉你唯品会更便宜，还有中检鉴定。会告诉你只有京东最快，下午就能送到等等。\n所以，我们可以预见未来的消费就是以AI为原点出发，延伸覆盖到各大平台，各大平台真正完成了去中心化。也许，我们未来在线下消费，也会让AI帮忙辨别，这是一场新的消费浪潮！",
+      "publish_time": 1781090034,
+      "publish_date": "2026-06-10 19:13",
+      "url": "https://m.toutiao.com/w/1867608263830537/?app=toutiao_web&timestamp=1788833381&use_new_style=1",
+      "digg_count": 176,
+      "comment_count": 45,
+      "read_count": 299072
+    },
+    {
+      "post_id": "7649719312626549283",
+      "content": "美伊叒打起来了！全球股市暴跌；彭博爆料，忍无可忍，中国出手了",
+      "publish_time": 1781089141,
+      "publish_date": "2026-06-10 18:59",
+      "url": "http://toutiao.com/group/7649719312626549283/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 2982
+    },
+    {
+      "post_id": "7649718287307244051",
+      "content": "美伊叒打起来了！全球股市暴跌；彭博爆料，忍无可忍，中国出手了",
+      "publish_time": 1781088840,
+      "publish_date": "2026-06-10 18:54",
+      "url": "https://m.toutiaoimg.cn/a7649718287307244051",
+      "digg_count": 1065,
+      "comment_count": 22,
+      "read_count": 53109
+    },
+    {
+      "post_id": "1867579294749707",
+      "content": "对于AI统治人类这种脑洞，很多年前倪匡在其小说《玩具》中就有过了，不过与更加为人熟知的人类与机器人大战的剧情不同，有好多现在看来仍然拍案叫绝的设定：\n\n1.人类被电脑统治，根源是人类过于依赖电脑，以至于自己的思考能力出现了退化。比如所有人都使用计算器，以至于人们甚至连乘法口诀都背不过。\n\n2.AI统治世界之后，并没有与人类爆发热战；电脑依据自己已经获得的全人类的知识，以及程序推理，认为人类的存在没有意义，所以他们选择直接把空气中的氧气换成了二氧化碳。没有交火，没有对抗，瞬间结束。\n\n3.AI获得对人类的掌控权之后，并没有奴役人类。想想也是，按照那时的生产力水平，人类还能干啥？根本不值得“奴役”。相反，他们保留了部分“种人”，让他们在保护区内繁衍，做他们的宠物或玩具，就像仓鼠或者猫狗。\n\n4.与很多人担心的不同，大部分机器人对作为他们宠物的人类还不错，只有个别机器人因为不熟悉人类养殖知识，会不小心导致宠物人丧命。\n\n宠物人类生活在机器人提供的，极为优渥的别墅中，有花园可以活动，还有充足且精美的食物；有机器人们的科技，宠物人能活到200岁；\n\n由于经过了机器人们精心的挑选和培育，剩下的宠物人都是外表精致、身体健康的俊男美女。机器人会给宠物人分配高质量配偶，如果不满意还可以随意更换。\n\n有趣的是，有宠物人来劝降主角卫斯理，说做宠物也没什么不好，卫斯理却大喊，不自由，毋宁死。放到现在，我估计主角的价值观反而可能会被群嘲了[笑哭]。\n\n这篇小说创作于1979年，彼时绝大多数中国人根本连电脑是什么都不知道，但是倪匡已经使用了类似于机器人获得全部人类的知识，并会自己推理的设定。这不就是大模型训练和推理嘛[笑哭]",
+      "publish_time": 1781062407,
+      "publish_date": "2026-06-10 11:33",
+      "url": "https://m.toutiao.com/w/1867579294749707/?app=toutiao_web&timestamp=1788833382&use_new_style=1",
+      "digg_count": 82,
+      "comment_count": 9,
+      "read_count": 163180
+    },
+    {
+      "post_id": "7649346489172378163",
+      "content": "腿拍断！一堆利好，全球科技股大涨！深夜发文，银行地产要起飞？",
+      "publish_time": 1781002393,
+      "publish_date": "2026-06-09 18:53",
+      "url": "http://toutiao.com/group/7649346489172378163/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 6175
+    },
+    {
+      "post_id": "7649346167838392882",
+      "content": "深夜发文！房地产银行基建要起飞？",
+      "publish_time": 1781002252,
+      "publish_date": "2026-06-09 18:50",
+      "url": "http://toutiao.com/group/7649346167838392882/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 4195
+    },
+    {
+      "post_id": "7649345808344596992",
+      "content": "腿拍断！一堆利好，全球科技股大涨！深夜发文，银行地产要起飞？",
+      "publish_time": 1781002132,
+      "publish_date": "2026-06-09 18:48",
+      "url": "https://m.toutiaoimg.cn/a7649345808344596992",
+      "digg_count": 920,
+      "comment_count": 15,
+      "read_count": 43733
+    },
+    {
+      "post_id": "7648977392203055626",
+      "content": "美国非农爆炸会引发流动性危机和股灾？不要人云亦云，危言耸听！",
+      "publish_time": 1780916465,
+      "publish_date": "2026-06-08 19:01",
+      "url": "http://toutiao.com/group/7648977392203055626/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 1046
+    },
+    {
+      "post_id": "7648976880774693414",
+      "content": "美国非农爆炸，可能砸了个黄金坑",
+      "publish_time": 1780916327,
+      "publish_date": "2026-06-08 18:58",
+      "url": "http://toutiao.com/group/7648976880774693414/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 3,
+      "read_count": 1154
+    },
+    {
+      "post_id": "7648972030414619174",
+      "content": "美国非农爆炸会引发流动性危机和股灾？不要人云亦云，危言耸听！",
+      "publish_time": 1780915086,
+      "publish_date": "2026-06-08 18:38",
+      "url": "https://m.toutiaoimg.cn/a7648972030414619174",
+      "digg_count": 1003,
+      "comment_count": 41,
+      "read_count": 58158
+    },
+    {
+      "post_id": "1867351643537536",
+      "content": "这次美股大跌，主要是非农数据的问题。不过别担心，这轮牛市本来也不是流动性催起来的水牛。希望这次能杀杀纳指ETF的溢价率，让很多一直踏空的朋友上车吧[捂脸]",
+      "publish_time": 1780845302,
+      "publish_date": "2026-06-07 23:15",
+      "url": "https://m.toutiao.com/w/1867351643537536/?app=toutiao_web&timestamp=1788833382&use_new_style=1",
+      "digg_count": 113,
+      "comment_count": 25,
+      "read_count": 154523
+    },
+    {
+      "post_id": "7647870903849615899",
+      "content": "博通“暴雷”韩股大跌，乌龙还是到顶？SpaceX启动路演，老马仗义",
+      "publish_time": 1780658722,
+      "publish_date": "2026-06-05 19:25",
+      "url": "https://m.toutiaoimg.cn/a7647870903849615899",
+      "digg_count": 940,
+      "comment_count": 32,
+      "read_count": 52044
+    },
+    {
+      "post_id": "7647495358804705811",
+      "content": "美伊又打起来了！AI行业有鬼故事？黄仁勋又“喊单”了一家公司",
+      "publish_time": 1780571457,
+      "publish_date": "2026-06-04 19:10",
+      "url": "http://toutiao.com/group/7647495358804705811/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 5,
+      "read_count": 1522
+    },
+    {
+      "post_id": "7647495018806002230",
+      "content": "黄仁勋又“喊单”了一家公司，AI行业还有未发掘的分支？",
+      "publish_time": 1780571268,
+      "publish_date": "2026-06-04 19:07",
+      "url": "http://toutiao.com/group/7647495018806002230/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 727
+    },
+    {
+      "post_id": "7647494798408991232",
+      "content": "美伊又打起来了！AI行业有鬼故事？黄仁勋又“喊单”了一家公司",
+      "publish_time": 1780571176,
+      "publish_date": "2026-06-04 19:06",
+      "url": "https://m.toutiaoimg.cn/a7647494798408991232",
+      "digg_count": 872,
+      "comment_count": 9,
+      "read_count": 48978
+    },
+    {
+      "post_id": "7647119676190818866",
+      "content": "形势正在起变化，央行投放罕见归零，利好OR利空？很多股民没看懂",
+      "publish_time": 1780483915,
+      "publish_date": "2026-06-03 18:51",
+      "url": "http://toutiao.com/group/7647119676190818866/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 5,
+      "read_count": 4293
+    },
+    {
+      "post_id": "7647119440433267210",
+      "content": "央行投放归零！90% 散户没看懂的信号，大盘要变天？",
+      "publish_time": 1780483795,
+      "publish_date": "2026-06-03 18:49",
+      "url": "http://toutiao.com/group/7647119440433267210/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 90,
+      "read_count": 146301
+    },
+    {
+      "post_id": "7647119238154486298",
+      "content": "形势正在起变化，央行投放罕见归零，利好OR利空？很多股民没看懂",
+      "publish_time": 1780483700,
+      "publish_date": "2026-06-03 18:48",
+      "url": "https://m.toutiaoimg.cn/a7647119238154486298",
+      "digg_count": 1087,
+      "comment_count": 34,
+      "read_count": 58892
+    },
+    {
+      "post_id": "7647016743361151526",
+      "content": "长鑫存储上市，股市会不会到顶？当年中石油上市，牛市是这么没的",
+      "publish_time": 1780459836,
+      "publish_date": "2026-06-03 12:10",
+      "url": "https://m.toutiaoimg.cn/a7647016743361151526",
+      "digg_count": 1139,
+      "comment_count": 132,
+      "read_count": 61248
+    },
+    {
+      "post_id": "1866885153444864",
+      "content": "6月才刚开始，感觉消费有点怪。六一，很多朋友给孩子送礼，以前优先买玩具，今年却优先买衣服。我身边有不少年轻奶爸，给孩子不是买的玩具车，而是耐克、安踏这类大品牌的童装。他们说，衣服更实用，而且孩子也喜欢这些好牌子。\n\n另一个是，很多朋友选择这个月换车，以前说实话都是五六十万的车，现在换车竟然看20万左右的。不是他们消费降级了，而是他们突然清醒了。一个朋友感叹，现在20多万的车其实已经很好了，能买到当下最新的科技和技术。\n\n我听完后，恍然大悟，还真是如此。不知不觉，我们就发现20多万的车其实已经不差了。同样也是比如问界、蔚来、理想等好牌子的汽车，并不觉得没有BBA有面子。\n\n这两个事情告诉我，大家真的变得越来越务实了，消费风向已经完全变了！",
+      "publish_time": 1780400422,
+      "publish_date": "2026-06-02 19:40",
+      "url": "https://m.toutiao.com/w/1866885153444864/?app=toutiao_web&timestamp=1788833383&use_new_style=1",
+      "digg_count": 114,
+      "comment_count": 10,
+      "read_count": 184487
+    },
+    {
+      "post_id": "7646760432488956451",
+      "content": "黄仁勋钦定下一个爆发行业！能翻4倍？伊朗又要封锁，特朗普救市",
+      "publish_time": 1780400269,
+      "publish_date": "2026-06-02 19:37",
+      "url": "http://toutiao.com/group/7646760432488956451/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 2282
+    },
+    {
+      "post_id": "7646760221045506560",
+      "content": "大事件！双创快要“能做空”了",
+      "publish_time": 1780400165,
+      "publish_date": "2026-06-02 19:36",
+      "url": "http://toutiao.com/group/7646760221045506560/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 7,
+      "read_count": 7269
+    },
+    {
+      "post_id": "7646760010239738414",
+      "content": "黄仁勋钦定下一个爆发行业！能翻4倍？伊朗又要封锁，特朗普救市",
+      "publish_time": 1780400068,
+      "publish_date": "2026-06-02 19:34",
+      "url": "https://m.toutiaoimg.cn/a7646760010239738414",
+      "digg_count": 802,
+      "comment_count": 14,
+      "read_count": 43095
+    },
+    {
+      "post_id": "7646391931114734115",
+      "content": "我去！又要整治资金抱团了？严查基金风格漂移，科技股遭殃，咋办",
+      "publish_time": 1780314504,
+      "publish_date": "2026-06-01 19:48",
+      "url": "http://toutiao.com/group/7646391931114734115/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 82,
+      "read_count": 34364
+    },
+    {
+      "post_id": "7646391595285201460",
+      "content": "我去，又要整治资金抱团了？",
+      "publish_time": 1780314358,
+      "publish_date": "2026-06-01 19:45",
+      "url": "http://toutiao.com/group/7646391595285201460/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 20,
+      "read_count": 13159
+    },
+    {
+      "post_id": "7645263138036417034",
+      "content": "20万亿来了！科技普跌老登回暖，股市要变天？美通胀新高！危险吗",
+      "publish_time": 1780051687,
+      "publish_date": "2026-05-29 18:48",
+      "url": "http://toutiao.com/group/7645263138036417034/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 5,
+      "read_count": 3273
+    },
+    {
+      "post_id": "7645262041439093282",
+      "content": "20万亿来了！科技普跌老登回暖，股市要变天？美通胀新高！危险吗",
+      "publish_time": 1780051291,
+      "publish_date": "2026-05-29 18:41",
+      "url": "https://m.toutiaoimg.cn/a7645262041439093282",
+      "digg_count": 983,
+      "comment_count": 9,
+      "read_count": 69134
+    },
+    {
+      "post_id": "1866431086126474",
+      "content": "今年618有三个反常，大家发现了吗？\n\n第一，安静得有点吓人，昨天和几个朋友聊天，他们竟然都不知道今年618其实已经开始了。问了一位电商行业的专家，他透露，本质上是各大平台都减少了声量，把重心放在了商品和消费者上。好的东西自然会吸引人来，而不是一顿宣传，却又发现不是消费者想要的。\n\n第二，规则、玩法几乎都没了。往年618，各种玩法、各种攻略，甚至买个东西都买出了心得，以前觉得这是平台想要的，毕竟更有氛围感。但今年，这些玩法几乎都没了，大家开始觉得直接一点更好。阿里取消预售和定金，京东只保留了一点预售和满减，唯品会一件商品也能减，看到多少就多少，直接明了。\n\n第三，大家开始真正的比服务、比优势了。以前各种算法算下来，本质上你单件商品根本难以完成比价。简单点说，你一堆买下来，你根本不清楚到底是买贵了还是便宜了。但现在，不再预售，甚至不再满减，完完全全就是单件商品的对比。\n\n昨天有朋友感叹，一双萨洛蒙的鞋子，比下来就是唯品会更便宜，还可以上门换货。一台华为手机比下来，价格差距不大，但就京东可以承诺当天能到。家里用的日用品，有些就是只有淘宝才有，京东唯品会根本买不到。\n\n所以，今年的618变了，平台变了，消费者的心态也变了。",
+      "publish_time": 1779967390,
+      "publish_date": "2026-05-28 19:23",
+      "url": "https://m.toutiao.com/w/1866431086126474/?app=toutiao_web&timestamp=1788833385&use_new_style=1",
+      "digg_count": 244,
+      "comment_count": 56,
+      "read_count": 384593
+    },
+    {
+      "post_id": "7644897307590246958",
+      "content": "美伊疑云重重，亚太股市深V！据传英伟达订单远超预期！",
+      "publish_time": 1779966559,
+      "publish_date": "2026-05-28 19:09",
+      "url": "http://toutiao.com/group/7644897307590246958/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 911
+    },
+    {
+      "post_id": "7644896831167562278",
+      "content": "老登股，连华尔街也扛不住了",
+      "publish_time": 1779966369,
+      "publish_date": "2026-05-28 19:06",
+      "url": "http://toutiao.com/group/7644896831167562278/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 11,
+      "read_count": 3443
+    },
+    {
+      "post_id": "7644517993263579663",
+      "content": "科技股大股东疯狂跑路！A股大跌！瑞银喊多，存储股还要大涨？",
+      "publish_time": 1779878251,
+      "publish_date": "2026-05-27 18:37",
+      "url": "http://toutiao.com/group/7644517993263579663/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 1,
+      "read_count": 1539
+    },
+    {
+      "post_id": "7644517904360178217",
+      "content": "悲剧！科技股大股东集体跑路，A股大跌；人家吃肉咱挨打，凭什么",
+      "publish_time": 1779878037,
+      "publish_date": "2026-05-27 18:33",
+      "url": "https://m.toutiaoimg.cn/a7644517904360178217",
+      "digg_count": 1713,
+      "comment_count": 219,
+      "read_count": 76061
+    },
+    {
+      "post_id": "7644150819492282921",
+      "content": "宇树上市倒计时，金融助力科技对决！三星工会内讧，资方赢麻了？",
+      "publish_time": 1779792569,
+      "publish_date": "2026-05-26 18:49",
+      "url": "https://m.toutiaoimg.cn/a7644150819492282921",
+      "digg_count": 919,
+      "comment_count": 19,
+      "read_count": 49443
+    },
+    {
+      "post_id": "7643829752989565449",
+      "content": "“划时代的定义”，华为“韬定律”是什么？台积电新技术爆发前夜",
+      "publish_time": 1779717807,
+      "publish_date": "2026-05-25 22:03",
+      "url": "https://m.toutiaoimg.cn/a7643829752989565449",
+      "digg_count": 1029,
+      "comment_count": 26,
+      "read_count": 57395
+    },
+    {
+      "post_id": "7642670934456828462",
+      "content": "吓人！英伟达新品太猛，配件带不动了！政策有变动，国产芯片利好",
+      "publish_time": 1779448003,
+      "publish_date": "2026-05-22 19:06",
+      "url": "https://m.toutiaoimg.cn/a7642670934456828462",
+      "digg_count": 1085,
+      "comment_count": 34,
+      "read_count": 61046
+    },
+    {
+      "post_id": "1865794350828551",
+      "content": "中美两国的货币政策走向，都不太乐观啊。中国LPR维持不变，已经连续12个月“不降息”；美联储会议纪要显示，多人倾向删除政策声明中“宽松偏向”的表述。\n\n特别注意前者对于房地产和大消费行业也有一定的利空。对于有房族，房价低迷意味着手上没有随时可以变现且盈利的大宗资产，自然缺乏安全感，节衣缩食，进一步冲击消费。所以美帝高血压是不是好转，直接影响咱的低血糖治疗啊[捂脸]。",
+      "publish_time": 1779360152,
+      "publish_date": "2026-05-21 18:42",
+      "url": "https://m.toutiao.com/w/1865794350828551/?app=toutiao_web&timestamp=1788833385&use_new_style=1",
+      "digg_count": 154,
+      "comment_count": 15,
+      "read_count": 218034
+    },
+    {
+      "post_id": "1865793797358664",
+      "content": "现在大家买东西，都养成了先看看有没有折扣的习惯。这对奥特莱斯、唯品会这类折扣平台的特卖模式，是有推动的。",
+      "publish_time": 1779359624,
+      "publish_date": "2026-05-21 18:33",
+      "url": "https://m.toutiao.com/w/1865793797358664/?app=toutiao_web&timestamp=1788833385&use_new_style=1",
+      "digg_count": 37,
+      "comment_count": 2,
+      "read_count": 134661
+    },
+    {
+      "post_id": "7642290246474613302",
+      "content": "三星劳资深夜达成协议，A股大跌！特朗普很快要打古巴？有何影响",
+      "publish_time": 1779359364,
+      "publish_date": "2026-05-21 18:29",
+      "url": "https://m.toutiaoimg.cn/a7642290246474613302",
+      "digg_count": 1054,
+      "comment_count": 19,
+      "read_count": 53938
+    },
+    {
+      "post_id": "7641920100894933538",
+      "content": "谈崩了！三星工会真吊！但存储行业有利空；商务部公布磋商结果！",
+      "publish_time": 1779273187,
+      "publish_date": "2026-05-20 18:33",
+      "url": "https://m.toutiaoimg.cn/a7641920100894933538",
+      "digg_count": 927,
+      "comment_count": 10,
+      "read_count": 43943
+    },
+    {
+      "post_id": "7641552670427218482",
+      "content": "伊朗要对海底光缆收费，特朗普撤回降息要求！股市的麻烦还没完？",
+      "publish_time": 1779187635,
+      "publish_date": "2026-05-19 18:47",
+      "url": "https://m.toutiaoimg.cn/a7641552670427218482",
+      "digg_count": 1069,
+      "comment_count": 17,
+      "read_count": 58317
+    },
+    {
+      "post_id": "7641181116648505897",
+      "content": "美准备再次打击伊朗！全球债市崩了；局势扑朔迷离，还有很多反常",
+      "publish_time": 1779101129,
+      "publish_date": "2026-05-18 18:45",
+      "url": "https://m.toutiaoimg.cn/a7641181116648505897",
+      "digg_count": 1143,
+      "comment_count": 12,
+      "read_count": 59322
+    },
+    {
+      "post_id": "1865492162978883",
+      "content": "消息1：千问AI眼镜S1荣获2026VRAR星球奖“年度最佳AI智能眼镜”！\n消息2：美国科技媒体Gizmodo网站：中国智能眼镜拉大了和Meta的差距！\nMeta： 天塌了……\n没错，现在对于Meta而言，真的宛如天塌了，千问AI眼镜在世界移动通信大会和Meta正面对垒之后，Meta就发现，局势变得越来越失控了。\n现在的千问AI眼镜S1不但拿下了大奖，而且就连美国媒体都开始为其“站台”。\n美国科技媒体Gizmodo网站的原话是这样的：Meta AI的智能眼镜在美国或许领先，但在中国，它们开始落后了，阿里刚发布了千问AI眼镜SI的升级版，进一步拉大了和Meta AI的差距。\n话说的很直白，事实也确实如此。\n前段时间，千问AI眼镜S1升级了了主动服务等一系列AI能力，直接将其AI从“可调用”变为了“随时在线”。\n现在的千问AI眼镜S1不但具备了一句话点外卖、打车等服务能力，而且还能够主动式的去提醒或者服务执行。\n比如说，当你在下午喝了多杯咖啡，想要继续点时，千问会发出提醒：“今天您已经点过多杯咖啡，要不要换杯水或者低因咖啡”。\n很明显，千问AI眼镜S1的AI已经不再只是“你说我做”的角色，而是变成了有自己思考，具有主动性的生活助手。这无疑是AI领域的一个新的突破。\n不得不说，AI领域的风向其实早已经变了，西方不再是唯一的主导者，相反，越来越多的目光，开始投向中国！",
+      "publish_time": 1779071963,
+      "publish_date": "2026-05-18 10:39",
+      "url": "https://m.toutiao.com/w/1865492162978883/?app=toutiao_web&timestamp=1788833386&use_new_style=1",
+      "digg_count": 63,
+      "comment_count": 5,
+      "read_count": 167754
+    },
+    {
+      "post_id": "7640068271932260927",
+      "content": "FK！股民迷失自我，朗哥出手调控？美股光通讯新技术，CPO革命！",
+      "publish_time": 1778842027,
+      "publish_date": "2026-05-15 18:47",
+      "url": "https://m.toutiaoimg.cn/a7640068271932260927",
+      "digg_count": 934,
+      "comment_count": 21,
+      "read_count": 48453
+    },
+    {
+      "post_id": "7639733083524284970",
+      "content": "黄仁勋临时被拽上飞机，有隐情？美金融大佬扎堆随访，意欲何为？",
+      "publish_time": 1778763986,
+      "publish_date": "2026-05-14 21:06",
+      "url": "https://m.toutiaoimg.cn/a7639733083524284970",
+      "digg_count": 1150,
+      "comment_count": 35,
+      "read_count": 69724
+    },
+    {
+      "post_id": "1865072058633216",
+      "content": "财报一发布，阿里AI战略越看越不简单，敢于投入的决心终于得到了回报！\n阿里发了最新的财报，这个财报仔细看了下，字里行间透露出的是两个字“兑现”！\n因为在财报中有组数据是这样的：阿里云外部商业化收入增长加速至40%，其中AI相关产品收入占比首次突破30%，AI相关产品季度收入89.71亿元，年化收入突破358亿元。\n这个收入水平在全球主要云厂商中都是处于领先水平的存在。\n阿里能在AI方面实现商业化的正向增长，仔细研究了下，离不开阿里正确的AI战略。\n对于当前的AI市场来说，大模型、GPU、token……各个环节都有需求，而阿里AI战略走的路子是全栈。简单来说，不管市场有啥需求，阿里都能拿出相对应的产品来接住。\n比如当前AI发展，token消耗量非常大，整个市场需要有人来做相关的服务。而阿里在3月份的时候就成立了成立ATH事业群。这个事业群，核心战略就是强化模型、MaaS、AI应用等业务战略协同。\n也正是基于这种战略协同下，阿里推出多样化MaaS产品组合，包括Qwen3.6在内的顶尖模型矩阵，升级灵活token方案。财报数据也显示，截至2026年3月31日，MaaS平台“百炼”的客户数量同比增长八倍。这说明市场是非常认可阿里的这些产品和服务的。\n通过这些，也能发现，此前阿里的一系列布局，踩准了市场的走向，未来十年乃至更长的发展时间里，阿里战略优势、投入力度将会逐步显现，那么对于市场来说，关于阿里AI和云的估值恐怕也要彻底转向了。",
+      "publish_time": 1778671320,
+      "publish_date": "2026-05-13 19:22",
+      "url": "https://m.toutiao.com/w/1865072058633216/?app=toutiao_web&timestamp=1788833386&use_new_style=1",
+      "digg_count": 134,
+      "comment_count": 6,
+      "read_count": 211217
+    },
+    {
+      "post_id": "7639326180847452735",
+      "content": "美国通胀又爆了，加息噩梦降临？谷歌要发几千颗卫星，马斯克发了",
+      "publish_time": 1778669247,
+      "publish_date": "2026-05-13 18:47",
+      "url": "https://m.toutiaoimg.cn/a7639326180847452735",
+      "digg_count": 1009,
+      "comment_count": 8,
+      "read_count": 47602
+    },
+    {
+      "post_id": "7638582102144909878",
+      "content": "绝杀！韩国股市涨到年轻人生孩子！科技泡沫会破吗？中金这样说！",
+      "publish_time": 1778496001,
+      "publish_date": "2026-05-11 18:40",
+      "url": "https://m.toutiaoimg.cn/a7638582102144909878",
+      "digg_count": 1201,
+      "comment_count": 42,
+      "read_count": 80876
+    },
+    {
+      "post_id": "1864623482028105",
+      "content": "今年五一，大家都不再乱花钱了。800以上的高价酒店单量下滑了35%，200-400的平价酒店大幅增长了80%。人均200以上的餐饮，几乎零增长，但平价餐饮增长很大。就连五一出行的户外服饰，萨洛蒙、伯希和、凯乐石，年轻人也转向奥特莱斯、唯品会这类折扣平台，之前1500，被干到五六百，确实省了一大堆。今年五一，再也听到天价酒店、天价餐饮的消息。",
+      "publish_time": 1778243524,
+      "publish_date": "2026-05-08 20:32",
+      "url": "https://m.toutiao.com/w/1864623482028105/?app=toutiao_web&timestamp=1788833386&use_new_style=1",
+      "digg_count": 236,
+      "comment_count": 48,
+      "read_count": 358215
+    },
+    {
+      "post_id": "7637470736868770344",
+      "content": "美伊又打起来了！黄仁勋发话，进攻光明顶！还有个利空要来...",
+      "publish_time": 1778237245,
+      "publish_date": "2026-05-08 18:47",
+      "url": "https://m.toutiaoimg.cn/a7637470736868770344",
+      "digg_count": 862,
+      "comment_count": 18,
+      "read_count": 39819
+    },
+    {
+      "post_id": "7637100447546786358",
+      "content": "破防！能源危机的日股为何大涨？美国让步，海峡重开有希望了？",
+      "publish_time": 1778151023,
+      "publish_date": "2026-05-07 18:50",
+      "url": "https://m.toutiaoimg.cn/a7637100447546786358",
+      "digg_count": 920,
+      "comment_count": 19,
+      "read_count": 47084
+    },
+    {
+      "post_id": "7636261102078165556",
+      "content": "巴菲特说美股像赌场、很离谱？胡评妄议！还有一段话没人提",
+      "publish_time": 1777955601,
+      "publish_date": "2026-05-05 12:33",
+      "url": "https://m.toutiaoimg.cn/a7636261102078165556",
+      "digg_count": 1040,
+      "comment_count": 33,
+      "read_count": 57226
+    },
+    {
+      "post_id": "1864154078702592",
+      "content": "货币基金存款利率都破1了，咱老百姓的钱还能放哪儿？\n\n这两天后台好多人问我：好多货币基金收益不到1了，还值得放吗？我先说结论：肯定值得！因为你想想看，市面上还能找到流动性、安全性兼顾的产品吗？\n\n关键是，还有不少货币基金收益还在1%以上。\n\n说实话，货币基金破1早有预兆。从2023年开始，银行存款利率一路往下。现在银行利率活期0.05%，大额存单也跑不出“1”字头。而货币基金主要投的就是这些东西，银行存款、短债、国债之类，利率都跌了，它破1 也是迟早的事。去年下半年以来，全市场已经有半数的货币基金7日年化收益率跌破过1%了，包括天弘余额宝。\n\n其实也不用太焦虑。哪怕跌破1，它也比银行活期利率高，跟定期利率接近。最近股市、黄金大家也都感受到了，进入了上蹿下跳的“猴市”，折腾半天，没准都还没余额宝收益高。有网友还调侃余额宝是“万绿丛中一点红”“比起炒股，至少十几年都没亏过！”\n\n货币基金灵活方便，还给投资者带来实实在在的收益，至今仍然是老百姓活钱配置的首选。中国银河证券基金研究中心发布的《1998年至2026年1季度公募基金累计利润数据报告》显示，公开数据显示，1998年至2026年一季度，货币基金为投资者赚取收益23398.62亿元，是公募基金里最多的。\n\n所以，很多人还是习惯把钱放在余额宝里面，图的不是那点收益，毕竟在当下这个利率水平，能随取随用、比活期高一点、还能日复利的产品，真不多。而且余额宝里分布了50多只基金，你可以切基换成收益高的，或者直接转入“攒着”里，能自动帮你选择收益更高的。\n\n个人觉得，低利率时代，就别太执着于“哪儿利息高”，更该考虑的是钱的安全性和流动性。收益不高的时候，少亏就是赚啊。\n\n更重要的是，我们别再指望单一资产就能跑赢通胀。如果想多赚一点，那就做做配置，用一部分钱尝试债券基金这类稳健型的资产，短债基金长期收益还是比较稳定的，想博一博也可以考虑配一点黄金，甚至指数基金，最近处于波动周期，建议大家看准时机入，拿稳了看长期～～",
+      "publish_time": 1777795866,
+      "publish_date": "2026-05-03 16:11",
+      "url": "https://m.toutiao.com/w/1864154078702592/?app=toutiao_web&timestamp=1788833388&use_new_style=1",
+      "digg_count": 246,
+      "comment_count": 27,
+      "read_count": 394241
+    },
+    {
+      "post_id": "7634497533137535515",
+      "content": "悲剧！特朗普和普京通话后，美伊停战悬了，油价大涨！怎么回事？",
+      "publish_time": 1777544993,
+      "publish_date": "2026-04-30 18:29",
+      "url": "https://m.toutiaoimg.cn/a7634497533137535515",
+      "digg_count": 852,
+      "comment_count": 10,
+      "read_count": 40363
+    },
+    {
+      "post_id": "1863721355424796",
+      "content": "各个平台的受众群体真的不太一样。最近我会在视频前面加一段表达我的心情，并与当期视频内容有关的视频片段。这一风格在某平台以好评为主，读者都知道是在整活，但是头条这边有人很严肃的批评我不应该加不相关的视频浪费大家的时间[捂脸]",
+      "publish_time": 1777383189,
+      "publish_date": "2026-04-28 21:33",
+      "url": "https://m.toutiao.com/w/1863721355424796/?app=toutiao_web&timestamp=1788833388&use_new_style=1",
+      "digg_count": 150,
+      "comment_count": 51,
+      "read_count": 248022
+    },
+    {
+      "post_id": "1863711741385772",
+      "content": "昨天和几个朋友聊今年五一，很有意思。一个是今年大家很多人都去小城市游玩了，以前没怎么关心过的小城市，热度直线飙升，比如云南普洱、四川泸州等地。原因很简单，大家认为小城市性价比更高，而且更舒服。\n另一个是，大家买五一出去玩的衣服，户外为主，也提前在折扣平台置办。比如萨洛蒙、凯乐石、伯希和集体在唯品会上疯狂打折，吸引了大量年轻人消费。还有郊区的奥特莱斯，现在生意越来越好，周末人山人海。\n大家都知道，五一是消费的大节点，但很多人没意识到，五一也会是一场消费转变的折射！",
+      "publish_time": 1777374021,
+      "publish_date": "2026-04-28 19:00",
+      "url": "https://m.toutiao.com/w/1863711741385772/?app=toutiao_web&timestamp=1788833388&use_new_style=1",
+      "digg_count": 129,
+      "comment_count": 10,
+      "read_count": 290300
+    },
+    {
+      "post_id": "7633760722278679066",
+      "content": "日韩台股市大涨！为啥A股落后？别急，重磅会议出利好了！",
+      "publish_time": 1777373426,
+      "publish_date": "2026-04-28 18:50",
+      "url": "https://m.toutiaoimg.cn/a7633760722278679066",
+      "digg_count": 1076,
+      "comment_count": 21,
+      "read_count": 62852
+    },
+    {
+      "post_id": "1863667952559232",
+      "content": "郭德纲有一句词，这两年我越来越觉得精彩：说相声的盼着死同行，可我死了，跟你说相声能卖出票去，是两回事。唉，救不了你们了[捂脸]",
+      "publish_time": 1777332260,
+      "publish_date": "2026-04-28 07:24",
+      "url": "https://m.toutiao.com/w/1863667952559232/?app=toutiao_web&timestamp=1788833388&use_new_style=1",
+      "digg_count": 154,
+      "comment_count": 8,
+      "read_count": 558452
+    },
+    {
+      "post_id": "7633390687588745738",
+      "content": "枪击案，特朗普又要对伊朗出手？美股大空头再次高调出手，太奸了",
+      "publish_time": 1777287274,
+      "publish_date": "2026-04-27 18:54",
+      "url": "https://m.toutiaoimg.cn/a7633390687588745738",
+      "digg_count": 749,
+      "comment_count": 13,
+      "read_count": 43993
+    },
+    {
+      "post_id": "7632274363609399860",
+      "content": "绝了，美国特种兵内幕交易上热搜；美国没封住，伊朗跑了30多艘船",
+      "publish_time": 1777027375,
+      "publish_date": "2026-04-24 18:42",
+      "url": "https://m.toutiaoimg.cn/a7632274363609399860",
+      "digg_count": 1208,
+      "comment_count": 19,
+      "read_count": 75466
+    },
+    {
+      "post_id": "7631908902438797860",
+      "content": "伊朗原油，马上停产！损害不可逆；战火烧向美元流动性，要出事？",
+      "publish_time": 1776942268,
+      "publish_date": "2026-04-23 19:04",
+      "url": "https://m.toutiaoimg.cn/a7631908902438797860",
+      "digg_count": 1262,
+      "comment_count": 37,
+      "read_count": 60763
+    },
+    {
+      "post_id": "7631534044190163499",
+      "content": "特朗普解锁新TACO姿势，继续停火；美联储后院起火，美股见顶了？",
+      "publish_time": 1776854993,
+      "publish_date": "2026-04-22 18:49",
+      "url": "https://m.toutiaoimg.cn/a7631534044190163499",
+      "digg_count": 731,
+      "comment_count": 9,
+      "read_count": 35208
+    },
+    {
+      "post_id": "7631176294679511592",
+      "content": "停火还剩几小时！中俄把朗子劝住了；库克继任者官宣，苹果会怎样",
+      "publish_time": 1776771696,
+      "publish_date": "2026-04-21 19:41",
+      "url": "https://m.toutiaoimg.cn/a7631176294679511592",
+      "digg_count": 744,
+      "comment_count": 16,
+      "read_count": 33177
+    },
+    {
+      "post_id": "1863078308700224",
+      "content": "一边存钱厉害，一边花钱精明，现在的年轻人真的不容小觑。\n最新存款实情公布了，超出了所有人的预期，今年1到3月，在银行利率不断下调，甚至部分银行直接取消长期存款之际，我们的存款量还大幅增长了。\n短短3个月，存款新增7.68万亿，相当于每个月存款新增超2.5万亿。要知道，这是和我们息息相关的住户存款，还不是广泛意义的存款。只能感叹，太疯狂了。\n而一边是存钱疯狂，另一边确实花钱无比精明。现在年轻人圈子突然刮起一阵折扣消费潮，什么叫折扣消费潮？简单来说，就是不打折大家就不想买了。\n现在出门吃饭要看看有没有折扣，打车也研究一口价，就连买衣服、买车、买房，也关心折扣。以前不温不火的奥特莱斯，现在客流销量都是新高，人山人海，就连五线小城市现在也要开奥莱。\n以前买奢侈品，都是去专柜，我都买奢侈品了，谁还要打折？现在的年轻人要，你看Burberry、COACH等在唯品会打两三折，引发了大量年轻人涌入。为什么？性价比消费正成为主流。\n所以，千万不要小看现在的年轻人，他们一边喜欢存钱，一边花钱又精打细算，这样的消费转变并不是简单的转变，而是结构性的彻底转变！",
+      "publish_time": 1776769932,
+      "publish_date": "2026-04-21 19:12",
+      "url": "https://m.toutiao.com/w/1863078308700224/?app=toutiao_web&timestamp=1788833390&use_new_style=1",
+      "digg_count": 113,
+      "comment_count": 26,
+      "read_count": 245619
+    },
+    {
+      "post_id": "1863057965782016",
+      "content": "从“千人一面”到“千人千需”：灵光圈如何重塑我们的数字生活？\n\n近日蚂蚁灵光官宣投入一亿扶持创作者，正试图解决一个普遍的数字矛盾：应用商店看似丰富，却常找不到“完全适合自己”的那一个。标准化商业应用追求最大用户规模，往往忽视个体独特需求，而灵光推出的“灵光圈”与创作者激励，核心目标正是开启从“千人一面”到“千人千需”的数字生活重构。\n\n过去，应用开发的商业逻辑是“寻找或创造大众市场”。但在“灵光圈”中涌现的“闪应用”，逻辑正好相反：它们往往始于“解决我的一个具体问题”。无论是为团队自制的协同工具，还是为家人设计的健康助手，这些应用可能永远不会有百万用户，但对创造者及其小圈子而言，其价值是百分之百的。而1亿元激励计划，正是为了鼓励并奖赏这类源自真实场景、服务特定需求的“微创造”。\n\n“灵光圈”的核心功能，在于让这些个性化方案能够流通、被发现、甚至被“接力”改进。你的独特需求，可能恰是世界另一端的某个小群体同样面临的痛点；你为自己开发的小工具，经过他人优化，便可能惠及更多人。这实质上构建了一种满足“长尾需求”的、动态的协作网络。#蚂蚁灵光启动1亿元创作者激励#\n\n长远看，当每个人都能便捷地为自己、为身边的小共同体创造并分享定制化数字工具时，我们的数字生活将逐渐告别被少数超级应用主导的时代，转向更碎片化、个性化、精准高效的新阶段。蚂蚁灵光通过“AI生成+社区协作+亿元激励”的组合，不仅是在推广一种工具，更是在倡导一种理念：数字世界不应是我们被动适应的既定环境，而应成为每个人都能参与塑造、服务于自身独特生活场景的工具箱。",
+      "publish_time": 1776750532,
+      "publish_date": "2026-04-21 13:48",
+      "url": "https://m.toutiao.com/w/1863057965782016/?app=toutiao_web&timestamp=1788833390&use_new_style=1",
+      "digg_count": 596,
+      "comment_count": 103,
+      "read_count": 1462599
+    },
+    {
+      "post_id": "7630787841299087918",
+      "content": "两天倒计时！美伊又开火了，印度成搅屎棍；股市还有希望吗？",
+      "publish_time": 1776681254,
+      "publish_date": "2026-04-20 18:34",
+      "url": "https://m.toutiaoimg.cn/a7630787841299087918",
+      "digg_count": 968,
+      "comment_count": 13,
+      "read_count": 40941
+    },
+    {
+      "post_id": "1862778517134376",
+      "content": "不得不承认，直接发现金和拉升股市，是最能提振消费的方式。不瞒大家说，我已经在开始琢磨这波做完之后怎么花钱，买点非必须的东西了。（但愿不是半场开香槟，乌鸦嘴）\n\n  这是人性，你辛苦加班赚来的钱可能会攒起来，但是上面发的钱和股市赚的钱，你花起来会没有   任何负罪感。希望A公子也能悬崖勒马，早日回到正确的轨道上来。\n\n  伊朗战争爆发之后，我先后把持有的黄金资产、抄巴菲特作业的西方石油都套现了，还从我家CF   O那里搞了一点支援资金，主要加了恒科指纳指和中美的科技股。这些都在文章中跟大家分享过。\n\n再次感谢川子和朗子的深明大义，另外小以你丫要是敢胡闹我就XXXXXX[发怒]",
+      "publish_time": 1776484029,
+      "publish_date": "2026-04-18 11:47",
+      "url": "https://m.toutiao.com/w/1862778517134376/?app=toutiao_web&timestamp=1788833390&use_new_style=1",
+      "digg_count": 232,
+      "comment_count": 45,
+      "read_count": 206996
+    },
+    {
+      "post_id": "7629937013415756324",
+      "content": "大消息！霍尔木兹海峡要放开，油价崩了；美伊谈判也有最新进展",
+      "publish_time": 1776483155,
+      "publish_date": "2026-04-18 11:32",
+      "url": "https://m.toutiaoimg.cn/a7629937013415756324",
+      "digg_count": 513,
+      "comment_count": 19,
+      "read_count": 22027
+    },
+    {
+      "post_id": "7629681978694025766",
+      "content": "以黎停火，美国加码封锁，谁是赢家？黑天鹅！美前财长发出警告",
+      "publish_time": 1776423780,
+      "publish_date": "2026-04-17 19:03",
+      "url": "https://m.toutiaoimg.cn/a7629681978694025766",
+      "digg_count": 814,
+      "comment_count": 20,
+      "read_count": 38743
+    },
+    {
+      "post_id": "7628919502851424814",
+      "content": "特朗普宣布：“战争结束”！股市飙升；巴基斯坦再爆谈判破裂内情",
+      "publish_time": 1776246247,
+      "publish_date": "2026-04-15 17:44",
+      "url": "https://m.toutiaoimg.cn/a7628919502851424814",
+      "digg_count": 1048,
+      "comment_count": 24,
+      "read_count": 51001
+    },
+    {
+      "post_id": "1862448612534281",
+      "content": "存款数据公布了，再一次让人感到惊讶。今年一季度，住户存款再次猛增7.68万亿，这可是住户存款，和我们息息相关的数据。\n如果只看刚刚过去的3月份，住户存款增加了2.44万亿。这样算下来，截止到3月末，大家在银行存的钱达到了174.09万亿，如果要算人均，则达到12.44万。\n很多人可能会说，这和我们没关系，还是富人存的多。但其实这至少可以看出一个趋势，那就是大家确实越来越爱存钱，大家存款的热情依然很高。\n其实仔细一想，也没问题。存款新增猛烈的背后，是我们消费的结果发生了变化。你看现在的汽车，昨天一则消息炸锅了，宝马5系和奔驰E级都只要20多万了。这太夸张了。三年前提一辆奔驰e，基本落地要到50以上，这等于打了5折。\n还有现在的房子，坦白讲现在的房子真的性价比很高了，不少一线城市或者新一线城市，甚至也能打5折，这是以前想都不敢想的。\n就连现在的衣服鞋子，包括奢侈品包包，打折都非常厉害。现在大家买衣服爱去奥特莱斯，包括像唯品会这类特卖平台，过去一年，900多万人在平台上买走近1000亿的折扣衣服鞋子，这是把折扣当成了日常消费。\n所以，现在能存钱也是顺理成章的，一边是消费结构的变化，曾经贵的东西，现在不贵了。另一边是，大家明白了手中钱袋子的重要性，这才是我们普通人的底气！",
+      "publish_time": 1776169407,
+      "publish_date": "2026-04-14 20:23",
+      "url": "https://m.toutiao.com/w/1862448612534281/?app=toutiao_web&timestamp=1788833390&use_new_style=1",
+      "digg_count": 495,
+      "comment_count": 158,
+      "read_count": 518696
+    },
+    {
+      "post_id": "7628557352974697003",
+      "content": "没开火、暂停铀浓缩5年，伊朗又让步；PPI创41个月新高，什么信号",
+      "publish_time": 1776161926,
+      "publish_date": "2026-04-14 18:18",
+      "url": "https://m.toutiaoimg.cn/a7628557352974697003",
+      "digg_count": 1028,
+      "comment_count": 27,
+      "read_count": 45083
+    },
+    {
+      "post_id": "7628198514308153890",
+      "content": "特朗普又划定最后期限！这招绝了！好消息是双方都在给局势降温",
+      "publish_time": 1776078377,
+      "publish_date": "2026-04-13 19:06",
+      "url": "https://m.toutiaoimg.cn/a7628198514308153890",
+      "digg_count": 1086,
+      "comment_count": 13,
+      "read_count": 54188
+    },
+    {
+      "post_id": "1862272668357644",
+      "content": "特朗普称美军将封锁任何试图进出霍尔木兹海峡的船只[泪奔]。\n\n高啊，打不开电瓶车的锁，就再加一把[笑哭]。估计伊朗也懵了，这特么说的是我的词儿啊……",
+      "publish_time": 1776001614,
+      "publish_date": "2026-04-12 21:46",
+      "url": "https://m.toutiao.com/w/1862272668357644/?app=toutiao_web&timestamp=1788833390&use_new_style=1",
+      "digg_count": 274,
+      "comment_count": 51,
+      "read_count": 286251
+    },
+    {
+      "post_id": "7627084326789792265",
+      "content": "美伊开战内幕流出，哭笑不得；阿里将推视频模型，鹿死谁手？",
+      "publish_time": 1775818969,
+      "publish_date": "2026-04-10 19:02",
+      "url": "https://m.toutiaoimg.cn/a7627084326789792265",
+      "digg_count": 1245,
+      "comment_count": 28,
+      "read_count": 60193
+    },
+    {
+      "post_id": "7626706331759657508",
+      "content": "以色列捅娄子，海峡又封上了！还有得谈吗？注意，deepseek大利好",
+      "publish_time": 1775730952,
+      "publish_date": "2026-04-09 18:35",
+      "url": "https://m.toutiaoimg.cn/a7626706331759657508",
+      "digg_count": 1142,
+      "comment_count": 44,
+      "read_count": 58468
+    },
+    {
+      "post_id": "7626330923750949385",
+      "content": "惊魂一夜！美伊为何突然不打了？战火重燃，经济衰退的风险有多大",
+      "publish_time": 1775643542,
+      "publish_date": "2026-04-08 18:19",
+      "url": "https://m.toutiaoimg.cn/a7626330923750949385",
+      "digg_count": 1231,
+      "comment_count": 71,
+      "read_count": 49634
+    },
+    {
+      "post_id": "1861809297822920",
+      "content": "据报道，沙特的石油出口收入在战争爆发后不跌反涨，原因是由于地理位置因素，其有替代运输路线，而伊拉克等国没有。\n\n不过伊朗刚刚表示“兄弟之国伊拉克可以免于伊朗对霍尔木兹海峡的限制”。\n\n遥想两伊战争时，两边打得跟cei瓜似的，甚至在人口密集区对平民使用化学武器进行种族灭绝......国际关系变换，乃至于此。",
+      "publish_time": 1775559709,
+      "publish_date": "2026-04-07 19:01",
+      "url": "https://m.toutiao.com/w/1861809297822920/?app=toutiao_web&timestamp=1788833392&use_new_style=1",
+      "digg_count": 128,
+      "comment_count": 3,
+      "read_count": 250894
+    },
+    {
+      "post_id": "7625965737642869267",
+      "content": "只剩几小时！美伊要打末世之战？停战希望渺茫，但金融市场却不慌",
+      "publish_time": 1775558521,
+      "publish_date": "2026-04-07 18:42",
+      "url": "https://m.toutiaoimg.cn/a7625965737642869267",
+      "digg_count": 1213,
+      "comment_count": 38,
+      "read_count": 70273
+    },
+    {
+      "post_id": "7624487928114201138",
+      "content": "伊朗提出与阿曼“共管”海峡，啥意思？特朗普疯了，大清洗鸽派！",
+      "publish_time": 1775214437,
+      "publish_date": "2026-04-03 19:07",
+      "url": "https://m.toutiaoimg.cn/a7624487928114201138",
+      "digg_count": 904,
+      "comment_count": 15,
+      "read_count": 42703
+    },
+    {
+      "post_id": "7624113868096258570",
+      "content": "不妙啊，美国和伊朗都支棱起来了；海湾国家和欧美会不会走极端？",
+      "publish_time": 1775127345,
+      "publish_date": "2026-04-02 18:55",
+      "url": "https://m.toutiaoimg.cn/a7624113868096258570",
+      "digg_count": 1404,
+      "comment_count": 15,
+      "read_count": 65353
+    },
+    {
+      "post_id": "7623742573449937444",
+      "content": "美伊均发停战信号，股市黄金大涨！中国也出手了，但有人想接着打",
+      "publish_time": 1775040898,
+      "publish_date": "2026-04-01 18:54",
+      "url": "https://m.toutiaoimg.cn/a7623742573449937444",
+      "digg_count": 1055,
+      "comment_count": 55,
+      "read_count": 43190
+    },
+    {
+      "post_id": "1861180661296128",
+      "content": "村里发布新规，扫清了社保、养老金、保险等万亿长线资金入市的制度障碍。\n具体说来，持股5%以上的大股东，若在买入6个月后卖出，或卖出6个月内买入，即构成短线交易，收益没收，还会被处罚。\n之前的算法是，大股东有多个资金管理产品，要合并计算是不是超过5%，现在单独计算。\n随口说一句：几个月后，大家可能会看到这些大资金趁着伊朗战争低位加仓的新闻。如果没有，那就算了[奸笑]",
+      "publish_time": 1774960195,
+      "publish_date": "2026-03-31 20:29",
+      "url": "https://m.toutiao.com/w/1861180661296128/?app=toutiao_web&timestamp=1788833392&use_new_style=1",
+      "digg_count": 484,
+      "comment_count": 85,
+      "read_count": 660977
+    },
+    {
+      "post_id": "1861177966973952",
+      "content": "衣服涨价15%？躲过了燃油汽车，却躲不过衣服涨价。\n昨晚，服饰圈被一则消息炸锅了，业内预测行业服饰零售价将可能上涨10%-15%。好好的，怎么衣服突然开始涨价了？原因说出来，很多人都没想到，竟是因为石油涨价了。\n数据显示，全球62%的服饰依赖涤纶、锦纶等石油合成纤维。而现在，国际油价单周猛涨36%，直接推高了原材料价格。比如涤纶POY从7000一吨，已经变成了9600一吨，涨幅接近40%，这样从原材料上已经开始传导到我们具体的衣服上。\n不仅是石油传导，还有南亚服装制造中心的电价、物流成本都有大幅上升，可以说是衣服涨价迫在眉睫。很多人可能不知道，这波受影响比较少的反而是纯棉，受影响到的主要是功能性服饰，比如冲锋衣、防晒衣等等。\n现在很多品牌还未正式调价，但供应链已经透露，随时可能调高售价，因为成本端已经体现到了。专家感叹，现在有几种方式。一种是，更倾向纯棉的材料服饰，可能影响较少。二是，刚需尽快下手，非刚需可以等一等。三是，可以了解类似唯品会、奥莱这种前置买断机制的服饰类特卖平台，暂时还影响不到。\n前段时间，很多人看到石油价格上涨，看到油企纷纷宣布汽车加油涨价，觉得躲过了一关，因为早早更换了新能源汽车。但万万没想到，石油涨价，还会导致衣服鞋子涨价！",
+      "publish_time": 1774957625,
+      "publish_date": "2026-03-31 19:47",
+      "url": "https://m.toutiao.com/w/1861177966973952/?app=toutiao_web&timestamp=1788833392&use_new_style=1",
+      "digg_count": 83,
+      "comment_count": 15,
+      "read_count": 233022
+    },
+    {
+      "post_id": "7623384372556677632",
+      "content": "一月来首次！霍尔木兹海峡，真要通了？沙特阿联酋鼓动美国继续打",
+      "publish_time": 1774957514,
+      "publish_date": "2026-03-31 19:45",
+      "url": "https://m.toutiaoimg.cn/a7623384372556677632",
+      "digg_count": 942,
+      "comment_count": 26,
+      "read_count": 42469
+    },
+    {
+      "post_id": "7623003808838205958",
+      "content": "巴基斯坦爆料：美伊快谈了！万斯公开批判以色列，美鸽派势力抬头",
+      "publish_time": 1774868900,
+      "publish_date": "2026-03-30 19:08",
+      "url": "https://m.toutiaoimg.cn/a7623003808838205958",
+      "digg_count": 1140,
+      "comment_count": 39,
+      "read_count": 55997
+    },
+    {
+      "post_id": "1860818858462220",
+      "content": "MD，没法过了，在已经向联合国安理会和国际海事组织发出正式照会，表示不会封锁霍尔木兹海峡的情况下，革卫队突然宣布关闭海峡，对任何通过该海峡的船只采取严厉措施。\n\n据说革卫队“劝返”了几艘大船，今天中国两艘船的神秘AIS信号轨迹，终于有解释了。\n\n革卫队突然这样做的原因，可能是此前特朗普一直吹嘘霍尔木兹海峡已经开通，甚至还说伊朗人求他担任伊朗的最高领袖，这一系列奇葩言行把革卫队惹急眼了。他们宣称海峡是关闭的，而不像特朗普说的那样已经打开。\n\n川子和朗子这一系列操作真特么能上史书，只是苦了全球投资者了。",
+      "publish_time": 1774615153,
+      "publish_date": "2026-03-27 20:39",
+      "url": "https://m.toutiao.com/w/1860818858462220/?app=toutiao_web&timestamp=1788833394&use_new_style=1",
+      "digg_count": 700,
+      "comment_count": 101,
+      "read_count": 1000204
+    },
+    {
+      "post_id": "7621890242194309666",
+      "content": "伊朗提“四个必须”，做出重大让步；普京也呼吁停战，不卖油了？",
+      "publish_time": 1774609625,
+      "publish_date": "2026-03-27 19:07",
+      "url": "https://m.toutiaoimg.cn/a7621890242194309666",
+      "digg_count": 1345,
+      "comment_count": 32,
+      "read_count": 57418
+    },
+    {
+      "post_id": "7621515639928259087",
+      "content": "伊朗终于松口了！调解方爆内情；谷歌的deepseek时刻，大利空？",
+      "publish_time": 1774522402,
+      "publish_date": "2026-03-26 18:53",
+      "url": "https://m.toutiaoimg.cn/a7621515639928259087",
+      "digg_count": 1272,
+      "comment_count": 38,
+      "read_count": 81333
+    },
+    {
+      "post_id": "7621143368239776282",
+      "content": "求和同时增兵，伊朗还拒谈，形势真的变好了吗？投资者得抓住重点",
+      "publish_time": 1774435738,
+      "publish_date": "2026-03-25 18:48",
+      "url": "https://m.toutiaoimg.cn/a7621143368239776282",
+      "digg_count": 1270,
+      "comment_count": 46,
+      "read_count": 64704
+    },
+    {
+      "post_id": "1860551177156617",
+      "content": "中东冲突，把全球股市带崩了，把油价搞涨了，现在更奇葩的是，把衣服都搞贵了。\n最近看到一个现象，不少冲锋衣、防晒衣、登山鞋的品牌商吐槽，原材料成本大幅上升，面临涨价风险。有专家提示，刚需的赶紧入手，非刚需的可以等一等。\n为什么衣服都搞贵了？原因很简单，以冲锋衣为例，90%都是原油做的。原油涨价，导致整个纺织业被带动，例如涤纶相关报价已经突破一万一顿，非常猛。\n当然，也有聪明人透露，现在就要盯着特卖平台去看，比如唯品会这类有前置买断机制，不仅暂时不会受到涨价影响，反而还有折扣。包括奥特莱斯，也差不多逻辑。\n所以，一次冲突，能带来这么多连锁反应，影响远远超出我们每个人的认知。还是希望早日停止冲突，愿世界和平，一切回归正轨继续加速发展，我们也更应该珍惜现在的幸福生活。",
+      "publish_time": 1774359872,
+      "publish_date": "2026-03-24 21:44",
+      "url": "https://m.toutiao.com/w/1860551177156617/?app=toutiao_web&timestamp=1788833394&use_new_style=1",
+      "digg_count": 125,
+      "comment_count": 18,
+      "read_count": 263255
+    },
+    {
+      "post_id": "7620774587386692147",
+      "content": "股市大涨，油价暴跌！美以伊三方，谁在说谎？有内幕党押注停战了",
+      "publish_time": 1774349860,
+      "publish_date": "2026-03-24 18:57",
+      "url": "https://m.toutiaoimg.cn/a7620774587386692147",
+      "digg_count": 886,
+      "comment_count": 28,
+      "read_count": 33080
+    },
+    {
+      "post_id": "7620433726337450548",
+      "content": "美伊首次提出停火条件，里面有文章？市场无差别抛售，明天更惨吗",
+      "publish_time": 1774270502,
+      "publish_date": "2026-03-23 20:55",
+      "url": "https://m.toutiaoimg.cn/a7620433726337450548",
+      "digg_count": 1236,
+      "comment_count": 31,
+      "read_count": 78321
+    },
+    {
+      "post_id": "1860451888835655",
+      "content": "当地时间 2026 年 3 月 23 日，美国总统特朗普在社交媒体平台 “真实社交” 发文称，美国和伊朗在过去两天进行了非常良好和富有成效的对话，他已指示美国国防部，将针对伊朗发电厂及能源基础设施的军事打击行动暂停 / 推迟 5 天。\n\n川子，你玩死我得了[凝视]。之前我设想了好几种可能，比如象征性打击一下，没想到是这个结果，感觉还是贸易战时的套路啊？什么叫你和朗子谈了两天？什么叫谈得非常好但5天后还是得打？[惊呆]\n\n3月下旬，美国官员透露可能在2-3周后转向外交斡旋；美国的主流智库普遍认为双方在5月5日之前结束大规模热战的概率高达90%。\n\nWTI原油期货与期权也定价冲突峰值和大规模战时在5月份结束；还有个数据是有数据显示4月中旬美军精确制导弹药库存会触及临界值。\n\n  总之股民们苟住啊，有条件的可以继续押注TACO。",
+      "publish_time": 1774265183,
+      "publish_date": "2026-03-23 19:26",
+      "url": "https://m.toutiao.com/w/1860451888835655/?app=toutiao_web&timestamp=1788833394&use_new_style=1",
+      "digg_count": 138,
+      "comment_count": 36,
+      "read_count": 314610
+    },
+    {
+      "post_id": "7619290388204880418",
+      "content": "沙特急眼，下场帮美国？胡塞也掺和进来了；油价没涨，但股市崩了",
+      "publish_time": 1774004299,
+      "publish_date": "2026-03-20 18:58",
+      "url": "https://m.toutiaoimg.cn/a7619290388204880418",
+      "digg_count": 918,
+      "comment_count": 24,
+      "read_count": 46494
+    },
+    {
+      "post_id": "7618914731662918207",
+      "content": "中东开始互炸油气田，我却笑了；战火中的利率决议，美联储说了啥",
+      "publish_time": 1773916831,
+      "publish_date": "2026-03-19 18:40",
+      "url": "https://m.toutiaoimg.cn/a7618914731662918207",
+      "digg_count": 1573,
+      "comment_count": 44,
+      "read_count": 68194
+    },
+    {
+      "post_id": "7618543224419795506",
+      "content": "海军陆战队、钻地弹，特朗普要在海峡决战了？这次他被以色列耍了",
+      "publish_time": 1773830332,
+      "publish_date": "2026-03-18 18:38",
+      "url": "https://m.toutiaoimg.cn/a7618543224419795506",
+      "digg_count": 1239,
+      "comment_count": 16,
+      "read_count": 58343
+    },
+    {
+      "post_id": "7618180569272222271",
+      "content": "伊朗的“李鸿章”，被做掉了",
+      "publish_time": 1773746367,
+      "publish_date": "2026-03-17 19:19",
+      "url": "http://toutiao.com/group/7618180569272222271/?app=news_article",
+      "digg_count": 0,
+      "comment_count": 16,
+      "read_count": 7679
+    },
+    {
+      "post_id": "1859906258665479",
+      "content": "今年，又一个千亿市场爆了！最近，只要你出门，你能看到到处都是冲锋衣、防晒服、登山鞋等，户外装备成为了今年春天第一个热点。但有两个现象，大家注意到了吗？\n\n一个是，大家开始看重参数，消费者都变聪明了。比如防晒衣的防晒指数、冲锋衣的透气指数，大家在户外装备上更倾向国产的好牌子，比如骆驼、凯乐石、安踏等。这背后的本质，其实不是再愿意听品牌的虚幻溢价故事，而是相信好国产牌子的质量底线。\n\n第二个是，大家开始既要又要，既要好的国产品牌，又要能打折。所以，今年开年以来，奥特莱斯特别火爆，各地都是人山人海。还有线上特卖平台唯品会，各类好牌子的户外装备都卖得非常好。究其原因是，满足了既是牌子，又能打折的消费需求。\n\n数据显示，2025年全国运动装备市场规模达到6021亿，同比增长超14%。预计未来五年可能接近一万亿市场。说白了，大家都开始倾向运动，这也是一种消费活力的体现。",
+      "publish_time": 1773744830,
+      "publish_date": "2026-03-17 18:53",
+      "url": "https://m.toutiao.com/w/1859906258665479/?app=toutiao_web&timestamp=1788833395&use_new_style=1",
+      "digg_count": 106,
+      "comment_count": 3,
+      "read_count": 244299
+    },
+    {
+      "post_id": "7618175553782284840",
+      "content": "战后首次！美军24小时没进攻，咋回事？黄仁勋讲话，这类公司要完",
+      "publish_time": 1773744727,
+      "publish_date": "2026-03-17 18:52",
+      "url": "https://m.toutiaoimg.cn/a7618175553782284840",
+      "digg_count": 1008,
+      "comment_count": 21,
+      "read_count": 40388
+    },
+    {
+      "post_id": "7617805424586244643",
+      "content": "伊朗居然在核问题上松口了！谈判在即？股市快熬出头了...",
+      "publish_time": 1773658554,
+      "publish_date": "2026-03-16 18:55",
+      "url": "https://m.toutiaoimg.cn/a7617805424586244643",
+      "digg_count": 1160,
+      "comment_count": 46,
+      "read_count": 48007
+    },
+    {
+      "post_id": "7616686952175141422",
+      "content": "小哈梅内伊讲话，股市大跌！伊朗转向？警告！AI要杀估值，跌一半",
+      "publish_time": 1773398132,
+      "publish_date": "2026-03-13 18:35",
+      "url": "https://m.toutiaoimg.cn/a7616686952175141422",
+      "digg_count": 1121,
+      "comment_count": 15,
+      "read_count": 54105
+    },
+    {
+      "post_id": "7616314213804081706",
+      "content": "别闹，地中海也要封？欧洲吓尿；小哈梅内伊总不露面，出大事了？",
+      "publish_time": 1773311350,
+      "publish_date": "2026-03-12 18:29",
+      "url": "https://m.toutiaoimg.cn/a7616314213804081706",
+      "digg_count": 1209,
+      "comment_count": 29,
+      "read_count": 56238
+    },
+    {
+      "post_id": "7615946863610495539",
+      "content": "局势骤变！伊朗居然布水雷了？美以表态要谈判，是缓兵之计吗？",
+      "publish_time": 1773225819,
+      "publish_date": "2026-03-11 18:43",
+      "url": "https://m.toutiaoimg.cn/a7615946863610495539",
+      "digg_count": 1175,
+      "comment_count": 18,
+      "read_count": 48227
+    },
+    {
+      "post_id": "1859328166622208",
+      "content": "最近被一组数据彻底刷新认知！不到1000万SVIP，去年在唯品会上买了超1000亿的东西，其中有800多亿还都是衣服鞋子。\n\n这相当于1个人在唯品会1年买衣服超1万，一个季节算下来是2500，等于一年四季几乎所有衣服都在唯品会上买，这太夸张了。\n\n以前觉得唯品会没什么人用，甚至每次提起，就有人反问“这个平台还在吗”。现在看来，用唯品会的人确实规模不大，比不上天猫、京东，但真正用的人，真的是越用越爱用。",
+      "publish_time": 1773193518,
+      "publish_date": "2026-03-11 09:45",
+      "url": "https://m.toutiao.com/w/1859328166622208/?app=toutiao_web&timestamp=1788833395&use_new_style=1",
+      "digg_count": 74,
+      "comment_count": 22,
+      "read_count": 276104
+    },
+    {
+      "post_id": "7615611995324170752",
+      "content": "特朗普放话，不打了！金融市场翻天；伊朗列出谈判条件，漫天要价",
+      "publish_time": 1773147852,
+      "publish_date": "2026-03-10 21:04",
+      "url": "https://m.toutiaoimg.cn/a7615611995324170752",
+      "digg_count": 853,
+      "comment_count": 74,
+      "read_count": 52312
+    },
+    {
+      "post_id": "1859239343326284",
+      "content": "受到女足亚洲杯首轮未唱国歌的影响，伊朗女足被伊朗国家电视台称作“战时叛徒”，已有5名球员逃离球队。美国总统特朗普随后公开发帖敦促澳大利亚给予伊朗女足庇护。\n\n很多人觉得非常时刻，伊朗女足应该放下一切支持国家。唱国歌代表支持国家，无关党派宗教和政治分歧。这话对于伊朗不一定对，你们可以看一下其国歌的歌词，这首歌主题是宗教和宗教领袖，无关国家民族。",
+      "publish_time": 1773108809,
+      "publish_date": "2026-03-10 10:13",
+      "url": "https://m.toutiao.com/w/1859239343326284/?app=toutiao_web&timestamp=1788833395&use_new_style=1",
+      "digg_count": 102,
+      "comment_count": 13,
+      "read_count": 250276
+    },
+    {
+      "post_id": "7615204276754825763",
+      "content": "深挖油价暴涨：美伊狗大户，谁在说谎？养虾爆火！又一个现象产品",
+      "publish_time": 1773052920,
+      "publish_date": "2026-03-09 18:42",
+      "url": "https://m.toutiaoimg.cn/a7615204276754825763",
+      "digg_count": 1125,
+      "comment_count": 28,
+      "read_count": 47039
+    },
+    {
+      "post_id": "1858912025690120",
+      "content": "美国刚刚又做了一件不地道的事儿：上个月伊朗战争还没爆发，伊朗派了一艘军舰去印度参加交流活动，按照印度的要求，该船没有携带武器。然后战争爆发了，印度没有跟伊朗就这艘军舰的问题进行任何沟通，放任其离去（甚至盼着它赶紧走），然后一直潜伏在附近的美国潜艇在公海把这艘没有武器的伊朗军舰击沉了。\n\n更过分的是，美军没有进行任何营救，放任该船上的80名军人全部遇难。而阿三从始至终不发一言，也不曾联系伊朗，更别说把这些伊朗军人留下来规避风险了。反而是斯里兰卡这个小国，表示将接收另一艘伊朗海军的补给舰，并且让船上的208人登岸，进行安置。斯里兰卡还说，他们不偏袒任何国家，也不屈服于任何国家。\n\n春秋时期的中国，各诸侯国之间严禁不宣而战和偷袭，甚至交战必须选在战车能正常使用的开阔平原才行，宋襄公因为坚持不在敌军列阵完成和渡水之时出击，甚至成为千古笑柄。而且那时战胜方不能虐待或杀死俘虏，还必须保留战败方的宗庙。\n\n有一次晋楚作战，晋军失败逃跑，有些战车陷入泥坑里，追上来的楚国士兵追上来之后，不但不攻击，反而帮他们推车。晋军一边跑还一边对楚军说，还得是你们大国的兵，有丰富的逃跑经验。\n\n既然战争注定要一直存在，希望各国能多少学习下中国古代的“君子之战”吧。",
+      "publish_time": 1772796655,
+      "publish_date": "2026-03-06 19:30",
+      "url": "https://m.toutiao.com/w/1858912025690120/?app=toutiao_web&timestamp=1788833395&use_new_style=1",
+      "digg_count": 352,
+      "comment_count": 55,
+      "read_count": 365874
+    },
+    {
+      "post_id": "1858876377017356",
+      "content": "醉了！当地时间5日，委内瑞拉外交部发布公告称，委内瑞拉在与美国建立外交对话后，两国政府已决定恢复外交和领事关系。当天稍早时，美国国务院宣布，美国与委内瑞拉政府已同意恢复外交和领事关系。抓总统这事儿就这么翻篇儿了[捂脸]。\n\n大胆揣测一下，伊朗的事儿最后也会这样不了了之。原油的多头和科技股的空头们最好小心点[泪奔]",
+      "publish_time": 1772762658,
+      "publish_date": "2026-03-06 10:04",
+      "url": "https://m.toutiao.com/w/1858876377017356/?app=toutiao_web&timestamp=1788833395&use_new_style=1",
+      "digg_count": 190,
+      "comment_count": 9,
+      "read_count": 282625
+    },
+    {
+      "post_id": "7613717253984354842",
+      "content": "啥玩意？霍尔木兹又要通了？英伟达全新CPO路线，有公司会被淘汰",
+      "publish_time": 1772706697,
+      "publish_date": "2026-03-05 18:31",
+      "url": "https://m.toutiaoimg.cn/a7613717253984354842",
+      "digg_count": 1431,
+      "comment_count": 24,
+      "read_count": 57392
+    },
+    {
+      "post_id": "1858733743884352",
+      "content": "特朗普刚刚表示，由于美军的炮火太猛，不小心把美国选好的傀儡也炸死了，这特么是什么黑暗政治冷笑话[捂脸]。\n\n话说，美以和伊朗都不是啥好东西，一个炸学校，一个无差别炸油轮油厂。\n\n伊朗真不该搞核武器。国运这东西，过去就是过去了。我们也曾错失第一二次工业革命，但后来的机遇抓住了。国家民族的崛起，就得靠阳谋，上不得台面的小伎俩没什么用。",
+      "publish_time": 1772626632,
+      "publish_date": "2026-03-04 20:17",
+      "url": "https://m.toutiao.com/w/1858733743884352/?app=toutiao_web&timestamp=1788833396&use_new_style=1",
+      "digg_count": 281,
+      "comment_count": 54,
+      "read_count": 395007
+    },
+    {
+      "post_id": "1858731790233824",
+      "content": "最近被一组唯品会的数据刷新了认知，不到1000万的SVIP活跃用户，却撑起了52%的GMV。52%的GMV是1000多亿，也就是说着1000万人一年在唯品会买走了超1000亿的商品，这其中有80%左右都是衣服鞋子。这太超出认知了，很多人觉得有了天猫、京东，谁还用唯品会？现在发现，用的人确实不多，但真正用的人却越用越爱用。",
+      "publish_time": 1772624769,
+      "publish_date": "2026-03-04 19:46",
+      "url": "https://m.toutiao.com/w/1858731790233824/?app=toutiao_web&timestamp=1788833396&use_new_style=1",
+      "digg_count": 57,
+      "comment_count": 14,
+      "read_count": 239826
+    },
+    {
+      "post_id": "7613352204379914779",
+      "content": "绝了！哈梅内伊遗命曝光：搞乱中东！革卫队已不受政府调遣！",
+      "publish_time": 1772621703,
+      "publish_date": "2026-03-04 18:55",
+      "url": "https://m.toutiaoimg.cn/a7613352204379914779",
+      "digg_count": 1967,
+      "comment_count": 82,
+      "read_count": 86831
+    },
+    {
+      "post_id": "7612978977602372146",
+      "content": "再升级！美国要派地面部队？亚太股市先崩了；美伊谈崩细节披露！",
+      "publish_time": 1772534808,
+      "publish_date": "2026-03-03 18:46",
+      "url": "https://m.toutiaoimg.cn/a7612978977602372146",
+      "digg_count": 1490,
+      "comment_count": 49,
+      "read_count": 63144
+    },
+    {
+      "post_id": "7612624323395813894",
+      "content": "霍尔木兹，这次真封了；沙特油厂被袭，局势是否已失控？还有变数",
+      "publish_time": 1772452229,
+      "publish_date": "2026-03-02 19:50",
+      "url": "https://m.toutiaoimg.cn/a7612624323395813894",
+      "digg_count": 1162,
+      "comment_count": 27,
+      "read_count": 49512
+    },
+    {
+      "post_id": "7611491223215358504",
+      "content": "谈崩了！美国增派航母，完成合围；央行出手，人民币走向生变？",
+      "publish_time": 1772188411,
+      "publish_date": "2026-02-27 18:33",
+      "url": "https://m.toutiaoimg.cn/a7611491223215358504",
+      "digg_count": 1996,
+      "comment_count": 30,
+      "read_count": 98387
+    },
+    {
+      "post_id": "7611121282876310051",
+      "content": "英伟达财报会，有个问题老黄没解决；美国数据中心增速到顶？咋办",
+      "publish_time": 1772102277,
+      "publish_date": "2026-02-26 18:37",
+      "url": "https://m.toutiaoimg.cn/a7611121282876310051",
+      "digg_count": 896,
+      "comment_count": 28,
+      "read_count": 35029
+    },
+    {
+      "post_id": "7610745090364998153",
+      "content": "马斯克新方案：取消火箭，月球弹射卫星！做空机构盯上存储，小心",
+      "publish_time": 1772014684,
+      "publish_date": "2026-02-25 18:18",
+      "url": "https://m.toutiaoimg.cn/a7610745090364998153",
+      "digg_count": 1394,
+      "comment_count": 99,
+      "read_count": 53966
+    },
+    {
+      "post_id": "1858060078663692",
+      "content": "几千年来留下的价值观，很可能都是错的，因为它们形成于生产水平低下，产能严重不足的时代，而现在社会是生产过剩，核心问题是财富分配，以及生产效率的进一步提升。\n\n举个例子，一些发达地区的人，手握大量拆迁款，还有巨额的分红。他们把钱存起来，过朴素的生活，甚至还去跑网约车当保安赚钱。按照传统价值观来衡量的话，这就是正面标杆。\n\n但是呢，他的钱趴在银行的账上，不投资，不消费，对经济的贡献几乎为0，这意味着没有人能从他身上得利。相比之下，到处撒币的王多鱼可是切切实实提供了就业，让很多人赚到了钱。\n\n至于开网约车当保安，其实是在跟底层人民抢饭吃。这与伐冰之家不蓄牛羊的精神相悖。总之就是，随着社会生产力的发展，有钱人好吃懒做才应该是被提倡的，尽管这听起来似乎违背常理 。",
+      "publish_time": 1771984175,
+      "publish_date": "2026-02-25 09:49",
+      "url": "https://m.toutiao.com/w/1858060078663692/?app=toutiao_web&timestamp=1788833396&use_new_style=1",
+      "digg_count": 474,
+      "comment_count": 182,
+      "read_count": 396577
+    },
+    {
+      "post_id": "1858006424923136",
+      "content": "春节回去，有几个“反常”见闻值得分享。\n\n第一，国产车确实多了起来，BBA没有以前那么多了。其实从去年公布的销量也能看出来，BBA的势头已经远不如当年，反倒是各种国产汽车越来越多。\n\n第二，旅游的选择不再是大城市，而是小城市。以前过年，很多人喜欢旅游，要么出国，要么就去北上广这类大城市，但今年不少小城市成为了首选。大家觉得，小城市物价低，幸福感更高。\n\n第三，大家买东西更精打细算了，比如买奢侈品，现在优先会去逛奥莱，听说春节期间各地的奥莱人山人海。过年的新衣服，也是会去唯品会这类折扣平台，又是大牌穿回去有面子，又是高性价比，穿着省心。\n\n所以，我们能感受到，一个春节带来的消费变化，越来越多的人正变得务实起来！",
+      "publish_time": 1771933007,
+      "publish_date": "2026-02-24 19:36",
+      "url": "https://m.toutiao.com/w/1858006424923136/?app=toutiao_web&timestamp=1788833396&use_new_style=1",
+      "digg_count": 144,
+      "comment_count": 31,
+      "read_count": 300493
+    },
+    {
+      "post_id": "7610381151097651718",
+      "content": "重加关税、威胁打伊朗，全球市场盯紧特朗普；机器人预期为何落空",
+      "publish_time": 1771929955,
+      "publish_date": "2026-02-24 18:45",
+      "url": "https://m.toutiaoimg.cn/a7610381151097651718",
+      "digg_count": 1063,
+      "comment_count": 29,
+      "read_count": 38249
+    },
+    {
+      "post_id": "1857792149720076",
+      "content": "大年初六，继续走亲戚。农村就是藏龙卧虎啊[大笑]",
+      "publish_time": 1771728658,
+      "publish_date": "2026-02-22 10:50",
+      "url": "https://m.toutiao.com/w/1857792149720076/?app=toutiao_web&timestamp=1788833398&use_new_style=1",
+      "digg_count": 287,
+      "comment_count": 43,
+      "read_count": 1347127
+    },
+    {
+      "post_id": "1857443629982732",
+      "content": "说下河北地区禁放烟花爆竹的一些真实情况：\n\n除夕这天，乡镇派出所就一直有民警开着车各个村子巡逻的，每个村子都有村民因为放炮被带走的传闻。各个城市小区的物业如临大敌，三令五申在群里转发派出所的通知，告诉人们哪里的什么人放炮被拘留了，营造紧张气氛。\n\n本来从傍晚就应该有人陆陆续续放烟花爆竹的，这下消停了许多。但是也就差了这一点儿，午夜12点的时候情况直接失控，还有凌晨五六点那一波，咣咣的直接把我炸醒。不过话说回来，这才有点过年的感觉[捂脸]。",
+      "publish_time": 1771396284,
+      "publish_date": "2026-02-18 14:31",
+      "url": "https://m.toutiao.com/w/1857443629982732/?app=toutiao_web&timestamp=1788833398&use_new_style=1",
+      "digg_count": 168,
+      "comment_count": 28,
+      "read_count": 339770
+    },
+    {
+      "post_id": "1857286087471104",
+      "content": "今年春晚机器人的武术表演，难度比去年的扭秧歌高了一个量级。去年还有人怀疑是人工遥控，但是按照今年这难度，就算有人工辅助，对于硬件的要求也已经很高了。\n\n主要机构对于人形机器人的预期普遍是2026年是大规模量产元年，瑞银的预期是今年有3万台的需求。但我觉得这个数目保守了，单单是有钱人买来玩的数量都不只这点。而且在一些领域，即使是刚刚量产比较昂贵的机器人，也已经有较高的性价比。我估计五年后，我们就能在日常生活中经常看到机器人了。\n\n不过话说回来，现在的机器人都能表演武术翻跟头了，但居然连扫地拖地都做不好，隔一会就被卡住，没电，或者是拖不干净，希望某些企业少吹点牛逼，把产品做好。",
+      "publish_time": 1771246039,
+      "publish_date": "2026-02-16 20:47",
+      "url": "https://m.toutiao.com/w/1857286087471104/?app=toutiao_web&timestamp=1788833398&use_new_style=1",
+      "digg_count": 768,
+      "comment_count": 289,
+      "read_count": 872338
+    },
+    {
+      "post_id": "7606299770071630346",
+      "content": "不去美元了？俄罗斯讨论重新接入美元系统！彭博社的报道靠谱吗？",
+      "publish_time": 1770979679,
+      "publish_date": "2026-02-13 18:47",
+      "url": "https://m.toutiaoimg.cn/a7606299770071630346",
+      "digg_count": 1199,
+      "comment_count": 79,
+      "read_count": 57260
+    },
+    {
+      "post_id": "7605928155840299570",
+      "content": "科技股财报纷纷炸裂，但市场懵了；非农数据大幅下修，如何解读？",
+      "publish_time": 1770893158,
+      "publish_date": "2026-02-12 18:45",
+      "url": "https://m.toutiaoimg.cn/a7605928155840299570",
+      "digg_count": 1083,
+      "comment_count": 11,
+      "read_count": 40562
+    },
+    {
+      "post_id": "7605565213013803529",
+      "content": "玻璃布产能不足！下一个存储？1月份CPI掉头向下，出什么事了？",
+      "publish_time": 1770808651,
+      "publish_date": "2026-02-11 19:17",
+      "url": "https://m.toutiaoimg.cn/a7605565213013803529",
+      "digg_count": 1070,
+      "comment_count": 20,
+      "read_count": 43289
+    },
+    {
+      "post_id": "7605185199864857097",
+      "content": "字节新产品，AI里程碑，利好谁？高市压倒性胜选，日股为何大涨？",
+      "publish_time": 1770720178,
+      "publish_date": "2026-02-10 18:42",
+      "url": "https://m.toutiaoimg.cn/a7605185199864857097",
+      "digg_count": 1094,
+      "comment_count": 26,
+      "read_count": 43472
+    },
+    {
+      "post_id": "7604819396065870376",
+      "content": "大利好！中美同提“金融强国”；美联储玩大了，沃什的狐狸尾巴！",
+      "publish_time": 1770635019,
+      "publish_date": "2026-02-09 19:03",
+      "url": "https://m.toutiaoimg.cn/a7604819396065870376",
+      "digg_count": 1838,
+      "comment_count": 52,
+      "read_count": 72441
+    },
+    {
+      "post_id": "7602958629863506467",
+      "content": "马斯克考察中国光伏大厂！他玩真的！二轮土地延包，政策有变？",
+      "publish_time": 1770201763,
+      "publish_date": "2026-02-04 18:42",
+      "url": "https://m.toutiaoimg.cn/a7602958629863506467",
+      "digg_count": 1326,
+      "comment_count": 36,
+      "read_count": 66676
+    },
+    {
+      "post_id": "1856108879521856",
+      "content": "最近有三个事情，让我感触很大，这真的是一个充满信息差的时代。\n\n一个是白银lof，其实很多人知道的时候，已经差不多“不能买了”，但很多人已经赚得盆满钵满，因为长达一个多月时间，场内场外有巨大价差，这就是信息差。\n\n第二个是过年买车，朋友买了一辆奔驰新E，这可是妥妥的大豪车，本以为五六十万，结果一问别人只花了30万。没错，奔驰E已经40万不到了，想当年一个C还要四十多万。\n\n第三个是买羽绒服，当我们还在默认一件好羽绒服就要上千甚至几千的时候，中产涌入山姆把400多的羽绒服买爆了、把胖东来300多的羽绒服买断货了，唯品会上不到300的波司登单件卖出超3万条评价，彻底刷新了认知。\n\n所以，这就是信息差。换个角度来看，信息差其实就是一种认知红利！",
+      "publish_time": 1770123367,
+      "publish_date": "2026-02-03 20:56",
+      "url": "https://m.toutiao.com/w/1856108879521856/?app=toutiao_web&timestamp=1788833398&use_new_style=1",
+      "digg_count": 250,
+      "comment_count": 18,
+      "read_count": 375257
+    },
+    {
+      "post_id": "7602583057891213850",
+      "content": "形势突变！黄金和股市飙升！特朗普又说啥了？SPACEX与XAI合并",
+      "publish_time": 1770114316,
+      "publish_date": "2026-02-03 18:25",
+      "url": "https://m.toutiaoimg.cn/a7602583057891213850",
+      "digg_count": 1222,
+      "comment_count": 21,
+      "read_count": 45456
+    },
+    {
+      "post_id": "7602214027510514219",
+      "content": "形势不妙！金银恐慌蔓延到了股市；特朗普放出黑天鹅，有三大谜团",
+      "publish_time": 1770028404,
+      "publish_date": "2026-02-02 18:33",
+      "url": "https://m.toutiaoimg.cn/a7602214027510514219",
+      "digg_count": 1406,
+      "comment_count": 40,
+      "read_count": 59411
+    },
+    {
+      "post_id": "1855811543643136",
+      "content": "深圳那边前几天有一个黄金平台爆仓了。\n\n具体情况有点复杂，简单说来就是有机构把一个本用于实体黄金购销的平台做成了一个像期货一样可以双向交易和加杠杆的软件。但是这个平台不接入国际大盘，散户的交易对手是庄家，只不过价格不由庄家操控。\n\n这种玩法本来屡试不爽，因为价格涨涨跌跌，频繁交易的赌狗大部分最后会亏掉。但是这次不一样，由于国际金价连涨两年，市场预期高度一致，所以散户们全都在做多，最后庄家先顶不住了。\n\n更特么黑色幽默的是，平台刚崩不到一礼拜，国际金价大跌，庄家差一点就扛过去了[泪奔]。",
+      "publish_time": 1769839805,
+      "publish_date": "2026-01-31 14:10",
+      "url": "https://m.toutiao.com/w/1855811543643136/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 310,
+      "comment_count": 27,
+      "read_count": 367549
+    },
+    {
+      "post_id": "1855796788384844",
+      "content": "黄金白银的这种跌法，纯粹的技术流是最吃香的，带杠杆的双向t0品种，不用管什么美联储和伊朗，跌破支撑位就做空，资金大赌性大的一晚上一套房。上次黄金这样跌应该是在2011年，当时我做交易员，一晚上没睡。\n\n不过这种机会十几年才遇到一次，你能十几年只交易一次吗？不可能的。\n\n另外，关于投资黄金白银的几种渠道：\n\n一个是连续交易的双向T0品种，比如黄金期货，外盘黄金。最大的好处是能做空，能随时平仓，但这只是理论上的好处，绝大多数人反而可能因此大亏。\n\n一个是单向交易的虚拟品种，比如黄金ETF，纸黄金，积存金。这些品种没有第一种灵活，但是比黄金实物灵活，点击一下就能变现。而且大部分不带杠杆，跌50%也不用上天台。我个人目前选的是这种。\n\n一个是实物黄金，最大的好处是看得见摸得着，而且不会因为随时可以交易激发赌性。但这两点同时也是缺点：你不能因为看空而随时变现，还要承担非常高昂的成本。考虑到收购黄金的奸商压价甚至偷窃，以及部分黄金实物高昂的加工费，摩擦成本甚至可能高达10%。也就是刚刚这轮黄金史诗级暴跌的幅度。",
+      "publish_time": 1769825733,
+      "publish_date": "2026-01-31 10:15",
+      "url": "https://m.toutiao.com/w/1855796788384844/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 195,
+      "comment_count": 28,
+      "read_count": 350013
+    },
+    {
+      "post_id": "1855794727979008",
+      "content": "网上看到一个关于加密货币的帖子，跟当前的黄金白银很贴切：\n\n如果你在2015年花1万美元买了 ETH，一路拿到现在，那它已经变成了2亿美元。\n\n听上去很轻松：“拿住就行了嘛。”\n\n可真把盈利曲线摊出来，你会发现那10万个\nETH 的心路历程完全不是人能受得了的：\n\n1万-100万-1,400万-39万 -3,000万-120万-9,300万-530万-3.23亿-5,400万-2亿\n\n你再问问自己一句：你真的拿得住吗？",
+      "publish_time": 1769823768,
+      "publish_date": "2026-01-31 09:42",
+      "url": "https://m.toutiao.com/w/1855794727979008/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 253,
+      "comment_count": 54,
+      "read_count": 385340
+    },
+    {
+      "post_id": "7601105826513715712",
+      "content": "金银铜暴跌！微软暴跌！美联储将迎来鹰派？股票黄金的牛市没了？",
+      "publish_time": 1769770371,
+      "publish_date": "2026-01-30 18:52",
+      "url": "https://m.toutiaoimg.cn/a7601105826513715712",
+      "digg_count": 1536,
+      "comment_count": 51,
+      "read_count": 71122
+    },
+    {
+      "post_id": "1855651390856192",
+      "content": "特斯拉公布四季度财报，并召开财报电话会。\n这季度特斯拉车卖得并不算太好，交付量同降15%，营收同降3%；但好在营收略超预期，毛利率大幅回升。\n其现金储备增加至441亿美元，这个水平比苹果谷歌等巨头低，但是显著高于英伟达和AMD，更是远高于传统车企。\n这么多现金要干嘛？2026年特斯拉要花200亿建设6座工厂。而且马斯克还说特斯拉还要建设芯片工厂。\n特斯拉将停产model S/X，聚焦model 3/Y，Cybertruck和AI业务，从汽车制造商转型为物理AI公司。\n有人说特斯拉汽车要被中国车企打败了，特朗普又不支持电车，前景不好吧？\n擎天柱机器人是特斯拉的产品，其所有盈利将100%归属于特斯拉的股东。其没有独立子公司或特殊股权结构。我更看好的是这个。",
+      "publish_time": 1769687071,
+      "publish_date": "2026-01-29 19:44",
+      "url": "https://m.toutiao.com/w/1855651390856192/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 126,
+      "comment_count": 2,
+      "read_count": 243025
+    },
+    {
+      "post_id": "1855651295850508",
+      "content": "现在有钱人的消费很反常，山姆400多的羽绒服被抢爆、胖东来300多的羽绒服卖断货、唯品会不到300的波司登被抢出3万多评价。当我们还在认为，一件好的羽绒服就要上千，有钱人却买爆了性价比羽绒服，太疯狂了。",
+      "publish_time": 1769686981,
+      "publish_date": "2026-01-29 19:43",
+      "url": "https://m.toutiao.com/w/1855651295850508/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 444,
+      "comment_count": 144,
+      "read_count": 1649261
+    },
+    {
+      "post_id": "7600734476364464692",
+      "content": "出什么事了？科技大跌，白酒集体涨停！鲍威尔讲话，黄金续创新高",
+      "publish_time": 1769683915,
+      "publish_date": "2026-01-29 18:51",
+      "url": "https://m.toutiaoimg.cn/a7600734476364464692",
+      "digg_count": 1525,
+      "comment_count": 56,
+      "read_count": 65829
+    },
+    {
+      "post_id": "7600361907127599631",
+      "content": "美军中东战备演习，随时转为实战！不是吧？黄金未来20年没机会？",
+      "publish_time": 1769597164,
+      "publish_date": "2026-01-28 18:46",
+      "url": "https://m.toutiaoimg.cn/a7600361907127599631",
+      "digg_count": 1283,
+      "comment_count": 29,
+      "read_count": 49488
+    },
+    {
+      "post_id": "7599990596136927779",
+      "content": "官媒发文定调商业航天，口风变了；春节AI应用红包大战，你支持谁",
+      "publish_time": 1769510714,
+      "publish_date": "2026-01-27 18:45",
+      "url": "https://m.toutiaoimg.cn/a7599990596136927779",
+      "digg_count": 1739,
+      "comment_count": 50,
+      "read_count": 71942
+    },
+    {
+      "post_id": "1855383185898636",
+      "content": "伊朗怂了。据央视消息，伊朗外交部发言人巴加埃当地时间1月26日表示，有关“伊朗寻求核武器”的说法不符合事实，并强调伊朗从未、也不会寻求核武器。\n\n要不特朗普要求伊朗把航母来前儿的油费报一下？[泪奔]",
+      "publish_time": 1769431291,
+      "publish_date": "2026-01-26 20:41",
+      "url": "https://m.toutiao.com/w/1855383185898636/?app=toutiao_web&timestamp=1788833399&use_new_style=1",
+      "digg_count": 166,
+      "comment_count": 11,
+      "read_count": 247036
+    },
+    {
+      "post_id": "7599617191293600298",
+      "content": "中东又要开打？金银比跌破50！十几年来首次，美日联合干预汇市！",
+      "publish_time": 1769423771,
+      "publish_date": "2026-01-26 18:36",
+      "url": "https://m.toutiaoimg.cn/a7599617191293600298",
+      "digg_count": 1259,
+      "comment_count": 35,
+      "read_count": 49407
+    },
+    {
+      "post_id": "7598505667372122639",
+      "content": "我去，飞来横祸，汇金减持了！马斯克达沃斯吹牛，特朗普要打伊朗",
+      "publish_time": 1769164983,
+      "publish_date": "2026-01-23 18:43",
+      "url": "https://m.toutiaoimg.cn/a7598505667372122639",
+      "digg_count": 1230,
+      "comment_count": 19,
+      "read_count": 57559
+    },
+    {
+      "post_id": "7598131998292574720",
+      "content": "特朗普对格陵兰表态大变！就为炒股？苹果要出震撼新品，能成功吗",
+      "publish_time": 1769077975,
+      "publish_date": "2026-01-22 18:32",
+      "url": "https://m.toutiaoimg.cn/a7598131998292574720",
+      "digg_count": 1083,
+      "comment_count": 18,
+      "read_count": 49264
+    },
+    {
+      "post_id": "1854937295698956",
+      "content": "大家感觉捐款不便的，可以在抖音李亚鹏的账号橱窗里买点东西，零食纸巾大米啥的，都是家常能用到的，莫以善小而不为[祈祷]。",
+      "publish_time": 1769006057,
+      "publish_date": "2026-01-21 22:34",
+      "url": "https://m.toutiao.com/w/1854937295698956/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 218,
+      "comment_count": 62,
+      "read_count": 354717
+    },
+    {
+      "post_id": "1854928338745408",
+      "content": "西贝获多个资方的A轮投资，金额未披露，但注册资本增幅约13.1%。蚂蚁集团前CEO胡晓明参与了这次融资。\n\n西贝方面曾透露，去年风波后，其采取包括降价、后厨直播在内的措施，10月份客流量甚至高于往年同期；优惠停止后，客流量保持持平。",
+      "publish_time": 1768997515,
+      "publish_date": "2026-01-21 20:11",
+      "url": "https://m.toutiao.com/w/1854928338745408/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 128,
+      "comment_count": 130,
+      "read_count": 345823
+    },
+    {
+      "post_id": "1854923873784976",
+      "content": "这几天大降温，一觉醒来，不少地方甚至开始下雪了。羽绒服的热度又起来了，但我看到一个令人惊讶的消息，不少有钱人、中产们竟然涌入山姆疯抢400多的羽绒服。\n\n这是咋回事？有钱人买400多的羽绒服？这和我们以前的认知有些偏差，以前中产都是买上千甚至上万的羽绒服，甚至在我们普通人眼里，提到羽绒服默认就是上千，尤其是一些好牌子。\n\n但现在大家的心态变了，买羽绒服也开始追求性价比。不仅是疯抢山姆的羽绒服，胖东来的羽绒服也非常火爆。现在有一组数据调研，现在线上卖得最好的十款羽绒服，单价都不超过500。\n\n还有很多有钱人现在去奥特莱斯买羽绒服，安踏等好牌子都有不错的折扣。线上就主要是唯品会，一件波司登羽绒服被干到300以内，买家秀都超过2万多条，直接卖爆了。\n\n所以说，羽绒服市场开始变天了，高价不再是羽绒服的专属名词，羽绒服也可以拥有性价比。",
+      "publish_time": 1768993257,
+      "publish_date": "2026-01-21 19:00",
+      "url": "https://m.toutiao.com/w/1854923873784976/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 120,
+      "comment_count": 9,
+      "read_count": 254334
+    },
+    {
+      "post_id": "7597765598865408552",
+      "content": "美国股债汇三杀！TACO还有吗？日债风暴！日本背刺还是另有隐情？",
+      "publish_time": 1768992671,
+      "publish_date": "2026-01-21 18:51",
+      "url": "https://m.toutiaoimg.cn/a7597765598865408552",
+      "digg_count": 973,
+      "comment_count": 11,
+      "read_count": 33633
+    },
+    {
+      "post_id": "7597393959984153140",
+      "content": "要玩真的？欧洲与特朗普剑拔弩张；降息落空，几部门发文提振经济",
+      "publish_time": 1768906138,
+      "publish_date": "2026-01-20 18:48",
+      "url": "https://m.toutiaoimg.cn/a7597393959984153140",
+      "digg_count": 1144,
+      "comment_count": 21,
+      "read_count": 44502
+    },
+    {
+      "post_id": "1854644076259408",
+      "content": "使用ai时间长了之后你会发现，很多时候它都被进行了信息投喂，也就是所谓的GEO。比如你跟他讨论宠物话题，它会很自然的推荐宠物用品，有时还是你从没听说过的某种东西。或者你跟它聊电脑问题，它会很自然的给你推荐软硬件。未来这个市场可能远远大于十年前的搜索引擎优化SEO。\n\n不同的是，现在几乎没有什么信息壁垒。以前的网民可能都不知道SEO是啥，以为自然搜索的结果就一定是权威可信的。但是现在的网民可奸多了，不好忽悠。",
+      "publish_time": 1768726421,
+      "publish_date": "2026-01-18 16:53",
+      "url": "https://m.toutiao.com/w/1854644076259408/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 127,
+      "comment_count": 26,
+      "read_count": 258154
+    },
+    {
+      "post_id": "7595908096364233250",
+      "content": "内存涨！封测涨！AI硬件永动机，周期律失效？金银比新低，啥影响",
+      "publish_time": 1768560182,
+      "publish_date": "2026-01-16 18:43",
+      "url": "https://m.toutiaoimg.cn/a7595908096364233250",
+      "digg_count": 1119,
+      "comment_count": 41,
+      "read_count": 50148
+    },
+    {
+      "post_id": "1854464007956480",
+      "content": "说个挺反常的事，现在中年人囤“保险”上瘾了？\n\n最近刷到《中国新闻周刊》一篇热文，是说越来越多的“顶梁柱”开始给家人配置保障，颇有“上瘾”的节奏。仔细想想其实没毛病，作为一家之主，都会认真审视家庭抗风险能力。\n\n就拿这篇文章提到的2个案例来说，对比下来挺让人感慨的。\n\n第一个故事说的是生活在杭州的李哲，他们家的结构很大众，上有4个快70岁的老人，自己和老公都是独生子，下面还有2个孩子，压力不小，但老人身体健康，还能照顾小孩，所以一直过的很安稳。\n\n直到她亲眼看到朋友的父亲脑溢血送去抢救，医保报销后仍自费近十万。这也就罢了，后续康复请的24小时护工每月一万多，康复训练每周两千，朋友一家人连轴转，结果很快母亲也累倒，家庭的经济、情绪、人力，全崩了。\n\n李哲这才意识到，自己这看似安稳的小家，但凡一个人生病，由于没“兜底”保障，随时会像朋友家那样直接崩塌，所以连忙给家庭配制了健康险。\n\n而另一个故事就幸运多了，是说深圳的陈琳在2019年底，给全家都配置了保险，有备无患。没想到不久后，她公公居然确诊肺癌晚期，但在后续五年半治疗中，因为这份保险，她通过47次理赔获赔近150万，治疗费家里压根没操过心。\n更关键是，因为家庭经济没受到冲击，她甚至还在这段时间买了房，生了二胎，生活节奏一点没乱。\n\n这么看的话，这两个家庭，一个被风险拖垮，一个靠着提前规划平稳度过，就很好解释了为啥顶梁柱囤保险了。其实数据也在印证这个趋势，据蚂蚁保统计，46%的用户首份保单是健康险，此外有41%的健康险用户会为家人投保，可见在这个不确定的时代，风险规划已经从个人延续到家庭。\n\n该说不说，人到中年真不能赌不会生病，稳字当先总错不了。这届中年人，将家庭抗风险能力当成大事办，这种“思路”挺好的。",
+      "publish_time": 1768554695,
+      "publish_date": "2026-01-16 17:11",
+      "url": "https://m.toutiao.com/w/1854464007956480/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 399,
+      "comment_count": 27,
+      "read_count": 527207
+    },
+    {
+      "post_id": "1854382953686220",
+      "content": "央行公布数据，20年全年社融增量和新增人民币贷款小幅超预期，12月份M2小幅超预期，M1小幅不及预期，剪刀差再次扩大。\n\n这显示当前居民和企业的消费和投资意愿仍然不足，大量的钱被存成了定期存款。\n\n不过也有一个原因是财政在加速投放，存款向实体经济转移，推动M2增长更多，拉大了剪刀差。\n\n这话也分怎么说，既然钱都被存起来了，这另一方面也显示存款搬家到股市的趋势没到顶峰对不？",
+      "publish_time": 1768477395,
+      "publish_date": "2026-01-15 19:43",
+      "url": "https://m.toutiao.com/w/1854382953686220/?app=toutiao_web&timestamp=1788833401&use_new_style=1",
+      "digg_count": 124,
+      "comment_count": 1,
+      "read_count": 181881
+    },
+    {
+      "post_id": "7595543151083799074",
+      "content": "降息！降首付！放水和救房地产组合拳；美军航母出动，看好火药桶",
+      "publish_time": 1768475211,
+      "publish_date": "2026-01-15 19:06",
+      "url": "https://m.toutiaoimg.cn/a7595543151083799074",
+      "digg_count": 1345,
+      "comment_count": 18,
+      "read_count": 48446
+    },
+    {
+      "post_id": "7595168069937365545",
+      "content": "涨得好好的，紧急降温为哪般？房贷利息全免？求是文章快有后续了",
+      "publish_time": 1768387885,
+      "publish_date": "2026-01-14 18:51",
+      "url": "https://m.toutiaoimg.cn/a7595168069937365545",
+      "digg_count": 2155,
+      "comment_count": 132,
+      "read_count": 88900
+    },
+    {
+      "post_id": "1854206389630156",
+      "content": "苹果官宣与谷歌达成多年合作协议，今年晚些时候进行重大升级的SIRI也将基于谷歌的Gemini模型和云技术。\n\n谷歌的股价继续创出新高，而苹果已经跌了一个多月。我个人并不看空苹果，但是很显然，它已经堕落为一家消费品公司，增长潜力大降。乔帮主来把库克老儿带走吧。[发怒]",
+      "publish_time": 1768309011,
+      "publish_date": "2026-01-13 20:56",
+      "url": "https://m.toutiao.com/w/1854206389630156/?app=toutiao_web&timestamp=1788833402&use_new_style=1",
+      "digg_count": 89,
+      "comment_count": 5,
+      "read_count": 169352
+    },
+    {
+      "post_id": "1854200878401808",
+      "content": "最近看到一个说法，“长期脑力工作的人会沉迷简单的体力劳动”，结果直接炸锅了，吸引了很多脑力劳动者的评论。\n\n网友A表示：“体力劳动只要停下来就是休息，而脑力劳动停下来CPU还是过热的”。\n\n码农B表示：“看见路边有沙堆和铁锹，只要没人我就会过去搞两下，感觉挺爽。”\n\n白领C表示：“没上班时，买衣服会为了点优惠到处做活动，现在上班了直接去唯品会买了，都是大牌，折扣也是一步到位，便宜多少一目了然，不烧脑”。\n\n学生D表示，“高考结束的暑假，在自家童装厂干活干了3个月，一天十几个小时，治好了自己的内耗，那是内心最平静的3个月”。\n\n职员E表示：以前是跟单员，每天就是接单催货和被客户催货，后来申请去了一个流水线的地方，下班之后领导、客户永远不找我，工资又不变。",
+      "publish_time": 1768303755,
+      "publish_date": "2026-01-13 19:29",
+      "url": "https://m.toutiao.com/w/1854200878401808/?app=toutiao_web&timestamp=1788833402&use_new_style=1",
+      "digg_count": 186,
+      "comment_count": 65,
+      "read_count": 330519
+    },
+    {
+      "post_id": "7594423877746180660",
+      "content": "马斯克又给指导工作！GEO是啥？黄金又创历史新高，出什么事了？",
+      "publish_time": 1768214608,
+      "publish_date": "2026-01-12 18:43",
+      "url": "https://m.toutiaoimg.cn/a7594423877746180660",
+      "digg_count": 1170,
+      "comment_count": 15,
+      "read_count": 46835
+    },
+    {
+      "post_id": "7593311330208104960",
+      "content": "香港房价开始涨了！通缩有望结束；中石化合并中航油，神车重现？",
+      "publish_time": 1767955577,
+      "publish_date": "2026-01-09 18:46",
+      "url": "https://m.toutiaoimg.cn/a7593311330208104960",
+      "digg_count": 1580,
+      "comment_count": 127,
+      "read_count": 73657
+    },
+    {
+      "post_id": "7592938478963327498",
+      "content": "匪夷所思，委内瑞拉股债双涨！白酒首份年报，消费降级还没结束？",
+      "publish_time": 1767868757,
+      "publish_date": "2026-01-08 18:39",
+      "url": "https://m.toutiaoimg.cn/a7592938478963327498",
+      "digg_count": 1073,
+      "comment_count": 50,
+      "read_count": 44129
+    },
+    {
+      "post_id": "1853657704844288",
+      "content": "三星在刚刚的CES上展示了一款无折痕的OLED面板，显示效果比Fold7还吊，下面为对比图：\n\n市场推测其最有可能用于苹果的首款折叠屏iPhone，其次是三星自家的Fold8。\n\n三星的这项技术由韩国 Fine M-Tec 公司供应金属板，核心工艺与供应链尚未向国内开放。\n\n不过国内有几家公司的“激光钻孔金属显示板”技术与此高度同源，分别为大族XX、锐科XX、光韵X、帝尔XX，其中大族被认为最有潜力搞这个。",
+      "publish_time": 1767785744,
+      "publish_date": "2026-01-07 19:35",
+      "url": "https://m.toutiao.com/w/1853657704844288/?app=toutiao_web&timestamp=1788833402&use_new_style=1",
+      "digg_count": 106,
+      "comment_count": 8,
+      "read_count": 232030
+    },
+    {
+      "post_id": "1853657597227392",
+      "content": "最近身边中年男人的三个特征。\n\n1、炒股，但跟以前乱买不一样了，紧跟大趋势。一会儿机器人、一会儿商业航天、一会儿存储芯片，感觉身边朋友都快比我懂了。\n\n2、过年回家自己倒没买新衣服，给父母整的巴巴适适，波司登、安踏羽绒服一套接一套，不过只在像奥莱、唯品会这种专门搞好牌子打折的地方买，觉得又满足了品牌又保证了性价比。\n\n3、奔驰宝马卖了，理想问界走起。以前会觉得过年回去开个BBA更有面子，但现在不认这一套了，觉得国产汽车更有一种自信，最关键是智能，而且据说还代表回归家庭。\n\n你中招了吗？",
+      "publish_time": 1767785642,
+      "publish_date": "2026-01-07 19:34",
+      "url": "https://m.toutiao.com/w/1853657597227392/?app=toutiao_web&timestamp=1788833402&use_new_style=1",
+      "digg_count": 330,
+      "comment_count": 74,
+      "read_count": 602791
+    },
+    {
+      "post_id": "7592567425577550336",
+      "content": "见证历史？美俄两国军队或将对峙；黄仁勋CES讲话，液冷完了？",
+      "publish_time": 1767782369,
+      "publish_date": "2026-01-07 18:39",
+      "url": "https://m.toutiaoimg.cn/a7592567425577550336",
+      "digg_count": 1697,
+      "comment_count": 51,
+      "read_count": 61305
+    },
+    {
+      "post_id": "7592197664989626931",
+      "content": "芬兰小公司捅破天，锂电行业完了？房地产反转，这次实锤了？",
+      "publish_time": 1767696277,
+      "publish_date": "2026-01-06 18:44",
+      "url": "https://m.toutiaoimg.cn/a7592197664989626931",
+      "digg_count": 2088,
+      "comment_count": 263,
+      "read_count": 81780
+    },
+    {
+      "post_id": "7591826030642348607",
+      "content": "马杜罗被抓，特朗普抢油是阳谋！求是发文，多个涉房地产罕见表态",
+      "publish_time": 1767609748,
+      "publish_date": "2026-01-05 18:42",
+      "url": "https://m.toutiaoimg.cn/a7591826030642348607",
+      "digg_count": 921,
+      "comment_count": 11,
+      "read_count": 44231
+    },
+    {
+      "post_id": "7589970291846070830",
+      "content": "2025收官！那些大事你还记得吗？还没完，2026重点看这些...",
+      "publish_time": 1767177681,
+      "publish_date": "2025-12-31 18:41",
+      "url": "https://m.toutiaoimg.cn/a7589970291846070830",
+      "digg_count": 1089,
+      "comment_count": 43,
+      "read_count": 45033
+    },
+    {
+      "post_id": "7589606490898432546",
+      "content": "牛啊！人民币破7！预言会成真吗？金银剧烈震荡，几个数据要看懂",
+      "publish_time": 1767092975,
+      "publish_date": "2025-12-30 19:09",
+      "url": "https://m.toutiaoimg.cn/a7589606490898432546",
+      "digg_count": 1081,
+      "comment_count": 31,
+      "read_count": 40829
+    },
+    {
+      "post_id": "1773580732769549",
+      "content": "最近，很多朋友私信问我在各个平台看到的我的账号，不知是真是假，这里特地总结一下，截至目前老马在各个平台的账号：\n\n视频：B站（马男说投资）、西瓜视频抖音今日头条百家号（马男聊投资）\n\n音频：喜马拉雅（马男聊投资）\n\n日推文章：微信公众号（马男聊投资、马男聊投资小号）\n\n此外，还有支付宝、格隆汇等平台有邀请我入驻，但是我更新并不多。\n\n最后再次提醒，马男不会主动私信或添加读者为好友，或从事有偿带单等服务，也请大家特别注意鉴别冒充马男团队以及马男合伙人、朋友的不明人员，看好自己的钱袋子。[谢谢][作揖][中国赞]\n\n由于每天私信和留言数量巨大，老马只能看到和回复其中一部分，还请见谅。",
+      "publish_time": 1691418398,
+      "publish_date": "2023-08-07 22:26",
+      "url": "https://m.toutiao.com/w/1773580732769549/?app=toutiao_web&timestamp=1788833364&use_new_style=1",
+      "digg_count": 2493,
+      "comment_count": 62,
+      "read_count": 3367967
+    }
+  ]
+}

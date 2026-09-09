@@ -2,10 +2,11 @@
 """路径与运行环境解析。
 
 briefing/ 是独立部署单元：部署时把整个 briefing/ 目录拷到服务器即可。
-它依赖父仓库（blogger_ana）的两样东西：
+它依赖父仓库（blogger_ana）的三样东西：
   1) 数据：data/posts、data/direction_signals、data/market、reports
   2) 爬虫/正文脚本：scripts/pipeline/scrape_toutiao.py、scripts/utils/fetch_bodies_shard.py、
-     scripts/utils/merge_bodies_to_posts.py、scripts/pipeline/extract_signals_direction.py（DeepSeek 调用底座）
+     scripts/utils/merge_bodies_to_posts.py
+  3) 共享标注模块：顶层 opinion/ 包（读帖/解析/DeepSeek 逐帖标注，推送·报告同源）
 
 父仓库路径可通过环境变量 REPO_ROOT 覆盖（部署到服务器时若目录结构不同）。
 """
@@ -23,7 +24,6 @@ REPORTS_DIR = os.path.join(REPO_ROOT, "reports")
 SCRAPE_SCRIPT = os.path.join(REPO_ROOT, "scripts", "pipeline", "scrape_toutiao.py")
 BODIES_SCRIPT = os.path.join(REPO_ROOT, "scripts", "utils", "fetch_bodies_shard.py")
 MERGE_BODIES_MOD = os.path.join(REPO_ROOT, "scripts", "utils", "merge_bodies_to_posts.py")
-EXTRACT_MOD = os.path.join(REPO_ROOT, "scripts", "pipeline", "extract_signals_direction.py")
 
 # 本项目运行时目录
 DATA_DIR = os.path.join(BRIEFING_DIR, "data")
