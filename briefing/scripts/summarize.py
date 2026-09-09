@@ -42,6 +42,14 @@ v15（波段窗口 3→5 交易日）→ **v16（2026-09-08 分层分解单趟�
   行入缓存 + 带方向纠错重试（有上证观点 → 重选上证句；只谈他指 → idx 改真实指数）；extract_layers
   对本文件 v20 上线前已缓存进 rows_cache 的矛盾旧帖**作废整帖重抽**（自愈，见 extract_layers）；
   collapse_board 只留**渲染底限**——矛盾行永不上上证卡，但不越权修复（坍缩无帖子全文）。
+**v21（2026-09-09 Pillar C 复核裁决固化逐帖缓存）**：fix/drop 不再只是当档内存展示 patch（fix 只
+  改 display 行、drop 只剔本档 win_rows 重坍缩——从不置 wrote、不落缓存 → 下一档坍缩从复核前原始
+  行把旧观点捞回，恰好制造跨档反转/缩水）。复核裁决现 mutate 逐帖缓存行（fix 就地覆写源行 d/s/idx/
+  spec/horizon/quote/summary；drop 剔该帖**被复核板层**全部行、余空保 entry 不整删防重抽复活），随后
+  对全部板重坍缩 → 修正后缓存行成为后续所有档的坍缩输入（T1 复核档输出 == T2 后续档输出，I1 无新增
+  不反转 / I2 无变化不缩水 结构性成立）。idx≠上证 的 fix 持久化后 collapse 自动挡在上证 卡外 → 持久
+  删除式效果（相较此前"显示一档后回弹"是有意语义升级）。复核触发集不变（仍只对本 tick 新标注帖产出的
+  上卡行）；不改缓存格式，无需 bump _ROWS_CACHE_VERSION。
 v12 跨板块 summarize_boards / SUMMARY_SYSTEM_PROMPT 与旧 v8 全板共识路径（POINTS_SYSTEM_PROMPT /
 SYNTH_SYSTEM_PROMPT / extract_points / synthesize）已于 2026-09-09 C1 一并移除（git 历史与
 archive/20260909-legacy 可恢复）；v9/v10 的 18 行名单路径已整段替换。
@@ -59,13 +67,13 @@ from . import calendar, config, paths
 # briefing 是独立部署单元，兜底把父仓根（paths.REPO_ROOT）补进 sys.path 以便 `import opinion`。
 try:
     from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
-    from opinion import prompts as o_prompts, schema as o_schema, text as o_text  # noqa: E402
+    from opinion import schema as o_schema  # noqa: E402
     from opinion import verify as o_verify  # noqa: E402
 except ImportError:
     if not any(os.path.abspath(p) == os.path.abspath(paths.REPO_ROOT) for p in sys.path):
         sys.path.insert(0, paths.REPO_ROOT)
     from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
-    from opinion import prompts as o_prompts, schema as o_schema, text as o_text  # noqa: E402
+    from opinion import schema as o_schema  # noqa: E402
     from opinion import verify as o_verify  # noqa: E402
 
 log = logging.getLogger("briefing")
@@ -146,6 +154,15 @@ def _origin_matches(board, disp, r, downgrade_ok=False):
     return o_schema.horizon_spec_ok(disp.get("horizon"), spec)
 
 
+def _row_board_layer(r, cal):
+    """缓存规范行归属板别（2026-09-09 v21：复核 drop 剔层行用，判层同 collapse_board 的 _row_layer 门）。"""
+    horizon = r.get("horizon")
+    if not isinstance(horizon, str) or not horizon:
+        return None
+    return o_ann._row_layer(horizon, str(r.get("spec") or ""),
+                            o_ann._quote_date(r.get("quote_ts")), cal)
+
+
 def extract_layers(work, starts=None):
     """单趟分层抽取（v5 逐帖缓存版）：{博主: {"posts": [窗口帖 新→旧], "boards": [层,…]}} → (rows_by_board, errors)。
 
@@ -157,7 +174,9 @@ def extract_layers(work, starts=None):
     - 标注失败博主（annotate 返 None）→ **回退窗口内已缓存旧帖行**续显（quote_ts≥窗口下界
       门自动拦陈旧），不写缓存、记入 errors 下档重试——不再是失败即整档置空；
     - 坍缩后再对「本 tick 新标注帖产出、且真上卡」的少数行跑复核（opinion.verify
-      keep/fix/drop，主结论句 doctrine），fix 改展示字段、drop 剔帖重坍缩续显更早行。
+      keep/fix/drop，主结论句 doctrine）；fix/drop 裁决**固化进逐帖缓存**（v21：fix 覆写源行、
+      drop 剔该板层行、余空保 entry），随后统一重坍缩——修正后缓存行成为后续所有档的坍缩输入，
+      杜绝"无新增却反转 / 该在的少了"的跨档闪变。
     同帖同层多行 → 目标日更近优先（collapse_board 内 HORIZON_RANK）。返回 rows_by_board =
     {board_key: {博主: 行}}，行 = {blogger, post_id, has_view, stance, horizon,
     summary(已剔相对词), quote, quote_ts}。
@@ -248,14 +267,21 @@ def extract_layers(work, starts=None):
                 win_rows[name].extend(r for sub in per_post.values() for r in sub)
                 wrote = True
 
-    # 每博主每层确定性坍缩（纯命中零调用；新帖并入 win_rows 后同趟坍缩）
-    for name, v in work.items():
-        for b in (v.get("boards") or []):
-            row = o_ann.collapse_board(b, name, win_rows.get(name) or [],
-                                       window_start=(starts or {}).get(b),
-                                       cal=calendar)  # 交易日相对再分类（2026-09-09）
-            if row:
-                rows_by_board[b][name] = row
+    # 每博主每层确定性坍缩（纯命中零调用；新帖并入 win_rows 后同趟坍缩）。Pillar C 复核裁决固化
+    # （v21）后重跑同趟：fix/drop mutate 的源行与 win_rows/缓存条目是同一批 dict 对象，重坍缩即让
+    # 当档卡面 == 后续档坍缩输入；未受影响博主输入未变 → 逐位复现同一行，零副作用。
+    def _collapse_all():
+        for _name, _v in work.items():
+            for _b in (_v.get("boards") or []):
+                _row = o_ann.collapse_board(_b, _name, win_rows.get(_name) or [],
+                                            window_start=(starts or {}).get(_b),
+                                            cal=calendar)  # 交易日相对再分类（2026-09-09）
+                if _row:
+                    rows_by_board[_b][_name] = _row
+                else:
+                    rows_by_board[_b].pop(_name, None)
+
+    _collapse_all()
 
     # ── Pillar C：推送复核——只复核「本 tick 新标注帖产出、坍缩后真上卡」的少数行 ──
     # 触发集 = 卡面某行 quote_ts/post_id 溯源到本 tick 新标注帖（fresh_ids）；纯缓存命中的
@@ -298,39 +324,71 @@ def extract_layers(work, starts=None):
         decisions, vstats = o_verify.review_candidates(candidates, label="briefing:card")
         log.info("  推送复核 %d 条新帖上卡行 → keep=%d fix=%d drop=%d err=%d",
                  len(candidates), vstats["keep"], vstats["fix"], vstats["drop"], vstats["err"])
-        drops = {}                                # (board, blogger) -> {post_id}
+        # v21（2026-09-09 复核裁决固化逐帖缓存）：fix/drop mutate 源规范行——源行与 win_rows /
+        # 缓存条目 rows 是**同一批 dict 对象**，随 wrote→save 持久化。不再只 patch 当档展示行，
+        # 否则下一档坍缩从复核前原始行把旧观点捞回 → 恰是"无新增却反转 / 该在的少了"。
+        applied = 0
         for dec, cand in zip(decisions, candidates):
             b, nm, act = dec["board"], dec["blogger"], dec["action"]
-            if act == "keep" or act == "err":
+            if act in ("keep", "err"):
                 log.info("    复核 %s/%s %s%s", b, nm, act,
                          "" if act == "keep" else f"（保留原行）：{dec['reason']}")
                 continue
+            origin = cand["row"]
             disp = rows_by_board.get(b, {}).get(nm)
-            if disp is None:
+            # 防御：复核定位的源行须与卡面展示行同帖同时刻（防裁决套到错补的行上丢 fix/drop）
+            if (disp is None
+                    or str(disp.get("post_id") or "") != str(origin.get("post_id") or "")
+                    or disp.get("quote_ts") != origin.get("quote_ts")):
+                log.warning("  %s 复核 %s/%s 展示行与源行失配（post_id/quote_ts），跳过裁决",
+                            nm, b, act)
                 continue
-            if act == "fix" and dec.get("fix"):
-                fx = dec["fix"]
-                disp["stance"] = "多" if fx.get("d") == 1 else "空"
-                disp["horizon"] = fx.get("horizon")
-                disp["summary"] = o_text.strip_rel_time(fx.get("summary") or "")[:50]
-                disp["quote"] = (fx.get("quote") or "").strip()[:60]
-                log.info("    复核 fix %s/%s horizon→%s：%s", b, nm, disp["horizon"], dec["reason"])
-            elif act == "drop":
-                drops.setdefault((b, nm), set()).add(pid := str(cand["row"].get("post_id") or ""))
-                log.info("    复核 drop %s/%s post_id=%s：%s", b, nm, pid, dec["reason"])
-        # drop → 剔除该帖该板候选行后重坍缩，让更早仍在窗口的合格行按路过语义续显（无则置空）
-        for (b, nm), pids in drops.items():
-            kept = [r for r in (win_rows.get(nm) or [])
-                    if str(r.get("post_id") or "") not in pids]
-            alt = o_ann.collapse_board(b, nm, kept, window_start=(starts or {}).get(b),
-                                       cal=calendar)  # 交易日相对再分类（2026-09-09）
-            if alt:
-                rows_by_board[b][nm] = alt
-                log.info("    复核 drop 后 %s/%s 重坍缩续显更早窗口行 quote_ts=%s",
-                         b, nm, alt.get("quote_ts"))
-            else:
-                rows_by_board[b].pop(nm, None)
-                log.info("    复核 drop 后 %s/%s 无合格行，置空", b, nm)
+            if act == "fix":
+                fx = dec.get("fix")
+                if not fx:
+                    continue
+                fixed = dict(origin)
+                fixed.update(fx)      # 覆写 d/s/idx/spec/cat/horizon/quote/summary；blogger/post_id/pub/quote_ts 保留
+                if o_ann.conflict_rows([fixed]):
+                    # 硬化：fix 后成 idx=上证 但主结论点名他指的矛盾行 → 不落缓存（否则下档坍缩
+                    # 自愈会作废整帖重抽、撤销本复核）。按原行保留（同 keep），log 供追溯。
+                    log.warning("  %s 复核 fix(%s/%s) 将成 idx=上证×点名他指 矛盾行，不落缓存按原行保留",
+                                nm, b, fixed.get("idx"))
+                    continue
+                origin.update(fx)     # 就地改：origin ∈ win_rows 且 ∈ 缓存条目 rows（同对象引用）
+                applied += 1
+                if fixed.get("idx") != "上证指数":
+                    log.info("    复核 fix %s/%s → idx=%s（上证 卡外，持久不再上卡）：%s",
+                             b, nm, fixed.get("idx"), dec["reason"])
+                else:
+                    log.info("    复核 fix %s/%s horizon→%s d=%s：%s",
+                             b, nm, origin.get("horizon"), origin.get("d"), dec["reason"])
+            else:                     # act == "drop"（review_candidates 只出 keep/fix/drop/err）
+                # 定位含源行的缓存条目：源行必为本 tick 新标注写入（fresh 门），按身份找免 key 重算
+                posts_map = (bloggers.get(nm) or {}).get("posts") or {}
+                entry = next((e for e in posts_map.values()
+                              if any(r is origin for r in (e.get("rows") or []))), None)
+                if entry is None:
+                    log.warning("  %s 复核 drop %s/%s 找不到源行缓存条目，跳过裁决", nm, b)
+                    continue
+                # 剔该帖**被复核板 b 层**的全部行（判层同 collapse 的 _row_layer 门）——整帖该板
+                # 主张不可取信，防同层未复核兄弟行胜出复活；其它层行保留（跨层观点不因本层 drop 消失）。
+                # 余空保 entry rows=[]，**绝不整删条目**——整删会 cache-miss 当新帖重抽复活。
+                drop_rows = [r for r in (entry.get("rows") or [])
+                             if _row_board_layer(r, calendar) == b]
+                if not drop_rows:
+                    continue
+                drop_ids = {id(r) for r in drop_rows}
+                win_rows[nm] = [r for r in (win_rows.get(nm) or []) if id(r) not in drop_ids]
+                entry["rows"] = [r for r in (entry.get("rows") or []) if id(r) not in drop_ids]
+                pid = str(origin.get("post_id") or "")
+                applied += 1
+                log.info("    复核 drop %s/%s post_id=%s 剔该板 %d 行：%s",
+                         b, nm, pid, len(drop_rows), dec["reason"])
+        if applied:
+            _collapse_all()           # 用 mutate 后的 win_rows（缓存同对象）重坍缩全部板
+            wrote = True
+            log.info("  复核裁决 %d 条已固化进逐帖缓存并重坍缩（后续档坍缩输入 = 修正后行）", applied)
 
     if wrote:
         # 安全修剪：含波段窗口的本档才做——早于波段窗口下界的帖永不回窗（窗口只前移），
