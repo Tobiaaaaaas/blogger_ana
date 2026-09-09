@@ -32,7 +32,7 @@ ALL_BLOGGERS = sorted(f[:-5] for f in os.listdir(eng.DATA_DIR) if f.endswith('.j
 rows_all, meta = {}, {}
 for b in ALL_BLOGGERS:
     data = json.load(open(os.path.join(eng.DATA_DIR, f'{b}.json'), encoding='utf-8'))
-    scored_all = [r for r in (eng.calc(s) for s in data['signals']) if r['score'] is not None]
+    scored_all = [r for r in (eng.calc(s) for s in eng.sanitize_signals(data['signals'])) if r['score'] is not None]
     # 排名样本只认 idx=上证指数（2026-09-08）；meta 展示计数保留全量（不掉池）
     rows_all[b] = [r for r in scored_all if (r.get('idx') or '上证指数') == '上证指数']
     meta[b] = {'signals': len(data['signals']), 'scored': len(scored_all)}

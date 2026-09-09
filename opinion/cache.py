@@ -11,6 +11,11 @@ v4（2026-09-08，整博主规范行 + 窗口帖集合指纹）→ v5（逐帖�
 内容 hash 必须参与键：正文回填让同 post_id 从标题帖变全文，只比 post_id 会命中过期缓存
 （坑位保留——hash 变 → 键变 → 只重抽那一帖）。版本或 prompt 指纹任一不符 → 整缓存作废
 全量重抽（首档按博主把窗口新帖合成一次批量调用，调用数同 v4 数量级）。
+
+**指纹域（2026-09-09 A3）**：load/save 的 prompt 入参是**标注期文本**——由调用方喂
+opinion.annotate.annotation_fp_input()（共享 ANNOTATION prompt + 到案后缀 DISPOSITION_SUFFIX）；
+改标注期文本任一 → fingerprint 变 → 整缓存作废重抽。坍缩 (collapse_board) 与复核 (verify)
+是**读时确定性步骤**（同一规范行每 tick 重算同一结果），改动它们不作废缓存、不进指纹。
 """
 import hashlib
 import json

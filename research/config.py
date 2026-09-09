@@ -43,16 +43,22 @@ HYST_WINDOW = 5                  # 滞回验证决策窗口 w（交易日）；r
 START_DATE = "2026-01-05"
 END_DATE = "2026-09-02"
 
-# ---- 板块名单 / 网格 / 窗口（从 briefing/scripts/config 导入，单一事实源）----
+# ---- 板块名单 / 窗口（从 briefing/scripts/config 导入，单一事实源）----
 from briefing.scripts import config as _bcfg  # noqa: E402
 
 PANELS = _bcfg.PANELS                 # {"short": [...], "swing": [...]}
 BOARD_WORD = _bcfg.BOARD_WORD          # {"short": "超短", "swing": "波段"}
-WINDOW_TRADING_DAYS = _bcfg.WINDOW_TRADING_DAYS   # {"short": 1, "swing": 3}
+WINDOW_TRADING_DAYS = _bcfg.WINDOW_TRADING_DAYS   # {"short": 1, "swing": 5}
 
-# 决策网格：short = 30 分档 10 档/日；swing = SWING_TICKS 3 档/日
-TRADING_TICKS = list(_bcfg.TRADING_TICKS)
-SWING_TICKS = sorted(_bcfg.SWING_TICKS)
+# ---- 决策网格（research 自带，冻结 09-06 基线）----
+# briefing/scripts/config 自 v15（2026-09-07）起把推送节奏改成两板块统一的算术判定
+# （in_trading_grid/in_restday_grid，20 档/日），TRADING_TICKS/SWING_TICKS 常量已删。
+# research 的决策网格（poll/backtest 采样决策时刻）当初是针对旧网格标定/回测的，
+# 为不静默改动研究语义，此处**冻结 09-06 基线值**（值取自 HEAD~briefing/config.py）。
+# 若要跟随 live v15 统一节奏（两板块同 20 档），属 research 语义改动，需另行确认后整体重跑。
+TRADING_TICKS = ["09:30", "10:00", "10:30", "11:00", "11:30",
+                 "13:00", "13:30", "14:00", "14:30", "15:00"]
+SWING_TICKS = sorted({"09:30", "11:00", "14:30"})  # 波段仅在这 3 档额外推（⊂ TRADING_TICKS）
 GRID_TICKS = {"short": TRADING_TICKS, "swing": SWING_TICKS}
 
 # ---- 父仓库数据路径 ----

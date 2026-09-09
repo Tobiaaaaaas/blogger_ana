@@ -38,7 +38,9 @@ from collections import Counter
 from openai import OpenAI
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+# REPO_ROOT 环境覆盖（与 briefing/paths.py、opinion/ref_price、eval/run_direction 同口径；
+# 默认行为不变 = 以本文件位置推导仓库根）
+PROJECT_ROOT = os.environ.get("REPO_ROOT") or os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 # 2026-09-08 共享模块重构：本脚本的读帖/正文解析/DeepSeek 网关/逐帖标注 prompt 统一委派
 # 顶层 opinion/（推送 briefing 同源）。回测消费的是本脚本产出的 direction_signals，不再走

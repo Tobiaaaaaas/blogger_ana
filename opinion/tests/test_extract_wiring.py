@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from opinion import annotate as ann_mod      # noqa: E402
 from opinion import cache as o_cache         # noqa: E402
-from opinion import prompts as o_prompts     # noqa: E402
 from opinion import verify as vfy_mod        # noqa: E402
+import briefing.scripts.summarize as sm      # noqa: E402  _ROWS_CACHE_VERSION（v6）
 
 # 经暂存缓存文件路径加载（extract_layers 调用路径读取）
 paths_mod = None
@@ -39,8 +39,10 @@ def _post(pid, ts, title="标题", content="正文"):
 
 
 def _write_cache(tmp, bloggers):
-    # 须带与缓存加载同口径的 version + prompt_fp，否则 cache.load 判失效作废全量重抽
-    data = {"version": 5, "prompt_fp": o_cache.prompt_fp(o_prompts.ANNOTATION_SYSTEM_PROMPT),
+    # 须带与缓存加载同口径的 version + prompt_fp（2026-09-09 A3：指纹 = annotation_fp_input()
+    # 共享 prompt + 到案后缀；version 现由 sm._ROWS_CACHE_VERSION 定），否则 cache.load 判失效全量重抽
+    data = {"version": sm._ROWS_CACHE_VERSION,
+            "prompt_fp": o_cache.prompt_fp(ann_mod.annotation_fp_input()),
             "bloggers": bloggers}
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)

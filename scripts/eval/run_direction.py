@@ -41,7 +41,7 @@ try:
 except Exception:
     pass
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.environ.get("REPO_ROOT") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_DIR = os.path.join(ROOT, 'data', 'direction_signals')
 REPORTS_DIR = os.path.join(ROOT, 'reports')
 INTRADAY_DIR = os.path.join(ROOT, 'data', 'market', 'intraday')
@@ -51,7 +51,8 @@ INTRADAY_DIR = os.path.join(ROOT, 'data', 'market', 'intraday')
 # 日线降级等使用，仅 ref_price_at 一处委托。
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
-from opinion import ref_price as _rp  # noqa: E402
+from opinion import ref_price as _rp      # noqa: E402
+from opinion import schema as _sch        # noqa: E402  spec_sane/SPEC_RE 域（读库守卫 A2 用）
 
 # ---------------- 行情数据 ----------------
 def _load_market():
@@ -392,6 +393,39 @@ def _calc_daily_fallback(sig):
                 ret=ret, score=round(score, 2), note='')
 
 
+def sanitize_signals(signals):
+    """读库守卫（2026-09-09 A2）：curated 早于 09-08 spec_sane 语义域 / 09-09 教义，域外 tN 防御。
+
+    direction_signals 里计分 tN 的语义域是 t1..t30（opinion.schema.spec_sane）；09-08 加固前
+    的 curated 数据残留域外 tN（t0/t34/t60/t90 共 8 条），照旧会沿 endpoint_of 循环 N 个交易日
+    打出真实分漏进报告。入 calc/endpoint_of 前统一归置：
+    - tN 且 N>30（t60"未来三个月后"之类）→ 按 09-09 教义属**中长期、不计分** → 改归
+      spec='long'/cat='unscored'（进报告 unscored 单列，方向保留不丢弃）；
+    - t0 / 语法畸形 → 丢弃并告警（宁缺勿错，不再尝试打分）。
+    其余信号（含 d: 历法日期）原样放行。幂等：已归 long/unscored 的行不受影响。"""
+    out = []
+    for s in signals:
+        if not isinstance(s, dict):
+            print(f"⚠️ [sanitize] 非对象行 → 丢弃：{s!r}")
+            continue
+        spec = s.get('spec')
+        if not isinstance(spec, str) or not spec.startswith('t'):
+            out.append(s)
+            continue
+        if _sch.spec_sane(spec):          # t1..t30 域内 → 原样
+            out.append(s)
+            continue
+        m = re.fullmatch(r't(\d+)', spec)
+        n = int(m.group(1)) if m else None
+        if n is not None and n > 30:
+            print(f"⚠️ [sanitize] 域外 t{n}>30 按 09-09 教义归 spec=long/unscored（中长期不计分）："
+                  f"pub={s.get('pub', '')} d={s.get('d', '')} {str(s.get('summary', ''))[:18]}")
+            out.append(dict(s, spec='long', cat='unscored'))
+        else:
+            print(f"⚠️ [sanitize] 域外 spec={spec!r}（t0/畸形）→ 丢弃：pub={s.get('pub', '')} d={s.get('d', '')}")
+    return out
+
+
 def calc(sig):
     """单条信号计算（统一 30 分钟口径）。返回行 dict：计分行带 ref/ep/epc/ret/score；单列行原样带 note"""
     sig = dict(sig)
@@ -475,7 +509,7 @@ def post_count(blogger):
 def generate(blogger):
     with open(os.path.join(DATA_DIR, f'{blogger}.json'), encoding='utf-8') as f:
         data = json.load(f)
-    rows = [calc(s) for s in data['signals']]
+    rows = [calc(s) for s in sanitize_signals(data['signals'])]
     scored_all = [r for r in rows if r['score'] is not None]
     # 指标/排名样本只认 idx=上证指数（2026-09-08）；上证以外计分行（创业板指/科创50/上证50/双创…）保留计数展示、不入评价集
     scored = [r for r in scored_all if (r.get('idx') or '上证指数') == '上证指数']

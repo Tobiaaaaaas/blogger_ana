@@ -442,9 +442,11 @@ def _norm_takeaways(items):
 # 重评分）→ v5（逐帖）：每博主按帖键 (post_id, 内容hash) 存各自规范行，每档只把窗口内
 # "新帖/正文回填变 content"的帖合并成一个子批送一次标注，旧帖（含跨交易日窗口滑动重叠帖）
 # 永不重评分。坍缩仍每 tick 确定性重算：参与坍缩的行 = 仅本次窗口各帖缓存行并集，窗口滑动
-# /行过期由 quote_ts≥该层窗口下界 门自动消化。版本或共享 prompt 指纹任一不符 → 整缓存作废
-# 全量重抽（首档按博主新帖合批一次调用，量级同 v4）。
-_ROWS_CACHE_VERSION = 5
+# /行过期由 quote_ts≥该层窗口下界 门自动消化。版本或**标注期指纹**（opinion.annotate.
+# annotation_fp_input() = 共享 ANNOTATION prompt + 到案后缀，2026-09-09 A3）任一不符 →
+# 整缓存作废全量重抽（首档按博主新帖合批一次调用，量级同 v4）。坍缩/复核是读时确定性步骤，
+# 改它们**不**作废缓存。v6：default_horizon t5 兜底改「未提」（A4-2）影响已缓存行语义。
+_ROWS_CACHE_VERSION = 6
 
 
 def _annotate_rows(name, posts):
@@ -462,6 +464,30 @@ def _annotate_rows(name, posts):
         if rows is not None:
             return rows
     return None
+
+
+def _origin_matches(board, disp, r, downgrade_ok=False):
+    """Pillar C 溯源：候选规范行 r 是否坍缩展示行 disp 的来源（2026-09-09 A4-1）。
+
+    展示行 disp = collapse_board 输出（无 spec 字段），源行 r 为窗口缓存规范行。精确 pass
+    (downgrade_ok=False)：post_id/quote_ts 相等 + idx=上证 + cat=scored + horizon 逐字相等 +
+    horizon_spec_ok(disp.horizon, r.spec)。降级豁免 pass (downgrade_ok=True)：仅放行 short 板
+    展示归一「明天」的交易日再分类行——周五~周日发帖 spec=nweek_first 的规范行（horizon=下周）
+    被坍缩按下一交易日降级到 short，展示词归一一为明天，精确 pass 永不匹配 → 最需复核的再分类
+    新行逃复核。返回 True/False。
+    """
+    if (str(r.get("post_id") or "") != str(disp.get("post_id") or "")
+            or r.get("quote_ts") != disp.get("quote_ts")):
+        return False
+    if r.get("idx") != "上证指数" or r.get("cat") != "scored":
+        return False
+    spec = str(r.get("spec") or "")
+    if downgrade_ok:
+        return (board == "short" and disp.get("horizon") == "明天"
+                and spec == "nweek_first" and r.get("horizon") == "下周")
+    if r.get("horizon") != disp.get("horizon"):
+        return False
+    return o_schema.horizon_spec_ok(disp.get("horizon"), spec)
 
 
 def extract_layers(work, starts=None):
@@ -485,7 +511,7 @@ def extract_layers(work, starts=None):
     layers_of = [b for v in work.values() for b in (v.get("boards") or [])]
     rows_by_board = {k: {} for k in dict.fromkeys(layers_of)}
     errors = []
-    cache = o_cache.load(paths.ROWS_CACHE_FILE, _ROWS_CACHE_VERSION, o_prompts.ANNOTATION_SYSTEM_PROMPT)
+    cache = o_cache.load(paths.ROWS_CACHE_FILE, _ROWS_CACHE_VERSION, o_ann.annotation_fp_input())
     bloggers = cache.setdefault("bloggers", {})
 
     # ── 逐帖分类：窗口帖键命中即复用其缓存行；未命中 = 新帖/正文回填 → 只送该子批标注 ──
@@ -590,28 +616,28 @@ def extract_layers(work, starts=None):
                 post = (fresh_posts.get(name) or {}).get(pid)
                 if post is None:
                     continue
-                # 定位坍缩选中的规范行（给复核方看 idx/spec/d/s/horizon/quote/summary 全字段）
+                # 定位坍缩选中的规范行（给复核方看 idx/spec/d/s/horizon/quote/summary 全字段）。
+                # 两段溯源（A4-1）：先精确命中（horizon 逐字相等，防降级豁免误抓到同帖真 t1 行）；
+                # 不中再放行降级豁免——short 板展示归一「明天」的交易日再分类行（源行 spec=nweek_first、
+                # horizon=下周，collapse_board 把展示词归一为明天）否则永不匹配、最需复核的行逃复核。
                 origin = None
                 for r in (win_rows.get(name) or []):
-                    if (str(r.get("post_id") or "") != pid
-                            or r.get("quote_ts") != disp.get("quote_ts")
-                            or r.get("horizon") != disp.get("horizon")):
-                        continue
-                    if (r.get("idx") != "上证指数" or r.get("cat") != "scored"):
-                        continue
-                    if not o_schema.horizon_spec_ok(disp.get("horizon"), str(r.get("spec") or "")):
-                        continue
-                    origin = r
-                    break
+                    if _origin_matches(b, disp, r):
+                        origin = r
+                        break
+                if origin is None:
+                    for r in (win_rows.get(name) or []):
+                        if _origin_matches(b, disp, r, downgrade_ok=True):
+                            origin = r
+                            break
                 if origin is None:
                     continue                      # 溯源失败不硬复核（宁缺）
-                # full_text = 模型当时可见的该帖文本（标题 + head 截断正文；微帖只标题）——
-                # 复核 fix 的 quote 逐字校验用同一可见口径，防复核方拿截断外原文改卡
-                _t, _b = o_text.resolve_post(post)
-                full = (_t + "\n" + o_text.truncate(_b, limit=1200, style="head")
-                        if _t and _b else (_t or _b or ""))
+                # full_text = 出处帖文本（o_verify.post_text = 标题 + middle 1200 正文，与给复核
+                # 方看的口径**完全同一**）——复核 fix 的 quote 逐字校验用同口径，防 head/middle 截断
+                # 分叉：复核方依 middle 文本引了中后部原话，却拿 head 截断文本逐字比对被误拒
+                pt = o_verify.post_text(post)
                 candidates.append({"board": b, "blogger": name, "row": origin,
-                                   "post_text": o_verify.post_text(post), "full_text": full})
+                                   "post_text": pt, "full_text": pt})
     if candidates:
         decisions, vstats = o_verify.review_candidates(candidates, label="briefing:card")
         log.info("  推送复核 %d 条新帖上卡行 → keep=%d fix=%d drop=%d err=%d",
@@ -660,7 +686,7 @@ def extract_layers(work, starts=None):
                 if isinstance(pm, dict):
                     for k in [k for k, e in pm.items() if (e.get("ts") or 0) < swing_start]:
                         del pm[k]
-        o_cache.save(paths.ROWS_CACHE_FILE, cache, o_prompts.ANNOTATION_SYSTEM_PROMPT)
+        o_cache.save(paths.ROWS_CACHE_FILE, cache, o_ann.annotation_fp_input())
         log.info("  行标注缓存已更新：共 %d 位博主", len(bloggers))
     return rows_by_board, errors
 

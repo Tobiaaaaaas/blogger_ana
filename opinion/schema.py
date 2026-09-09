@@ -110,8 +110,11 @@ def horizon_spec_ok(horizon, spec):
 def default_horizon(spec, cat="scored"):
     """spec → 默认展示词（模型漏填 horizon 时的系统兜底；仅无歧义档兜底）。
 
-    t5 等模糊档（可能是"大趋势向上"只进报告）兜底留空串，宁可不上卡也不误显；long/unscored
-    无展示词。仅当模型评分行 horizon 为空才调用。
+    2026-09-09 A4-2：t5 兜底改「未提」——t5=近期/短期/无周期方向（"最近涨差不多减仓"类裸操作
+    帖无日历词），落当前波段即 horizon=未提（horizon_spec_ok(未提,t5)=True、PANEL_HORIZONS swing
+    白名单含未提），此前留空串被 collapse 静默弃行 → 无周期有方向的波段行不上卡。t6 无对应单值
+    档（可能"大趋势向上"只进报告）留空串，宁可不上卡也不误显；long/unscored 无展示词。
+    仅当模型评分行 horizon 为空才调用。
     """
     if cat != "scored" or spec == "long":
         return ""
@@ -132,6 +135,8 @@ def default_horizon(spec, cat="scored"):
         return "更长"
     if n is not None and 2 <= n <= 4:
         return "近日"
+    if n == 5:
+        return "未提"
     return ""
 
 

@@ -193,7 +193,7 @@ def to_canonical(row, post, blogger, post_n):
         s = None
     horizon = str(row.get("horizon") or "").strip()
     if cat == "scored" and not horizon:
-        horizon = schema.default_horizon(spec)  # 无歧义档兜底；t5 等模糊档留空（仅报告）
+        horizon = schema.default_horizon(spec)  # 无歧义档兜底；t5→未提(A4-2)、t6 留空（仅报告）
     # quote 存储上限 60→90：逐字保真后上限只是缓存预算；卡面展示截断由 collapse 单独做——
     # 展示截断不再反噬缓存原文（#J 根子：模型输出端把时间词截掉）
     return {
@@ -214,14 +214,24 @@ def to_canonical(row, post, blogger, post_n):
 
 
 # 推送档逐帖到案契约（2026-09-08 解析加固）。只挂 annotate_blogger 的 user message 后缀，
-# **不进 ANNOTATION_SYSTEM_PROMPT**：报告离线批（15 帖/批海量语料）不承担逐帖交代开销；
-# system prompt 指纹不变 → 既有 rows_cache 不因此作废。
+# **不进 ANNOTATION_SYSTEM_PROMPT**：报告离线批（15 帖/批海量语料）不承担逐帖交代开销。
+# 到案后缀是标注期文本（影响模型产行）→ 纳入缓存指纹（annotation_fp_input，2026-09-09 A3）：
+# 改共享 prompt 或本后缀任一 → 旧口径缓存全量作废重抽。坍缩/复核是读时确定性步骤，不进指纹。
 DISPOSITION_SUFFIX = ("\n\n【本批次逐帖到案（推送档）】批次里每一条帖子 [i] 都必须交代去向，不得遗漏任何一条："
                       "它要么出现在 rows（含可提取的明确方向预测——注意：**只要该帖写过 rows，就绝不要再把它写进 "
                       "no_view**，no_view 只留给整帖无任何方向观点的帖子），要么出现在并列键 no_view（无方向观点）。"
                       "no_view 每条写 {post_n, reason}，reason 只能取：复盘回顾 / 状态描述 / 转述他人 / "
                       "仓位或理念 / 无明确方向 / 仅他指或板块非大盘 / 无实质内容。仍只输出一个 JSON 对象："
                       "{\"rows\": [...], \"no_view\": [...]}。")
+
+
+def annotation_fp_input():
+    """rows_cache 指纹输入（2026-09-09 A3）：标注期全部文本 = 共享 ANNOTATION prompt + 到案后缀。
+
+    collapse_board / verify 复核是**读时确定性步骤**（同一规范行每 tick 重算同一结果），不需要
+    作废缓存；只有会改变模型产行的标注期文本才进指纹。改共享 prompt 或 DISPOSITION_SUFFIX
+    任一 → fingerprint 变 → 既有缓存全量作废重抽。"""
+    return prompts.ANNOTATION_SYSTEM_PROMPT + DISPOSITION_SUFFIX
 
 
 def _canonical_rows_and_pns(raw_rows, blogger, posts):

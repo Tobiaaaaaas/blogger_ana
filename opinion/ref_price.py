@@ -21,7 +21,7 @@ import json
 import os
 from datetime import date
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # …/opinion → repo 根
+ROOT = os.environ.get("REPO_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # …/opinion → repo 根
 MARKET_PATH = os.path.join(ROOT, 'data', 'market', 'market_data.json')
 INTRADAY_DIR = os.path.join(ROOT, 'data', 'market', 'intraday')
 
@@ -196,8 +196,9 @@ def pub_note(pub, indices=None):
 def target_d_check(target, ref, d):
     """目标位(终点目标)与参考价/方向的符号一致性——**只信息性 flag，永不改写 d**。
 
-    语义（用户 2026-09-09 裁决）：target 只在"博主预测价格将移动到的终点目标位"句填（站上4250/
-    跌至3880/目标3500）；条件/支撑/分水岭/区间锚不填 target，方向照取博主真实观点。故 target
+    语义（2026-09-09 教义）：target 只在"博主**无条件**预测价格将移动到的终点目标位"句填
+    （站上4250/跌至3880/反弹目标4200）；条件/支撑/分水岭/区间锚句（"守住3900看反弹""3900是
+    分水岭"）按教义归**无方向、不产行**——无 d、也不填 target（target/d 均不落）。故 target
     在场时 sign(target−ref) 应与 d 同号；异号 = 提取可疑（要么 target 张冠李戴、要么 d 判反），
     记 flag 给人审。返回 agree/conflict/flat/no_ref。"""
     try:
