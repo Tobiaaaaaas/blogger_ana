@@ -87,6 +87,22 @@ assert s2 and s2["horizon"] == "明天" and s2["quote"].startswith("明天"), s2
 assert w2 and w2["horizon"] == "本周" and w2["quote"].startswith("本周"), w2
 print("[PASS] C2 混合两层：short=明天 / swing=本周，quote 各引各层")
 
+# ── C2b：同帖 today(今天) + week(本周) 各行其板；单 today 行 swing 永无观点 ──
+# 赵红力 09-07 型（2026-09-09 教义 R1）："今天市场会大涨"＋"这周市场启动判断不变"
+# 应抽 today 与 week 两行。这里只锁坍缩侧：两行并存 → 各归各板；只有 today 行 → 波段博主永不上卡
+_p2b = post(202, "2026-09-08 09:05", "盘前与周展望",
+            "今天市场会大涨；这周大盘我看空。")
+_r2b_today = canon(_p2b, {"d": 1, "s": 1, "idx": "上证指数", "spec": "today", "cat": "scored",
+                          "horizon": "今天", "quote": "今天市场会大涨", "summary": "今天看多"})
+_r2b_week = canon(_p2b, {"d": -1, "s": 1, "idx": "上证指数", "spec": "week", "cat": "scored",
+                         "horizon": "本周", "quote": "这周大盘我看空", "summary": "本周看空"})
+s2b = col("short", [_r2b_today, _r2b_week])
+w2b = col("swing", [_r2b_today, _r2b_week])
+assert s2b and s2b["horizon"] == "今天" and s2b["quote"].startswith("今天"), s2b
+assert w2b and w2b["horizon"] == "本周" and w2b["quote"].startswith("这周"), w2b
+assert col("swing", [_r2b_today]) is None, "C2b: 只有 today 行 → swing 永不上卡（波段博主只靠本周行）"
+print("[PASS] C2b 同帖今天+本周：short=今天行 / swing=本周行；单 today 行 swing 无观点")
+
 # ── C3：纯转述不认 → 无合格行 → 无观点 ─────────────────────────────────────
 assert col("swing", []) is None
 assert col("short", []) is None

@@ -61,6 +61,17 @@ _not_has(P,
          '仓位自述（"还剩4成仓"',                 # 旧：仓位自述整类丢（已拆状态/动作）
          label="共享 prompt 无旧反教义")
 
+# ── 一帖多周期各产一行（R1）＋ 周期词不救形态（R2）：共享 prompt 与报告后缀同达 ──
+_has(P,
+     "每个周期各产一行（必做）", "不得只取近端周期句",   # R1：一帖多周期各行
+     "不得丢弃远端周期",
+     "周期词不救形态", "有周期词的形态句仍是形态句",      # R2：周期词不救形态
+     "这周高开低走", "今天冲高回落", "下周探底回升",      # R2 反例（周期词+形态）
+     "今天市场会大涨", "综合看这周市场启动的判断不变",    # R1/R2/输出区正例共用原句
+     "一帖两周期各产一行",                              # 输出区正例
+     label="共享 prompt R1/R2 多周期各行 + 输出区正例")
+_has(SUFFIX, "周期词不救形态", "每个周期各产一行（必做）", label="报告后缀 R1/R2 同达")
+
 # ── 推送复核：条件/形态主句硬凑 d → drop/fix；净方向 keep；操作 vs 状态 ──
 _has(V_PUSH,
      "仓位状态自述/无明确方向",                  # 判定要点1 drop 桶（不再一刀切仓位自述）
@@ -70,6 +81,13 @@ _has(V_PUSH,
      "还剩4成",
      label="推送 verify 新教义")
 _not_has(V_PUSH, "仓位自述/无明确方向", label="推送 verify 无旧一刀切桶")
+
+# ── 推送复核判定要点 1 按行周期限定：一帖多周期各行独立，不 cross-fix ──
+_has(V_PUSH,
+     "该行所载周期",                             # 主结论句 doctrine 限定到该行所载周期
+     "见教义节 8",                              # 一帖多周期各行独立
+     label="推送 verify 要点1 按行周期")
+_not_has(V_PUSH, "行必须与之一致", label="推送 verify 无旧一刀切措辞")
 
 # ── 报告 extract 后缀：条件式/区间句无方向不产行（target 段落反转）──
 _has(SUFFIX,
@@ -89,6 +107,13 @@ _has(V_REPORT,
      "仓位状态自述", "还剩几成/满仓持股",
      label="报告 verify 新教义")
 
+# ── 报告 VERIFY 第一步：主结论限定该行周期，去 cross-fix；多周期按教义节 8 ──
+_has(V_REPORT,
+     "该行所载周期", "互不构成不一致",           # 一帖多周期各自独立评审
+     "复核教义节 8",                            # 只影响本行、不 cross-fix 其它周期行
+     label="报告 verify 第一步按行周期")
+_not_has(V_REPORT, "改为主结论句的方向/周期", label="报告 verify 无旧 cross-fix 指令")
+
 # ── B3 教义单一同源：标注/报告后缀嵌 DOCTRINE_NO_DIRECTION，双复核嵌 DOCTRINE_REVIEW，
 #    哨兵零泄漏（改 prompts 常量一处 → 四处文本同变，杜绝逐地手改漂移）──
 D_NO = o_prompts.DOCTRINE_NO_DIRECTION
@@ -96,6 +121,7 @@ D_REV = o_prompts.DOCTRINE_REVIEW
 assert D_NO in P, "共享 ANNOTATION prompt 必须内嵌 DOCTRINE_NO_DIRECTION"
 assert D_NO in SUFFIX, "报告 extract 后缀必须插值 DOCTRINE_NO_DIRECTION"
 assert D_REV in V_PUSH and D_REV in V_REPORT, "推送 REVIEW 与报告 VERIFY 必须同嵌 DOCTRINE_REVIEW"
+assert '8. **多周期各行独立评审' in D_REV, "DOCTRINE_REVIEW 应含条目 8（多周期各行独立评审）"
 for _t, _n in [(P, "共享 prompt"), (V_PUSH, "推送 verify"), (V_REPORT, "报告 verify"), (SUFFIX, "报告后缀")]:
     assert "__DOCTRINE" not in _t, f"{_n} 残留教义哨兵（replace 未生效）"
 assert o_prompts.ANNOTATION_SYSTEM_PROMPT.count("## 无方向：条件式与先A后B形态") == 1
