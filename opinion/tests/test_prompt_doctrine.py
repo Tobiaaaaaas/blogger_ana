@@ -72,6 +72,11 @@ _has(P,
      label="共享 prompt R1/R2 多周期各行 + 输出区正例")
 _has(SUFFIX, "周期词不救形态", "每个周期各产一行（必做）", label="报告后缀 R1/R2 同达")
 
+# ── 具体日期口径（D3 一致）：不产 d:YYYY-MM-DD，自然日差落 tN / 远期 long ──
+_has(P, "不写 d:YYYY-MM-DD", "自然日差", "t10", label="共享 prompt 具体日期落档位")
+_not_has(P, "→ d:YYYY-MM-DD", label="共享 prompt 无具体日期→d: 旧指令")
+_has(SUFFIX, "不写 d:YYYY-MM-DD", "自然日差", label="报告后缀具体日期同口径")
+
 # ── 推送复核：条件/形态主句硬凑 d → drop/fix；净方向 keep；操作 vs 状态 ──
 _has(V_PUSH,
      "仓位状态自述/无明确方向",                  # 判定要点1 drop 桶（不再一刀切仓位自述）

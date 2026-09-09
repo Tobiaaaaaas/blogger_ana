@@ -15,7 +15,7 @@ ana/
 │       └── SKILL.md                博主分析主技能（Direction 方向预测评估）
 │
 ├── knowledge/                      市场知识库（拐点目录）
-│   └── market_analysis.md          2024.06~2026.07 上证 zigzag 拐点链
+│   └── market_analysis.md          2024.06~2026.08 上证 zigzag 拐点链
 │
 ├── data/
 │   ├── posts/                      爬取的原始帖子
@@ -35,9 +35,8 @@ ana/
 ├── briefing/                       推送卡片流水线（summarize/render/state…，独立短/波段面板，VSCode/Windows 定时跑）
 │
 ├── reports/
-│   ├── *_direction.md              125 位博主逐条方向验证报告
-│   ├── comparison_direction.md     横向对比总榜
-│   └── Direction_结论报告.md        125 位博主横向结论
+│   ├── *_direction.md              博主逐条方向验证报告（run_direction.py 生成）
+│   └── comparison_direction.md     横向对比总榜（comparison_all.py 生成）
 │
 └── archive/                        历史快照 & 临时文件
     ├── scratch/                    一次性调试输出
@@ -48,6 +47,8 @@ ana/
     ├── 20260803-pre-restructure/   目录重组前快照
     ├── 20260808-pre-v12/           v12 体系前快照
     ├── 20260817-pre-direction/     Direction 体系前快照（旧 v11/v12/v13 打分体系 + 仓位模拟 SIMULATE 子系统）
+    ├── 20260909-manual-reports/    人工维护快照报告归档（Direction_结论报告 / top20 双榜 md+pdf，2026-09-09）
+    ├── 20260909-legacy/            C1 死代码移除清单（phase2/3、migrate_*、restore_bodies 等）
     ├── knowledge_archive/          旧版打分公式差异说明
     └── skills/                     已归档技能（v13 拐点线段打分）
 ```
@@ -62,7 +63,7 @@ ana/
 /analyze-blogger <博主名称> <帖子链接>
 ```
 
-Skill 定义见 `.claude/skills/analyze-blogger/SKILL.md`（博主画像 / 评估背景）。**标注契约（逐条判层 prompt、schema、09-09 教义）以 `opinion/prompts.py` 为单一同源**，推送（briefing）与报告（extract）共用——判层请读 opinion/prompts.py，勿照 SKILL.md 旧文。
+Skill 定义见 `.claude/skills/analyze-blogger/SKILL.md`（判层规则的可读同步稿 + 博主画像 / 评估背景）。**标注契约（逐条判层 prompt、09-09 教义）以 `opinion/prompts.py` 为单一同源**，字段/spec 合法域以 `opinion/schema.py` 为准，推送（briefing）与报告（extract）共用——判层以 opinion/prompts.py 现行文本为准；SKILL.md §1~§8 是同一规则的同步稿，发现不一致以代码为准并回改 SKILL（改判层规则两处一起改）。
 
 ### 后台脚本流水线
 
@@ -116,7 +117,7 @@ comparison_all.py ──► reports/comparison_direction.md
 
 ## 当前博主
 
-> 125 位博主已完成 Direction 逐条方向评估（`reports/*_direction.md`），横向结论见 `reports/Direction_结论报告.md` 与 `reports/comparison_direction.md`。
+> 125 位博主已完成 Direction 逐条方向评估（`reports/*_direction.md`），现行横向数字见 `reports/comparison_direction.md`（comparison_all.py 持续刷新）；早期人工快照 `Direction_结论报告.md`、`top20_值得关注博主.{md,pdf}`、`comparison_direction.pdf` 已归档 `archive/20260909-manual-reports/`，勿再按现行口径引用。
 > 评估口径：2026-09-09 起方向教义（条件式/先A后B形态无方向、操作动词=方向同义）与 schema 以 `opinion/prompts.py` / `opinion/schema.py` 为准；curated `data/direction_signals/*.json` 为 09-09 前抽取的既有数据，个别域外 spec 行（t0/t34/t60/t90）在读库守卫下归 unscored、不入分（全量 125 博主 LLM 重抽按 09-09 口径仍门控后置）。
 
 ## 依赖
@@ -132,4 +133,4 @@ comparison_all.py ──► reports/comparison_direction.md
 - **API Key 安全**：DeepSeek API Key 通过环境变量传入，不要写入脚本或上传到 GitHub
 - **今日头条反爬**：爬虫使用 Playwright 浏览器内 API 调用，自带签名；风控与重爬校验见 SKILL.md §前置条件
 - **拐点知识库**：所有拐点以 `knowledge/market_analysis.md` 为准，不重新识别
-- **标注契约单一同源**：逐条判层以 `opinion/prompts.py` 为准（共享 prompt + 09-09 教义，改动会作废标注缓存指纹）；字段/spec 合法域以 `opinion/schema.py` 为准；SKILL.md §1~§8 只作背景。推送与报告共用同源，改判层规则勿只改一侧
+- **标注契约单一同源**：逐条判层以 `opinion/prompts.py` 为准（共享 prompt + 09-09 教义，改动会作废标注缓存指纹）；字段/spec 合法域以 `opinion/schema.py` 为准；SKILL.md §1~§8 是可读同步稿，改判层规则须连同 SKILL 一起改（推送与报告共用同源，勿只改一侧）
