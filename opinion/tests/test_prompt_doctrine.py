@@ -18,6 +18,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 from opinion import prompts as o_prompts     # noqa: E402
 from opinion import verify as o_verify       # noqa: E402
@@ -31,6 +35,8 @@ P = o_prompts.ANNOTATION_SYSTEM_PROMPT
 V_PUSH = o_verify.REVIEW_SYSTEM_PROMPT
 V_REPORT = ex.VERIFY_SYSTEM_PROMPT
 SUFFIX = ex._REPORT_EXTRACT_SUFFIX
+D_NO = o_prompts.DOCTRINE_NO_DIRECTION
+D_REV = o_prompts.DOCTRINE_REVIEW
 
 
 def _has(txt, *subs, label):
@@ -88,17 +94,33 @@ _has(P,
      label="共享 prompt 「下周一」编码分叉")
 _not_has(P, '"下周一" → nweek_first', label="共享 prompt 无「下周一」一律 nweek_first 旧编码")
 
-# ── 2026-09-10 周口径修正③：非交易日「本周」——回顾不产行 / 前瞻须编 nweek ──
+# ── 2026-09-10 周口径修正③：非交易日「本周」——先自问回顾还是前瞻；非交易日不得产 week ──
 # 引擎侧：week = 发帖日所在 ISO 周最后交易日（周末发帖 → 该周已收盘 → 终点早于发帖日）。
-# 判层侧：区分"回顾刚结束那一周"（不产行）与"预判即将到来那一周"（从发帖时点看就是下一周
-# → 编 nweek）。缺了这条，真前瞻句会被编成 week 而在报告侧判"无效-过时"、推送侧过期门剔除。
-_has(P,
-     "先分清是\"回顾\"还是\"前瞻\"", "2026-09-10 周口径修正",
-     "不产行", "必须编码 `nweek`", "非交易日发帖一律不得编 `week`",
-     "226 条摘要写的是",                        # 语料回溯：旧编码错误而非博主在复盘
-     label="共享 prompt 非交易日「本周」回顾/前瞻分叉")
-_has(ex._REPORT_EXTRACT_SUFFIX, "非交易日（周末/节假日）发帖说\"本周\"", "必须编码 `nweek`",
-     label="报告后缀非交易日「本周」同口径")
+# 判层侧（2026-09-10 提升为**共享教义**，四处同达）：引导模型对非交易日帖里的"本周/这周"
+# 先自问"博主说的是刚走完的那一周（复盘）还是马上要开盘的那一周（预测）" → 复盘不产行 /
+# 前瞻编 nweek；复核侧同源（week→nweek fix / 复盘 drop）。此前只写在 ANNOTATION prompt 与
+# 报告后缀两处手写拷贝里、复核侧完全缺失 → 错编的 week 行既不会被修成 nweek 也不会被 drop。
+_has(D_NO,                                   # 共享教义 → 自动同达 ANNOTATION prompt 与报告后缀
+     "先自问是\"刚结束的那一周\"还是\"即将到来的那一周\"", "2026-09-10 周口径",
+     "博主说的是刚走完、已经结束的那一周（复盘），还是马上要开盘的那一周（预测）",
+     "不产行", "必须编码 `nweek`", "此时产 `week` 必有错",
+     "286 条", "223 条",                       # 实证：curated 语料回溯（987 week 行）
+     label="共享教义「本周」已走完时的自问分叉")
+# 反过度应用：周中假日（如周一休市但本周之后仍有交易日）的 "本周" 是正常 week 行 —— 缺这条
+# 会把 14 条合法行（curated 实测 02-23 / 04-06 / 05-04 / 05-05）误杀。
+_has(D_NO, "别过度应用（反例）", "周中假日", "本周**尚未**走完",
+     label="共享教义 反过度应用（周中假日仍正常 week）")
+_has(P, "先分清是\"回顾\"还是\"前瞻\"", "本周已走完（典型：周六/周日发帖）时不得产 `week`",
+     label="共享 prompt §周期编码 指针句")
+_has(SUFFIX, "「本周」已走完时发帖说\"本周\"", "该行不得产 `week`",
+     "回顾句不产行、前瞻句编 `nweek`", "本周尚未走完",
+     label="报告后缀「本周」已走完时同口径")
+_has(D_REV,                                  # 复核镜像：fix→nweek / 复盘与存疑 drop / 反过度应用
+     "9. **「本周」已走完时发的 `week` 行", "spec→`nweek`", "不得 drop", "复盘刚结束那一周",
+     "无从判断", "死行", "别过度应用",
+     label="DOCTRINE_REVIEW 条目 9「本周」已走完时 week 复核")
+_has(V_PUSH, "「本周」已走完时发的 `week` 行", label="推送 verify 条目 9 同达")
+_has(V_REPORT, "「本周」已走完时发的 `week` 行", label="报告 verify 条目 9 同达")
 
 # ── 具体日期口径（D3 一致）：不产 d:YYYY-MM-DD，自然日差落 tN / 远期 long ──
 _has(P, "不写 d:YYYY-MM-DD", "自然日差", "t10", label="共享 prompt 具体日期落档位")
@@ -159,8 +181,6 @@ _not_has(V_REPORT, "改为主结论句的方向/周期", label="报告 verify �
 
 # ── B3 教义单一同源：标注/报告后缀嵌 DOCTRINE_NO_DIRECTION，双复核嵌 DOCTRINE_REVIEW，
 #    哨兵零泄漏（改 prompts 常量一处 → 四处文本同变，杜绝逐地手改漂移）──
-D_NO = o_prompts.DOCTRINE_NO_DIRECTION
-D_REV = o_prompts.DOCTRINE_REVIEW
 assert D_NO in P, "共享 ANNOTATION prompt 必须内嵌 DOCTRINE_NO_DIRECTION"
 assert D_NO in SUFFIX, "报告 extract 后缀必须插值 DOCTRINE_NO_DIRECTION"
 assert D_REV in V_PUSH and D_REV in V_REPORT, "推送 REVIEW 与报告 VERIFY 必须同嵌 DOCTRINE_REVIEW"
