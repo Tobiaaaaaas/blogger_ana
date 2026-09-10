@@ -89,7 +89,7 @@ python scripts/pipeline/extract_signals_direction.py <博主名>
 3. 在标题 + 正文中快速提取方向与预测周期即可，行情回顾、纯复盘、投资理念、仓位自述不提取
 4. 若 content 未合并进完整正文，先按「前置条件」补齐（分片抓取 + 合并）再标注；标题疑问句本身不代表预测。
 
-**核心原则**：信号 = 帖子中**明确对未来的方向预测**。不逐项机械检查，整体判断"这篇帖子表达了对某板块或某指数未来的方向预测吗？"以下**不产生信号**：
+**核心原则**：信号 = 帖子中**明确对未来的方向预测**。不逐项机械检查，整体判断"这篇帖子表达了对某板块或某指数未来的方向预测吗？"。以下**不产生信号**：
 
 - 模棱两可：方向不明、涨跌皆可（"可能涨也可能跌""不好说""边走边看""看市场情绪""不确定""即将变盘"）
 - 纯复盘 / 对过去分析：回顾行情、评价已发生走势（"今天这波下跌说明……""这次探底回升很标准"）
@@ -141,7 +141,7 @@ python scripts/pipeline/extract_signals_direction.py <博主名>
 | `idx` | `target_index` | 数据 key 名（默认"上证指数"）；帖子明确提到某指数/板块则按下方映射表标注 |
 | `spec` | `time_horizon` | 预测周期编码，见 §3 表（`today`/`t1`/`t2`/`t3`/`t5`/`tN`/`week`/`nweek`/`nweek_first`/`month`/`nmonth`/`long`/`d:YYYY-MM-DD`）。**精准对应帖子中预测本身的时间周期**，不从宽泛分类中选取——LLM 必须从原文提取博主明确说的时间，按 §3 转换 |
 | `summary` | 信号内容摘要 | ≤50 字的预测关键句概括 |
-| `cat` | 参与状态 | 只有两个值：`scored` 参与打分；`unscored` 不计分（**spec=`long` 的信号一律 `cat=unscored`**）。**`待验证`/`无效-过时`/`报错` 不需 LLM 手写**：终点超出数据覆盖、或过时（终点 ≤ 发布日且已收盘），则 cat=unscored |
+| `cat` | 参与状态 | 只有两个值：`scored` 参与打分；`unscored` 不计分（**spec=`long` 的信号一律 `cat=unscored`**）。**`待验证`/`报错` 不需 LLM 手写**：终点超出数据覆盖、或过时（终点 ≤ 发布日且已收盘），则 cat=unscored |
 
 > **模型行 vs 入库行**：上表是**入库**的最小键集（report 侧 `normalize_signal` 产物）。**模型判读时产生的信号**（共享标注 prompt 输出、校验前）另含 `post_n`（帖序号）、`horizon`（推送展示词）、`quote`（预测原句逐字截取 ≤60 字，unscored 留空）——**入库时裁掉的是 `post_n`（`pub` 全文替换它）、`horizon`、`quote`**；另有可选 `target`（数值）**保留入库**（`extract_signals_direction.py:normalize_signal` 落 `sig["target"]`），用途是让提取脚本自校验 d 与目标位方向一致，**报告引擎不读它**（`run_direction.py` 只取 pub/d/s/idx/spec/summary/cat）。仅**无条件净方向的移动目标**才填 `target`——条件式/区间锚句不产生信号、不填 d、不填 target。
 
