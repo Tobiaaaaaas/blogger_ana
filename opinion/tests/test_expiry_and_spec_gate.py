@@ -149,16 +149,31 @@ SHORT_ROW = {"blogger": "测试博主", "post_id": "P1", "has_view": True, "stan
              "quote_ts": ts("2026-09-09 20:00"), "anchor": "09-10",
              "endpoint": date(2026, 9, 10)}
 line1 = R._fmt_board_row("测试博主", SHORT_ROW).split("\n")[0]
-assert line1 == "🔴 **测试博主** 看多 · 明天(09-10) · 终点 09-10 收盘 · spec t1", line1
-print(f"[PASS] 行头标注（超短）：{line1}")
+# 2026-09-10 用户：超短行「明天(09-10)」与终点同一天 → 冗余段不再显示
+assert line1 == "🔴 **测试博主** 看多 · 终点 09-10 收盘 · spec t1", line1
+print(f"[PASS] 行头标注（超短，冗余周期段已省）：{line1}")
+
+# 无终点时回落显示周期词（不让行头彻底失去日期）
+SHORT_NO_EP = dict(SHORT_ROW); SHORT_NO_EP.pop("endpoint")
+line1 = R._fmt_board_row("测试博主", SHORT_NO_EP).split("\n")[0]
+assert line1 == "🔴 **测试博主** 看多 · 明天(09-10) · spec t1", line1
+print(f"[PASS] 行头标注（超短无终点兜底）：{line1}")
 
 SWING_ROW = {"blogger": "智由智哉", "post_id": "P2", "has_view": True, "stance": "多",
              "horizon": "下周", "spec": "nweek", "summary": "先抑后扬，整体看多",
              "quote": "下周先抑后扬，整体看多", "quote_ts": ts("2026-09-06 11:29"),
              "anchor": "下周 09-14~09-18", "endpoint": date(2026, 9, 18)}
 line1 = R._fmt_board_row("智由智哉", SWING_ROW).split("\n")[0]
-assert line1 == "🔴 **智由智哉** 看多 · 下周 09-14~09-18 · 终点 09-18 收盘 · spec nweek", line1
-print(f"[PASS] 行头标注（波段，用户案例）：{line1}")
+# 2026-09-10 用户裁决：波段周期段同样在有终点时省去（终点即该周最后交易日，重复陈述）
+assert line1 == "🔴 **智由智哉** 看多 · 终点 09-18 收盘 · spec nweek", line1
+print(f"[PASS] 行头标注（波段，用户案例，周期段已省）：{line1}")
+
+# 波段无终点（long / 更长）→ 周期段回落显示，不空着
+SWING_LONG = {"blogger": "测试博主", "has_view": True, "stance": "多", "horizon": "更长",
+              "spec": "long", "summary": "s", "quote": "q", "quote_ts": ts("2026-09-07 09:30")}
+line1 = R._fmt_board_row("测试博主", SWING_LONG).split("\n")[0]
+assert line1 == "🔴 **测试博主** 看多 · 更长 · spec long", line1
+print(f"[PASS] 行头标注（波段无终点兜底）：{line1}")
 
 # 无终点（long / 无 anchor 的历史行）→ 只给 spec，不编造终点
 NO_EP = {"blogger": "测试博主", "has_view": True, "stance": "空", "horizon": "未提",

@@ -119,23 +119,34 @@ def _fmt_board_row(name, row):
     2026-09-10（用户需求②）：行头再追加**验证终点与 spec 编码**（`· 终点 MM-DD 收盘
     · spec <code>`，由 resolve_anchors 算好的 endpoint 提供；无终点（long/无法推算）
     则省去终点段）——让每条推送自带"这句话按什么口径、什么时候被验证"。
+
+    2026-09-10（用户：周期段冗余）：**有终点就不显示周期段**（超短的「今天/明天(MM-DD)」
+    与终点恒同一天；波段「下周 09-14~09-18」的终点即该周最后一个交易日，同为重复陈述）
+    ——行头统一为「方向 · 终点 MM-DD 收盘 · spec」，只保留这两个可核验标注。周期段仅在
+    **无终点**（long/无法推算）时回落显示，避免行头彻底失去日期/周期。
     """
     emoji = STANCE_EMOJI.get(row.get("stance"), "")
     stext = STANCE_TEXT.get(row.get("stance"), row.get("stance") or "")
     line1 = f"{emoji} **{name}** {stext}"
     period = PERIOD_WORD.get(row.get("horizon")) or "周期未提"
     anchor = row.get("anchor")
-    if anchor:
-        # 超短：anchor 只是目标日 MM-DD，词+日期并列；波段：anchor 已含周词/周期词
-        #（本周/下周/近日/更长）→ 直接用 anchor（避免“下周 · 本周 …”式重复/矛盾）
-        label = f"{period}({anchor})" if period in ("今天", "明天") else anchor
-    else:  # 周期未提 / 无 anchor 的历史行 → 固定给周期词，未提也给 周期未提
-        label = period
-    if label:
-        line1 += f" · {label}"
     ep = row.get("endpoint")
+    # 2026-09-10（用户）：超短行的「今天(09-10)/明天(09-10)」与验证终点是**同一天**
+    # （spec today/t1 的终点定义即发帖日/次日收盘），纯冗余 → 有终点时不再显示该段，
+    # 行头直接给「方向 · 终点 MM-DD 收盘 · spec」，终点+spec 已完整表达"哪天验证、什么口径"。
+    # 仅当**无终点**（long/无法推算）时回落显示周期词，避免行头彻底失去日期。
     if ep:
         line1 += f" · 终点 {ep:%m-%d} 收盘"
+    else:
+        # 无终点（long / 无法推算）才回落显示周期段，避免行头彻底失去日期/周期
+        if anchor:
+            # 超短兜底：anchor 只是目标日 MM-DD，词+日期并列；波段：anchor 已含周词/
+            # 周期词（本周/下周/近日/更长）→ 直接用 anchor（避免“下周 · 本周 …”式重复/矛盾）
+            label = f"{period}({anchor})" if period in ("今天", "明天") else anchor
+        else:  # 周期未提 / 无 anchor 的历史行 → 固定给周期词，未提也给 周期未提
+            label = period
+        if label:
+            line1 += f" · {label}"
     if row.get("spec"):
         line1 += f" · spec {row['spec']}"
     lines = [line1]
