@@ -33,11 +33,20 @@ class CorpusIndex:
     附带语料覆盖元数据（用于判定某决策日窗口是否被 100% 抽取覆盖）：
       ES/LS = 该博主 signals 的最早/最晚 pub 日（= 方向抽取的起/止）
       LP    = data/posts 中该博主的最晚发帖日（= 真实发帖的最晚点，data/posts 全量）
+      XT    = 抽取水位线 extract_through：该博主帖子被方向抽取**处理到**的日期
+              （2026-09-10 新增；缺字段的旧文件 → 无水位线，回退到 LS 口径）
 
     covered(b, D, board)：窗口 [ws, D) 内博主的表态被语料完整捕获 ⟺
-      已入抽取（ES ≤ ws）且 无漏抽取（LP ≤ LS，即抽取追到了最后一帖；或 LS ≥ D，
+      已入抽取（ES ≤ ws）且 无漏抽取（LP ≤ 前沿，即抽取追到了最后一帖；或 前沿 ≥ D，
       即抽取已达决策日，窗口后的帖不影响）。data/posts 缺失 → LP 视为 LS（无漏）。
-    注意：方向抽取只记"有方向的帖"；data/posts 中无方向的帖不产生信号属正常，非漏抽。
+
+    前沿（frontier）= XT 若有、否则 LS。**为什么不能只拿 LS 当代理**（2026-09-10 修正）：
+    LS 是「最后一条**信号**的发布日」，而漏抽问的是「抽取**跑到**了哪天」。两者在尾巴那几帖
+    本来就没有方向观点时不等（脚本判 无实质内容/无明确方向 → 不产信号 → LS 原地不动），
+    于是「已抽取但无信号」被误判成「右侧漏抽」，整档判不干净、样本窗被无谓截断。
+    实例：道术合一 尾段 4 帖抽出 0 条 → short 回测样本窗 158→140 日；补水位线后恢复。
+    注意：方向抽取只记"有方向的帖"；data/posts 中无方向的帖不产生信号属正常，非漏抽——
+    XT 正是把这一点与「真的没抽」区分开的凭据。
     """
 
     def __init__(self):
@@ -45,12 +54,16 @@ class CorpusIndex:
         import os
         self.sigs = {}     # blogger → rows（升序）
         self._ts = {}      # blogger → 并行升序 pub_ts 数组（二分用）
-        self.ES, self.LS, self.LP = {}, {}, {}
+        self.ES, self.LS, self.LP, self.XT = {}, {}, {}, {}
         for blogger in sorted(set(config.PANELS["short"]) | set(config.PANELS["swing"])):
             fp = os.path.join(config.SIGNALS_OUT_DIR, f"{blogger}.json")
             if not os.path.exists(fp):
                 continue
-            rows = json.load(open(fp, encoding="utf-8"))["signals"]
+            _doc = json.load(open(fp, encoding="utf-8"))
+            rows = _doc["signals"]
+            _xt = _doc.get("extract_through")
+            if _xt:
+                self.XT[blogger] = date.fromisoformat(_xt[:10])   # 抽取水位线（2026-09-10，见 uncovered）
             rows = [r for r in rows if r["idx"] == config.IDX_DEFAULT]  # idx 口径过滤
             for r in rows:
                 r["_ts"] = _parse_pub(r["pub"])
@@ -77,9 +90,10 @@ class CorpusIndex:
     def uncovered(self, board, d: date):
         """返回某决策日 d 该板块中"窗口存在未被抽取的真实方向帖"的成员名单（空 = 干净日）。
 
-        覆盖语义：语料缺失只可能是**右侧漏抽**——方向抽取止于该博主最近一条信号日 LS，
-        而 data/posts 显示其后仍发帖（LP > LS）。此时若其真实帖进入窗口 [ws, d) 即未盖。
-          判定：LS < d 且 LP > LS 且 LP ≥ ws → 未盖。
+        覆盖语义：语料缺失只可能是**右侧漏抽**——方向抽取止于某日（前沿），而 data/posts
+        显示其后仍发帖（LP > 前沿）。此时若其真实帖进入窗口 [ws, d) 即未盖。
+          判定：前沿 < d 且 LP > 前沿 且 LP ≥ ws → 未盖。
+        前沿 = XT（抽取水位线）若有、否则 LS（2026-09-10；见类 docstring 的"为什么"）。
         左侧（该博主进入抽取前的历史帖）不视为漏抽：那是它进入追踪名册之前的时期，
         poll 按其"该时期无信号 → 不表态"自然处理，与当时实盘口径一致（名册分批纳入）。
         保守取向：宁可少计也不把可能的漏抽当弃权；漏抽风险成员的当日整档判不干净。
@@ -87,15 +101,16 @@ class CorpusIndex:
         ws = tc.n_trading_days_ago(d, config.WINDOW_TRADING_DAYS[board])
         out = []
         for b in config.PANELS[board]:
-            ls, lp = self.LS.get(b), self.LP.get(b)
-            if ls is None:
+            ls, lp, xt = self.LS.get(b), self.LP.get(b), self.XT.get(b)
+            frontier = xt or ls
+            if frontier is None:
                 if lp is not None:
                     out.append(b)                       # 有真实帖但无任何方向语料 → 无从判定
                 continue
-            if lp is None or lp <= ls:
+            if lp is None or lp <= frontier:
                 continue                                # 抽取已追到最后一帖 → 无右侧漏抽
-            if ls < d and lp >= ws:
-                out.append(b)                           # 抽取止于 LS，其后真实帖可能已入窗口
+            if frontier < d and lp >= ws:
+                out.append(b)                           # 抽取止于前沿，其后真实帖可能已入窗口
         return out
 
 

@@ -1,5 +1,6 @@
 {
  "blogger": "要有心态",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "要有心态",
@@ -206,8 +207,8 @@
    "cat": "scored",
    "summary": "下周反弹到3950-4000点区域，除非跌破3794",
    "board": "swing",
-   "target": "2026-04-03",
-   "target_txt": "本周（至 04-03）"
+   "target": "2026-03-27",
+   "target_txt": "本周（至 03-27）"
   },
   {
    "blogger": "要有心态",
@@ -934,8 +935,8 @@
    "cat": "scored",
    "summary": "大盘接近反弹顶点4000，下周注意筑顶走势，预防周线3浪下跌",
    "board": "swing",
-   "target": "2026-08-14",
-   "target_txt": "本周（至 08-14）"
+   "target": "2026-08-07",
+   "target_txt": "本周（至 08-07）"
   },
   {
    "blogger": "要有心态",
@@ -986,8 +987,8 @@
    "cat": "scored",
    "summary": "下周大盘弱势，围绕3880-3960反弹或低点逐渐降低",
    "board": "swing",
-   "target": "2026-08-28",
-   "target_txt": "本周（至 08-28）"
+   "target": "2026-08-21",
+   "target_txt": "本周（至 08-21）"
   },
   {
    "blogger": "要有心态",

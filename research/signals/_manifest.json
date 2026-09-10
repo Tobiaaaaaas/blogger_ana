@@ -1,160 +1,233 @@
 {
  "version": 1,
- "created": "2026-09-06 18:13 CST",
+ "created": "2026-09-10 13:04 CST",
  "source": "data/direction_signals/{昵称}.json（DeepSeek 既有信号，未重跑）",
- "members": 40,
+ "members": 47,
  "by_blogger": {
+  "A股老黎实战操盘手": {
+   "signals": 183,
+   "extract_through": null
+  },
   "一只小小牛": {
-   "signals": 90
+   "signals": 90,
+   "extract_through": null
   },
   "三粒光": {
-   "signals": 285
+   "signals": 285,
+   "extract_through": null
   },
   "中国技术玩家": {
-   "signals": 33
+   "signals": 33,
+   "extract_through": null
   },
   "云帆观市": {
-   "signals": 368
+   "signals": 368,
+   "extract_through": null
   },
   "入竹风拂面画船听雨眠": {
-   "signals": 56
+   "signals": 56,
+   "extract_through": null
   },
   "刘海娃娃": {
-   "signals": 91
+   "signals": 91,
+   "extract_through": null
+  },
+  "博股思金": {
+   "signals": 518,
+   "extract_through": "2026-09-08"
   },
   "四十二流光": {
-   "signals": 220
+   "signals": 220,
+   "extract_through": null
   },
   "大白白": {
-   "signals": 162
+   "signals": 162,
+   "extract_through": null
   },
   "大盘蜂向标": {
-   "signals": 181
+   "signals": 181,
+   "extract_through": null
   },
   "子房论市": {
-   "signals": 81
+   "signals": 81,
+   "extract_through": null
   },
   "孙万林": {
-   "signals": 276
+   "signals": 276,
+   "extract_through": null
   },
   "家有高中生2": {
-   "signals": 44
+   "signals": 44,
+   "extract_through": null
   },
   "山顶望星空的诗人": {
-   "signals": 112
+   "signals": 112,
+   "extract_through": null
   },
   "我觉醒了": {
-   "signals": 239
+   "signals": 239,
+   "extract_through": null
   },
   "故乡的云ZYH": {
-   "signals": 250
+   "signals": 250,
+   "extract_through": null
   },
   "时空鹰眼": {
-   "signals": 97
+   "signals": 97,
+   "extract_through": null
   },
   "时间轨迹": {
-   "signals": 72
+   "signals": 72,
+   "extract_through": null
+  },
+  "星哥投研": {
+   "signals": 34,
+   "extract_through": null
   },
   "智由智哉": {
-   "signals": 84
+   "signals": 84,
+   "extract_through": null
+  },
+  "期指作手": {
+   "signals": 108,
+   "extract_through": null
   },
   "江河之水终有入海之日": {
-   "signals": 339
+   "signals": 339,
+   "extract_through": null
   },
   "波段研究师": {
-   "signals": 132
+   "signals": 132,
+   "extract_through": null
   },
   "爱生活的荷叶Rp": {
-   "signals": 140
+   "signals": 140,
+   "extract_through": null
   },
   "白猫财眼": {
-   "signals": 155
+   "signals": 155,
+   "extract_through": null
   },
   "知行合一": {
-   "signals": 77
+   "signals": 77,
+   "extract_through": null
   },
   "禅壹": {
-   "signals": 39
+   "signals": 39,
+   "extract_through": null
   },
   "红红火火的老牛哥": {
-   "signals": 278
+   "signals": 278,
+   "extract_through": null
   },
   "纽约音乐厨房": {
-   "signals": 200
+   "signals": 200,
+   "extract_through": null
   },
   "股傲": {
-   "signals": 170
+   "signals": 170,
+   "extract_through": null
   },
   "股往金来oo": {
-   "signals": 34
+   "signals": 34,
+   "extract_through": null
+  },
+  "股指看盘": {
+   "signals": 115,
+   "extract_through": null
   },
   "股评老陈": {
-   "signals": 360
+   "signals": 360,
+   "extract_through": null
   },
   "衡山佛曰论股": {
-   "signals": 507
+   "signals": 507,
+   "extract_through": null
   },
   "要有心态": {
-   "signals": 77
+   "signals": 77,
+   "extract_through": null
   },
   "诸葛不亮": {
-   "signals": 359
+   "signals": 359,
+   "extract_through": null
   },
   "谭阿坤": {
-   "signals": 210
+   "signals": 210,
+   "extract_through": null
   },
   "赵红力": {
-   "signals": 78
+   "signals": 78,
+   "extract_through": null
   },
   "趋势巡航": {
-   "signals": 329
+   "signals": 329,
+   "extract_through": null
   },
   "选对时机买对股": {
-   "signals": 20
+   "signals": 20,
+   "extract_through": null
+  },
+  "道术合一": {
+   "signals": 135,
+   "extract_through": "2026-08-21"
+  },
+  "钱眼": {
+   "signals": 149,
+   "extract_through": "2026-08-29"
   },
   "顺应周期": {
-   "signals": 387
+   "signals": 387,
+   "extract_through": null
   },
   "香满衣": {
-   "signals": 71
+   "signals": 71,
+   "extract_through": null
   },
   "麟老哥": {
-   "signals": 192
+   "signals": 192,
+   "extract_through": null
   },
   "龙五": {
-   "signals": 126
+   "signals": 126,
+   "extract_through": null
   }
  },
  "totals": {
-  "signals": 7021,
-  "short": 3194,
-  "swing": 3827,
-  "scored": 6060,
-  "unscored": 961,
-  "raw_signals_seen": 7021
+  "signals": 8263,
+  "short": 3714,
+  "swing": 4549,
+  "scored": 7047,
+  "unscored": 1216,
+  "raw_signals_seen": 8265
  },
- "dropped": {},
+ "dropped": {
+  "non_trading_today 2026-02-23": 1,
+  "non_trading_today 2026-06-06": 1
+ },
  "spec_dist": {
-  "t1": 2008,
-  "long": 961,
-  "t5": 1589,
-  "nweek_first": 216,
+  "nweek_first": 260,
+  "long": 1216,
+  "nweek": 406,
+  "t1": 2292,
+  "week": 232,
+  "t5": 1794,
+  "today": 1422,
+  "t2": 289,
   "t60": 2,
-  "nweek": 287,
-  "today": 1186,
-  "week": 208,
-  "t2": 264,
-  "t3": 136,
+  "t3": 142,
   "t8": 3,
   "t4": 6,
-  "nmonth": 42,
+  "nmonth": 49,
   "d:2026-08-21": 2,
-  "month": 66,
+  "month": 80,
+  "t7": 3,
+  "t10": 2,
+  "d:2026-05-06": 1,
+  "d:2026-09-10": 1,
   "t21": 1,
   "t15": 4,
-  "t30": 11,
-  "t7": 1,
-  "t10": 1,
+  "t30": 12,
   "t90": 2,
   "d:2026-09-20": 2,
   "d:2026-09-30": 1,
@@ -163,19 +236,38 @@
   "t20": 4,
   "t6": 1,
   "d:2026-04-30": 1,
-  "d:2026-05-28": 1,
+  "d:2026-05-28": 2,
   "d:2026-06-02": 2,
-  "d:2026-08-25": 1,
+  "d:2026-08-25": 2,
   "t34": 1,
   "d:2026-09-04": 1,
   "t25": 1,
+  "t14": 2,
   "t12": 1,
   "d:2026-02-04": 1,
+  "d:2026-04-17": 1,
+  "d:2026-04-22": 1,
+  "d:2026-05-15": 1,
+  "d:2026-05-27": 1,
+  "d:2026-06-29": 1,
+  "d:2026-07-08": 1,
+  "d:2026-07-20": 1,
+  "d:2026-07-21": 1,
+  "d:2026-07-22": 1,
+  "d:2026-07-23": 1,
+  "d:2026-07-30": 1,
+  "d:2026-08-05": 1,
+  "d:2026-08-18": 1,
   "t28": 1,
   "d:2026-08-07": 2
  },
+ "extract_through": {
+  "博股思金": "2026-09-08",
+  "道术合一": "2026-08-21",
+  "钱眼": "2026-08-29"
+ },
  "pub_range": [
   "2026-01-01",
-  "2026-09-05"
+  "2026-09-08"
  ]
 }

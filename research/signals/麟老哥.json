@@ -1,5 +1,6 @@
 {
  "blogger": "麟老哥",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "麟老哥",
@@ -284,8 +285,8 @@
    "cat": "scored",
    "summary": "下周节奏还要继续调整，先寻求企稳位置",
    "board": "swing",
-   "target": "2026-01-23",
-   "target_txt": "本周（至 01-23）"
+   "target": "2026-01-16",
+   "target_txt": "本周（至 01-16）"
   },
   {
    "blogger": "麟老哥",
@@ -531,8 +532,8 @@
    "cat": "scored",
    "summary": "下周预计延续缩量震荡、窄幅整理",
    "board": "swing",
-   "target": "2026-02-13",
-   "target_txt": "本周（至 02-13）"
+   "target": "2026-02-06",
+   "target_txt": "本周（至 02-06）"
   },
   {
    "blogger": "麟老哥",
@@ -1181,8 +1182,8 @@
    "cat": "scored",
    "summary": "下周大盘继续向上，4000点反复争夺",
    "board": "swing",
-   "target": "2026-04-17",
-   "target_txt": "本周（至 04-17）"
+   "target": "2026-04-10",
+   "target_txt": "本周（至 04-10）"
   },
   {
    "blogger": "麟老哥",
@@ -1740,8 +1741,8 @@
    "cat": "scored",
    "summary": "下周先扬后抑，奔3910方向",
    "board": "swing",
-   "target": "2026-06-12",
-   "target_txt": "本周（至 06-12）"
+   "target": "2026-06-05",
+   "target_txt": "本周（至 06-05）"
   },
   {
    "blogger": "麟老哥",

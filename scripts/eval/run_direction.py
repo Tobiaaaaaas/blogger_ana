@@ -148,13 +148,16 @@ def endpoint_of(pub_date, spec):
                 return None
         return d
     if spec == 'week':                                         # 本周最后交易日
-        base = pub_date if pub_date in CAL_SET else next_td(pub_date)
-        if base is None:                                       # 发布日已超行情截止（如 08-29+）→ 无法验证，不计分
-            return None
-        y, w, _ = datetime.strptime(base, '%Y-%m-%d').isocalendar()
+        # 2026-09-10 周口径修正：本周 = **发布日所在** ISO 周（周一~周日），不再对非交易日
+        # 顺延到下一交易日。旧口径把周末发布的"本周"挪进了下一周（周六/日 base=下周一 →
+        # 答下周五），使"回顾本周"的句子被当成对未来的预测计分；现非交易日发布的 week 行
+        # 终点落在发布日之前 → 下方 calc ③ 判"无效-过时"单列（不参与打分）。
+        # 若博主真在预判即将到来的那一周，判层应编 nweek（见 SKILL §3 周期词表）。
+        y, w, _ = pub.isocalendar()
         days = [d for d in CAL if datetime.strptime(d, '%Y-%m-%d').isocalendar()[:2] == (y, w)]
         return days[-1] if days else None
     if spec in ('nweek', 'nweek_first'):                       # 下周最后/第一个交易日
+        # 下周 = 发布日 +7 天所在 ISO 周（三份实现统一口径，见 briefing/scripts/endpoint.py）
         nd = pub + timedelta(days=7)
         y, w, _ = nd.isocalendar()
         days = [d for d in CAL if datetime.strptime(d, '%Y-%m-%d').isocalendar()[:2] == (y, w)]

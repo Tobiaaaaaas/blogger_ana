@@ -1,5 +1,6 @@
 {
   "blogger": "博股思金",
+  "extract_through": "2026-09-08",
   "signals": [
     {
       "pub": "2026-01-01 02:17",
@@ -4518,6 +4519,41 @@
       "s": 2,
       "spec": "nweek_first",
       "cat": "scored"
+    },
+    {
+      "pub": "2026-09-06 07:59",
+      "d": 1,
+      "idx": "上证指数",
+      "summary": "下周券商保险回调即低吸，看多",
+      "spec": "nweek",
+      "cat": "scored",
+      "s": 1
+    },
+    {
+      "pub": "2026-09-07 16:22",
+      "d": 1,
+      "idx": "上证指数",
+      "summary": "本周大金融上升通道未变，看多",
+      "spec": "week",
+      "cat": "scored",
+      "s": 1
+    },
+    {
+      "pub": "2026-09-08 02:04",
+      "d": 1,
+      "idx": "上证指数",
+      "summary": "大牛市就在当下，看多",
+      "spec": "long",
+      "cat": "unscored"
+    },
+    {
+      "pub": "2026-09-08 07:00",
+      "d": 1,
+      "idx": "上证指数",
+      "summary": "本周大盘反转向上，看多",
+      "spec": "week",
+      "cat": "scored",
+      "s": 1
     }
   ]
 }

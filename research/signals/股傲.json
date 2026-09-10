@@ -1,5 +1,6 @@
 {
  "blogger": "股傲",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "股傲",
@@ -2104,8 +2105,8 @@
    "cat": "scored",
    "summary": "下周上摸年线概率大，最终站上年线",
    "board": "swing",
-   "target": "2026-08-21",
-   "target_txt": "本周（至 08-21）"
+   "target": "2026-08-14",
+   "target_txt": "本周（至 08-14）"
   },
   {
    "blogger": "股傲",
@@ -2182,8 +2183,8 @@
    "cat": "scored",
    "summary": "下周市场大概率还有缩量过程",
    "board": "swing",
-   "target": "2026-08-28",
-   "target_txt": "本周（至 08-28）"
+   "target": "2026-08-21",
+   "target_txt": "本周（至 08-21）"
   },
   {
    "blogger": "股傲",

@@ -2,8 +2,10 @@
 """research 交易日历工具：复用以简报缓存的官方交易日历（1990→2026-12-31）。
 
 与父仓库 eval/run_direction.py 的 endpoint_of 语义对齐（tN = 信号日之后第 N 个交易日、
-week = 本周最后交易日、nweek/nweek_first = 下周最后/第一个、month/nmonth = 当月/下月最后、
-d: 顺延）。简报缓存按天全量覆盖到 2026 年末，供语料把 spec 解析成绝对目标日；
+week = **发布日所在 ISO 周**最后交易日、nweek/nweek_first = **发布日+7 天所在 ISO 周**最后/
+第一个交易日、month/nmonth = 当月/下月最后、d: 顺延）——2026-09-10 周口径修正后，与
+briefing/scripts/endpoint.py 三份实现逐格相等（由 opinion/tests/test_endpoint_consistency.py
+全网格钉死）。简报缓存按天全量覆盖到 2026 年末，供语料把 spec 解析成绝对目标日；
 若缓存缺失则回退到简报 calendar 的内置 2026 规则。
 """
 import os
@@ -102,10 +104,9 @@ def endpoint_of(pub_date, spec):
     if spec.startswith("t") and spec[1:].isdigit():
         return _nth_from(d, int(spec[1:]))
     if spec == "week":
-        base = d if d.isoformat() in DAY_SET else next_trading_day(d)
-        if base is None:
-            return None
-        _, last = _week_bounds(base)
+        # 本周 = 发布日所在 ISO 周的最后交易日（2026-09-10 周口径修正，三份实现统一：
+        # 不再对非交易日顺延到下一周；周末发布的"本周"终点落在发布日之前，报告侧判过时）
+        _, last = _week_bounds(d)
         return last
     if spec in ("nweek", "nweek_first"):
         nd = d + timedelta(days=7)

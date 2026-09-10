@@ -14,6 +14,10 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 from opinion import annotate as o_ann, cache as o_cache, prompts as o_prompts  # noqa: E402
 from opinion import verify as o_verify  # noqa: E402

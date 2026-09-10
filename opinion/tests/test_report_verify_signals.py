@@ -12,6 +12,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 _spec = importlib.util.spec_from_file_location(
     "extract_signals_direction",

@@ -12,6 +12,10 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 from opinion import schema as sch
 from opinion import text as ot
 

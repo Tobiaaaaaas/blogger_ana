@@ -18,6 +18,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 BRIEFING = os.path.join(ROOT, "briefing")
 sys.path.insert(0, BRIEFING)          # scripts.summarize（包内相对 import）
 sys.path.insert(0, ROOT)              # opinion.*
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 from opinion import annotate as ann        # noqa: E402
 from opinion import schema as sch          # noqa: E402

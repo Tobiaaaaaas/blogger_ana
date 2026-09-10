@@ -114,19 +114,29 @@ def trading_days(d: date, n: int) -> list:
     return sorted(out)
 
 
-def blogger_week_monday(d: date) -> date:
-    """博主视角「本周」的周一（2026-09-10 从 summarize._week_monday 上移，单一同源）。
+def iso_week_monday(d: date) -> date:
+    """d 所在自然周（ISO 周，周一~周日）的周一。
 
-    周一~周五 → 当周周一（ISO 周）；**周六/日 → 下一周周一**——周末帖多在预判将临一周，
-    故周日说的"本周"指明天开始的那一周。此口径决定"下周"落在哪一周，是锚定展示与
-    验证终点**共用**的周定义（`endpoint.endpoint_of` 的 week/nweek 必须与
-    `summarize._anchor_row` 的 anchor 同口径，否则卡面会出现"下周 09-14~09-18 ·
-    终点 09-11 收盘"式的自相矛盾，且过期门会提前一周剔除该行）。
+    **2026-09-10 周口径修正**：本函数此前名为 `blogger_week_monday`，对周六/日**前瞻式
+    加 7 天**（当时理由："周末帖多在预判将临一周，故周日说的'本周'指明天开始的那一周"）。
+    该口径有两个问题，已撤销：
+
+    1. **与另两份 endpoint 实现不一致**（canonical `run_direction.endpoint_of` 与 mirror
+       `research.trading_cal` 的 nweek 都是"pub+7 取 ISO 周"），三份实现靠测试互相豁免；
+    2. **把"回顾本周"的句子悄悄挪进未来计分**——周末帖写"本周"若是在复盘刚结束的那一周，
+       前瞻式口径会把它判成"预判下一周"并给出一个**尚未发生**的验证终点。
+
+    现统一为纯自然周（`week`/`nweek`/`nweek_first` 三档共用一条规则）：
+      - 「本周」= 发帖日所在那一周（**周末/节假日发帖 → 该周已结束** → 报告侧判 `无效-过时`
+        单列、推送侧过期门剔除，不再顺延到下一周）；
+      - 「下周」= **发帖日 + 7 天**所在那一周——周末发帖说"下周"即**即将到来的那一周**；
+      - 周末发帖若真在预判即将到来的那一周，判层按 `nweek` 编码（`opinion/prompts.py` §3
+        周期词表：非交易日"本周"前瞻须落 nweek），引擎只管把终点算对。
+
+    锚定展示（`summarize._anchor_row`）与验证终点（`endpoint.endpoint_of`）**共用**本定义，
+    否则卡面会出现"下周 09-14~09-18 · 终点 09-11 收盘"式自相矛盾。
     """
-    m = d - timedelta(days=d.weekday())
-    if d.weekday() >= 5:
-        m += timedelta(days=7)
-    return m
+    return d - timedelta(days=d.weekday())
 
 
 def trading_days_in_iso_week(d: date) -> list:

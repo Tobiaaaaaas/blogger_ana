@@ -432,12 +432,14 @@ def _bj_date(ts):
 
 
 def _week_monday(d):
-    """博主视角"本周"周一（2026-09-10 上移 calendar.blogger_week_monday，此处仅别名）。
+    """d 所在自然周（ISO 周）的周一（委托 calendar.iso_week_monday）。
 
     锚定展示与验证终点**必须**同一周定义，否则卡面出现"下周 09-14~09-18 · 终点 09-11
-    收盘"式自相矛盾（详见 calendar.blogger_week_monday 与 endpoint 模块注释）。
+    收盘"式自相矛盾（详见 calendar.iso_week_monday 与 endpoint 模块注释）。
+    2026-09-10 周口径修正：不再对周六/日前瞻加 7 天——周末行说"本周"指的是**刚结束**
+    那一周（该周已过 → 下方目标周已过门剔除）；真在预判即将到来那一周的，判层编 nweek。
     """
-    return calendar.blogger_week_monday(d)
+    return calendar.iso_week_monday(d)
 
 
 def _fmt_week_range(monday):
@@ -510,6 +512,9 @@ def _anchor_row(board_key, row, card, now):
             out = dict(row)
             out["anchor"] = horizon
             return out
+        # 目标周 = 发帖日所在周（本周）/ 发帖日 +7 天所在周（下周）——与 endpoint_of 同口径。
+        # 周末发帖的「本周」= 刚结束那一周 → 下面"目标周已整体过去"门必然命中剔除
+        # （真在预判即将到来那一周的，判层编 nweek，走 +7 分支）。
         mon = _week_monday(qd) + (timedelta(days=7) if horizon == "下周" else timedelta())
         if mon + timedelta(days=4) < card:
             log.info("  %s [swing] %s 目标周 %s 已整体过去 → 不显示",

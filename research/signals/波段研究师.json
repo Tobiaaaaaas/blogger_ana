@@ -1,5 +1,6 @@
 {
  "blogger": "波段研究师",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "波段研究师",
@@ -193,8 +194,8 @@
    "cat": "scored",
    "summary": "下周先扬后抑，一月收盘4100点附近",
    "board": "swing",
-   "target": "2026-01-30",
-   "target_txt": "本周（至 01-30）"
+   "target": "2026-01-23",
+   "target_txt": "本周（至 01-23）"
   },
   {
    "blogger": "波段研究师",
@@ -375,8 +376,8 @@
    "cat": "scored",
    "summary": "看好节后第一周红包行情",
    "board": "swing",
-   "target": "2026-02-27",
-   "target_txt": "本周（至 02-27）"
+   "target": null,
+   "target_txt": "周期不明确"
   },
   {
    "blogger": "波段研究师",
@@ -427,8 +428,8 @@
    "cat": "scored",
    "summary": "下周出两根中大阴线概率大",
    "board": "swing",
-   "target": "2026-03-06",
-   "target_txt": "本周（至 03-06）"
+   "target": "2026-02-27",
+   "target_txt": "本周（至 02-27）"
   },
   {
    "blogger": "波段研究师",
@@ -1532,8 +1533,8 @@
    "cat": "scored",
    "summary": "下周重点盯3731点，守住底线，周一冲高减仓",
    "board": "swing",
-   "target": "2026-07-24",
-   "target_txt": "本周（至 07-24）"
+   "target": "2026-07-17",
+   "target_txt": "本周（至 07-17）"
   },
   {
    "blogger": "波段研究师",

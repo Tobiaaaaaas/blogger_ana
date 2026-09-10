@@ -1,5 +1,6 @@
 {
  "blogger": "顺应周期",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "顺应周期",
@@ -3950,8 +3951,8 @@
    "cat": "scored",
    "summary": "大概率从3800附近正式开启反弹，预计反弹最起码过3900",
    "board": "swing",
-   "target": "2026-07-31",
-   "target_txt": "本周（至 07-31）"
+   "target": "2026-07-24",
+   "target_txt": "本周（至 07-24）"
   },
   {
    "blogger": "顺应周期",

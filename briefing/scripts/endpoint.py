@@ -11,19 +11,21 @@
 - 两板块统一**过期门**：终点（终点交易日 15:00 收盘）已过 → 该行不再显示
   （"9月9日晚上发的、预测 9.9 下午三点收盘"这类已发生验证的行不得再推）。
 
-与 canonical 的**两处已知差异**（均由 `opinion/tests/test_endpoint_consistency.py` 显式
-枚举并断言，不靠人工比对）：
+与 canonical 的**唯一已知差异**（由 `opinion/tests/test_endpoint_consistency.py` 全网格
+比对钉死，不靠人工比对）：
 
-1. **行情覆盖上限**：canonical 的 `next_td` 以行情数据末日为上限（超出即 None），本模块用
-   `briefing.scripts.calendar`（无上限，可向前无限推算）——推送侧只关心"终点是否已过"，
-   不需要被行情覆盖截断。
-2. **`nweek` 的周口径（2026-09-10 修正）**：canonical 写作 `pub + 7 天` 再取 ISO 周，而
-   ISO 周为周一~周日——**周六/日发帖**时 `pub+7` 仍落在同一 ISO 周，导致"下周"不前进、
-   与其自身的"本周"撞成同一天（09-06 周日：week 与 nweek 同为 09-11）。本模块改用
-   `calendar.blogger_week_monday(pub) + 7 天`，与推送锚定展示（`summarize._anchor_row`
-   的 `下周 MM-DD~MM-DD`）同一口径；否则卡面会自相矛盾（"下周 09-14~09-18 · 终点 09-11
-   收盘"），且过期门会提前一周剔除该行。**canonical 未改**（它参与历史打分，改动会波及
-   已冻结的 curated 信号评分）——是否同步修正待用户裁决。
+**行情覆盖上限**：canonical 的 `next_td` 以行情数据末日为上限（超出即 None），本模块用
+`briefing.scripts.calendar`（无上限，可向前无限推算）——推送侧只关心"终点是否已过"，
+不需要被行情覆盖截断。
+
+> **周口径已于 2026-09-10 三份归一**（此前本模块对周六/日走 `blogger_week_monday(pub)+7`
+> 的前瞻式口径，canonical/mirror 走 `pub+7`，两者靠测试互相豁免、且"本周/下周"在周末
+> 撞车）。现三份统一为**纯自然周**：
+> `week` = 发帖日所在 ISO 周最后交易日；`nweek` = 发帖日 **+7 天**所在 ISO 周最后交易日；
+> `nweek_first` = 发帖日 +7 天所在 ISO 周首个交易日。
+> 周末帖的「回顾 vs 前瞻」之分**不在引擎**，而在判层（前瞻即将到来的那一周 → `nweek`；
+> 回顾刚结束的那一周 → 不产行）——引擎不再替模型猜"周末说的本周是哪一周"。误产的
+> 周末 `week` 行终点落在发帖日之前，报告侧判 `无效-过时`、推送侧过期门剔除。
 """
 from datetime import date as _date, datetime, time, timedelta, timezone
 
@@ -47,8 +49,8 @@ def endpoint_of(pub_date, spec):
 
     pub_date：发帖自然日（date 或 'YYYY-MM-DD'）。语义逐条对齐 canonical：
     today=发帖日收盘（非交易日顺延）、tN=发帖后第 N 个交易日（t0 同 canonical 返回发帖日，
-    上游 sanitize 已拦畸形档）、week=博主视角周最后交易日、nweek=博主视角周 +1 周最后交易日
-    （见下差异 2）、nweek_first=发帖日 +7 天所在 ISO 周首个交易日（= t1，见该分支注释）、
+    上游 sanitize 已拦畸形档）、week=发帖日所在 ISO 周最后交易日、nweek=发帖日 +7 天所在
+    ISO 周最后交易日、nweek_first=发帖日 +7 天所在 ISO 周首个交易日（= t1，见该分支注释）、
     month/nmonth=当月/下月最后交易日、d:YYYY-MM-DD=该日（非交易日顺延，兼容既有行）。
     """
     if spec == "long":
@@ -62,26 +64,22 @@ def endpoint_of(pub_date, spec):
             d = calendar.next_trading_day(d)      # tN = 发帖后第 N 个交易日
         return d
     if spec == "week":
-        # 保持 canonical 口径（非交易日顺延到下一交易日再取 ISO 周）：周六/日顺延进下一 ISO 周，
-        # 结果与博主视角周一致（09-05 周六 / 09-06 周日 → 均为 09-11），故与卡面 anchor 不矛盾。
-        # 已知角落（未修，非本轮引入）：**周内节假日**发帖（如 09-25 中秋周五）此处顺延到 09-28
-        # 那一周 → 答 09-30，而 anchor 仍按 09-21~09-25 展示；该情形 anchor 通常已判"目标周已过"
-        # 剔除，实际极罕见，留待后续统一。
-        base = pub if calendar.is_trading_day(pub) else calendar.next_trading_day(pub)
-        days = calendar.trading_days_in_iso_week(base)
+        # 本周 = **发帖日所在** ISO 周（周一~周日）的最后交易日。2026-09-10 修正：不再对
+        # 非交易日顺延到下一交易日（旧口径把周末帖的"本周"挪进下一周，与 canonical/mirror
+        # 不一致）。周末/节假日发帖 → 该周已结束 → 终点落在发帖日之前，过期门自然剔除；
+        # 若博主真在预判即将到来的那一周，判层应编 `nweek`（见模块 docstring）。
+        days = calendar.trading_days_in_iso_week(pub)
         return days[-1] if days else None
     if spec == "nweek":
-        # 下周 = 博主视角周 +1 周的最后交易日。**不可写作 pub+7 再取 ISO 周**：ISO 周是
-        # 周一~周日，周六/日 +7 天落进的那一周，正是 `week` 分支顺延到下一交易日时落进的
-        # 同一周（09-06 周日：week 与 nweek 同为 09-11）——"下周"于是与"本周"撞车，且与
-        # 卡面 anchor（下周 09-14~09-18）自相矛盾（canonical/mirror 现存缺陷，2026-09-10 发现）。
-        days = calendar.trading_days_in_iso_week(calendar.blogger_week_monday(pub) + timedelta(days=7))
+        # 下周 = **发帖日 +7 天**所在 ISO 周的最后交易日（三份实现统一口径）。周末发帖说
+        # "下周"即即将到来的那一周（09-06 周日 → 09-07~09-11 → 09-11），与 `week`
+        # （09-04，已过）不再撞车。
+        days = calendar.trading_days_in_iso_week(pub + timedelta(days=7))
         return days[-1] if days else None
     if spec == "nweek_first":
-        # **刻意不对齐 blogger_week_monday**：「下周一」是**星期几**指代而非"整周"指代，
-        # 其语义 = pub+7 所在 ISO 周的首个交易日；对周五/周六/周日发帖，该日恰好就是
-        # 发帖后首个交易日 → 与 t1 同值（见 test 的 nweek_first ≡ t1 断言，A1 编码分叉
-        # 正是建立在这条等价上）。若改走博主视角周，周六/日会跳到再下一周，等价即破。
+        # 「下周一」是**星期几**指代而非"整周"指代，其语义 = pub+7 所在 ISO 周的首个
+        # 交易日；对周五/周六/周日发帖，该日恰好就是发帖后首个交易日 → 与 t1 同值
+        # （见 test 的 nweek_first ≡ t1 断言，"下周一"编码分叉正建立在这条等价上）。
         days = calendar.trading_days_in_iso_week(pub + timedelta(days=7))
         return days[0] if days else None
     if spec == "month":

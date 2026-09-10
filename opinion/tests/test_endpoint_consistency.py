@@ -21,15 +21,21 @@
    行情只覆盖到 09-04 → 它答 09-04 而非真值 09-30）。这是行情数据新鲜度问题，
    不是三份实现的语义分歧（补行情后本分支自动收窄）。
 
-**已知语义分歧 1 处（2026-09-10 发现，push 已修、canonical/mirror 未修）**：
-`周六/周日 × nweek`。canonical/mirror 写作 `pub + 7 天` 再取 ISO 周，而 ISO 周是
-**周一~周日**——周六/日 +7 天仍落在**同一个** ISO 周内，"下周"因此永不前进，与其自身的
-`week`（会顺延到下一交易日）撞成同一天（09-06 周日：week 与 nweek **同为** 09-11）。
-push 侧改用 `calendar.blogger_week_monday(pub) + 7 天`，与推送卡锚定展示同一口径
-（否则卡面自相矛盾："下周 09-14~09-18 · 终点 09-11 收盘"，且过期门提前一周剔除该行）。
-本测试**枚举**这一处分歧（`_KNOWN_DIVERGENT`，非模式豁免）：分歧格断言 push 的正确值 +
-canonical/mirror 的现状值，并**钉住撞车现象**——canonical/mirror 一旦修正，本文件立刻红，
-提示撤销豁免并三份归一。
+**周口径已于 2026-09-10 三份归一（无豁免格）**：此前 push 对周六/日 `nweek` 走
+`blogger_week_monday(pub) + 7 天`（博主视角周，前瞻式），canonical/mirror 走 `pub + 7 天`，
+两者靠 `_KNOWN_DIVERGENT` 豁免互不追究；同时 push 的 `week` 对非交易日顺延到下一交易日，
+与 canonical/mirror 的 `pub+7` 取 ISO 周在周末**撞车**（09-06 周日：week 与 nweek 同为 09-11）。
+现行三份统一为**纯自然周**：
+
+    week         = 发帖日所在 ISO 周最后交易日      （非交易日不顺延）
+    nweek        = 发帖日 +7 天所在 ISO 周最后交易日
+    nweek_first  = 发帖日 +7 天所在 ISO 周首个交易日
+
+周末帖的「回顾 vs 前瞻」之分**不在引擎而在判层**（前瞻即将到来的那一周 → `nweek`；
+回顾刚结束的那一周 → 不产行，见 `opinion/prompts.py` §3）：误产的周末 `week` 行终点落在
+发帖日之前，报告侧判 `无效-过时`、推送侧过期门剔除，不再被悄悄挪进下一周计分。
+本文件因此**无任何分歧格**——`research == push` 必须全网格相等，canonical 在行情覆盖内
+必须同值。
 
 注意：import run_direction 会装载行情（market_data + intraday），与报告重渲同环境。
 直接 python3 运行。
@@ -42,6 +48,10 @@ from datetime import date, timedelta
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "briefing"))
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 # canonical（打分引擎；importlib，非包路径）
 _spec = importlib.util.spec_from_file_location(
@@ -53,13 +63,6 @@ from research import trading_cal as TC            # noqa: E402  mirror
 import scripts.endpoint as EP                     # noqa: E402  push（briefing/scripts/endpoint.py）
 
 CAL_LAST = date.fromisoformat(eng.CAL[-1])        # 行情数据最新交易日（canonical 的日历上限）
-
-import scripts.calendar as CALMOD                 # noqa: E402  博主视角周（push 与锚定共用）
-
-
-def _known_divergent(pub, spec):
-    """canonical/mirror 与 push 的**已知语义分歧**格：仅「周六/周日 × nweek」（见文件头）。"""
-    return spec == "nweek" and pub.weekday() >= 5
 
 SPECS = ["today", "t1", "t2", "t5", "t30", "week", "nweek", "nweek_first",
          "month", "nmonth", "d:2026-09-18", "d:2026-10-12", "long"]
@@ -84,25 +87,11 @@ def _push(pub, spec):
 n = 0
 won = 0          # canonical 给值（三方必须全等）的组数
 cov = 0          # canonical 为 None 但被行情覆盖解释掉的组数
-div = 0          # 已知分歧格（周六/日 × nweek）组数
 pub = GRID_START
 while pub <= GRID_END:
     for spec in SPECS:
         n += 1
         r, p = _research(pub, spec), _push(pub, spec)
-        if _known_divergent(pub, spec):
-            div += 1
-            # 分歧格：push 取博主视角周 +1 周的最后交易日。用**未分歧的 week 分支**独立求期望值
-            # （week 在周一不触发分歧），构成非循环校验。
-            want = _push(CALMOD.blogger_week_monday(pub) + timedelta(days=7), "week")
-            assert p == want, (f"[push nweek] {pub} {spec}：push={p} 期望 {want}"
-                               "（= 博主视角周 +1 周的最后交易日，与卡面 anchor 同口径）")
-            assert p > _push(pub, "week"), \
-                f"{pub}：博主视角「下周」终点 {p} 必须晚于「本周」终点 {_push(pub, 'week')}"
-            assert r == _push(pub, "week"), \
-                (f"canonical/mirror 的周末 nweek 似乎已修（{pub}：research={r} 不再等于其 week "
-                 f"{_push(pub, 'week')}）→ 请同步三份实现并撤销 _known_divergent 豁免")
-            continue
         assert r == p, (f"[mirror≠push] {pub} {spec}：research={r} push={p}"
                         "—— 两份无上限日历必须逐格相等，改一份就要同步另一份")
         if p is not None and p <= CAL_LAST:
@@ -115,21 +104,23 @@ while pub <= GRID_END:
             cov += 1   # 周期越过行情覆盖边界 → canonical 的 None/截断值不作判（见文件头规则 3）
     pub += timedelta(days=1)
 
-print(f"[PASS] 验证终点三方一致：网格 {n} 组 —— 除 {div} 组已知分歧格（周六/日 × nweek，"
-      f"push 已修 / canonical·mirror 未修）外 research==push 全等；其中 {won} 组终点落在"
-      f"行情覆盖内（≤{CAL_LAST}）且 canonical 同值；{cov} 组越过覆盖边界（canonical 的"
-      f"None/截断不作判，属行情新鲜度）")
+print(f"[PASS] 验证终点三方一致：网格 {n} 组 —— research==push **全等（无豁免格）**；其中 "
+      f"{won} 组终点落在行情覆盖内（≤{CAL_LAST}）且 canonical 同值；{cov} 组越过覆盖边界"
+      f"（canonical 的 None/截断不作判，属行情新鲜度）")
 
-# ── 钉住 canonical/mirror 的周末 nweek 撞车（已知缺陷，未修）：修正后本段会红，提示归一 ──
-# 08-29 周六 / 08-30 周日落在 canonical 行情覆盖内（CAL 至 09-04），可直接探其现状。
-for pub in (date(2026, 8, 29), date(2026, 8, 30), date(2026, 9, 5), date(2026, 9, 6)):
-    assert _research(pub, "week") == _research(pub, "nweek"), \
-        (f"mirror 的 {pub} 「本周」与「下周」不再撞车 → 缺陷似已修，"
-         "请同步 canonical 并撤销 _known_divergent 豁免")
-for pub in (date(2026, 8, 29), date(2026, 8, 30)):
-    assert _canon(pub, "week") == _canon(pub, "nweek"), \
-        f"canonical 的 {pub} 「本周」与「下周」不再撞车 → 缺陷似已修，请同步三份实现"
-print("[PASS] canonical/mirror 的周末 nweek 撞车现象已钉住（本周==下周，属缺陷；push 侧已修正）")
+# ── 周口径归一后的不变式：本周/下周在周末不再撞车，且"下周"恒晚于"本周"（2026-09-10）──
+for pub in (date(2026, 8, 29), date(2026, 8, 30), date(2026, 9, 5), date(2026, 9, 6),
+            date(2026, 9, 7), date(2026, 9, 11)):
+    w, nw = _push(pub, "week"), _push(pub, "nweek")
+    assert w != nw, f"{pub}（周{pub.weekday()+1}）：「本周」与「下周」终点撞车（均为 {w}）"
+    assert nw > w, f"{pub}：「下周」终点 {nw} 必须晚于「本周」终点 {w}"
+    # 周末/节假日发帖的「本周」终点必落在发帖日之前 → 报告侧判"无效-过时"、推送侧过期门剔除
+    if pub.weekday() >= 5:
+        assert w < pub, f"{pub}（周末）发「本周」终点 {w} 应早于发帖日（该周已收盘结束）"
+        assert _research(pub, "week") == w, f"mirror 的周末 week 口径漂移：{pub}"
+        assert _canon(pub, "week") == w, f"canonical 的周末 week 口径漂移：{pub}"
+print("[PASS] 周口径归一：本周≠下周且下周恒晚于本周；周末「本周」终点早于发帖日"
+      "（回顾句不再被挪进未来计分；前瞻句由判层编码 nweek，见 opinion/prompts.py §3）")
 
 # ── spec 语义的定点断言（防"三份一起改错"）：与 SKILL §3 / 打分引擎口径逐条对齐 ──
 # 09-04 是周五；09-07 周一、09-11 周五、09-14 周一、09-18 周五、09-30 周三（09-25~09-27 中秋休）
@@ -141,10 +132,11 @@ cases = [
     (SUN, "t1", MON),
     (MON, "t5", date(2026, 9, 14)),         # 发帖后第 5 个交易日
     (MON, "week", date(2026, 9, 11)),       # 本周最后交易日（周五）
-    (SAT, "week", date(2026, 9, 11)),       # 周末"本周" → 下一交易周最后交易日
+    (SAT, "week", date(2026, 9, 4)),        # ★ 周末"本周" = 发帖日所在周（已收盘）→ 09-04，落在发帖日之前
+    (SUN, "week", date(2026, 9, 4)),        # ★ 同上（09-05/09-06 同属 08-31~09-04 那一周）
     (MON, "nweek", date(2026, 9, 18)),      # 周一"下周" = 09-14~09-18 最后交易日
-    (FRI, "nweek", date(2026, 9, 11)),      # 周五"下周" = 09-07~09-11（周五与 canonical 同值）
-    (SUN, "nweek", date(2026, 9, 18)),      # ★ 周日"下周" = 博主视角周 +1 周（canonical 误答 09-11）
+    (FRI, "nweek", date(2026, 9, 11)),      # 周五"下周" = 09-07~09-11
+    (SUN, "nweek", date(2026, 9, 11)),      # ★ 周日"下周" = 发帖日+7 所在周（09-07~09-11）→ 09-11
     (SUN, "nweek_first", MON),              # ★ 周末"下周一" = 发帖后首个交易日（=t1，同值）
     (MON, "nweek_first", date(2026, 9, 14)),  # 周一"下周一" 隔一个整周（≠t1）
     (MON, "month", date(2026, 9, 30)),
@@ -155,9 +147,20 @@ cases = [
 for pub, spec, want in cases:
     got = _push(pub, spec)
     assert got == want, f"push endpoint_of({pub}, {spec!r}) = {got}，期望 {want}"
-    if not _known_divergent(pub, spec):        # 分歧格另在下方单列（mirror 现状不同）
-        assert _research(pub, spec) == want, f"research mirror 语义漂移：{pub} {spec!r}"
+    assert _research(pub, spec) == want, f"research mirror 语义漂移：{pub} {spec!r}"
 print(f"[PASS] 验证终点语义定点 {len(cases)} 条（含周末「下周一」=t1 与 交易日「下周一」=nweek_first 的分叉）")
+
+# ── 2026-09-10 周口径修正的定点校验：周末「回顾本周」不再被挪进未来 ──
+# 周日(09-06)发「本周」→ 终点 09-04（该周最后一个交易日，早于发帖日）。修正前为 09-11
+# （前瞻式挪到下一周），使复盘句被当成对下一周的预测计分。
+assert _push(SUN, "week") == date(2026, 9, 4) < SUN, "周末「本周」终点必须落在发帖日之前"
+assert _push(SUN, "nweek") == date(2026, 9, 11), "周日「下周」= 即将到来那一周（09-07~09-11）"
+# 周末发帖真在预判即将到来的那一周时，判层应编 nweek —— 引擎侧与「本周」严格分开
+assert _push(SUN, "nweek") > _push(SUN, "week"), "周末：下周终点必须晚于本周终点"
+# 周中不受影响：周一/周五的「本周」「下周」语义与修正前一致
+assert _push(MON, "week") == date(2026, 9, 11) and _push(FRI, "week") == FRI
+print("[PASS] 周末「本周」终点落在发帖日之前（回顾句由报告侧判无效-过时、推送侧过期门剔除）；"
+      "「下周」= 即将到来那一周（前瞻句由判层编码 nweek）")
 
 # ── 2026-09-10 编码纠正的直接校验：「下周一」是否落在 t1 与 nweek_first 的分界上 ──
 for pub in (FRI, SAT, SUN):

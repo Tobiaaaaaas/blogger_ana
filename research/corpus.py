@@ -92,7 +92,12 @@ def build():
             print(f"  ⚠️ 缺 {src}，跳过")
             manifest["by_blogger"][blogger] = {"signals": 0, "error": "no source file"}
             continue
-        raw_list = json.load(open(src, encoding="utf-8")).get("signals", [])
+        _src = json.load(open(src, encoding="utf-8"))
+        raw_list = _src.get("signals", [])
+        # 抽取水位线（2026-09-10）：提取脚本记录「该博主帖子被方向抽取处理到的日期」。
+        # 原样透传给 poll —— 后者用它取代 LS（最后一条信号日）当前沿代理，见 poll.uncovered。
+        # 缺失（旧文件/未重抽）→ None，poll 回退到 LS 口径，行为不变。
+        xt = _src.get("extract_through") or None
         out = []
         for raw in raw_list:
             n_all += 1
@@ -108,10 +113,14 @@ def build():
             manifest["spec_dist"][norm["spec"]] = manifest["spec_dist"].get(norm["spec"], 0) + 1
         out.sort(key=lambda s: s["pub"])
         with open(os.path.join(config.SIGNALS_OUT_DIR, f"{blogger}.json"), "w", encoding="utf-8") as f:
-            json.dump({"blogger": blogger, "signals": out}, f, ensure_ascii=False, indent=1)
-        manifest["by_blogger"][blogger] = {"signals": len(out)}
+            json.dump({"blogger": blogger, "extract_through": xt, "signals": out},
+                      f, ensure_ascii=False, indent=1)
+        manifest["by_blogger"][blogger] = {"signals": len(out), "extract_through": xt}
+        if xt:
+            manifest.setdefault("extract_through", {})[blogger] = xt
         print(f"  {blogger}: {len(raw_list)} raw → {len(out)} 归一化"
-              + (f"（剔 {len(raw_list) - len(out)}）" if len(out) != len(raw_list) else ""))
+              + (f"（剔 {len(raw_list) - len(out)}）" if len(out) != len(raw_list) else "")
+              + (f" | 水位线 {xt}" if xt else ""))
     manifest["totals"]["raw_signals_seen"] = n_all
     # 覆盖区间（每板块/全部）
     dates = []

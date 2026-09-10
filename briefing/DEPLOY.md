@@ -135,13 +135,57 @@ tar --exclude='__pycache__' --exclude='*.pyc' --exclude='briefing/data' \
 - **⚠️ 验证终点既有三份实现，改一处必同步**（2026-09-10）：`scripts/eval/run_direction.py`
   （canonical/打分）/ `research/trading_cal.py`（mirror）/ `briefing/scripts/endpoint.py`（推送）。
   `opinion/tests/test_endpoint_consistency.py` 702 组网格三方比对钉死，改任一份即红。
-  **已知 1 处有意分歧**：`周六/日 × nweek`——canonical/mirror 用 `pub+7 天` 取 ISO 周，
-  而 ISO 周是周一~周日，周末 +7 天落进的那一周正是 `week` 顺延后落进的同一周，于是
-  "本周"与"下周"**撞成同一天**；推送侧已改用博主视角周（与卡面 `下周 MM-DD~MM-DD`
-  同口径，否则卡面自相矛盾且过期门提前一周剔行）。canonical 参与历史打分，**未改**。
+  **2026-09-10 起三份已完全归一、无任何豁免格**（此前 `周六/日 × nweek` 有一处有意分歧：
+  push 走"博主视角周+7"前瞻式、canonical/mirror 走 `pub+7`，导致周末"本周"与"下周"撞成
+  同一天）。现行**统一周口径**（自然周，非交易日不顺延）：
+  - `week` = **发布自然日所在** ISO 周最后交易日 → 周末/节假日发帖时该周已收盘，终点落在
+    发布日之前 → 报告侧 `无效-过时`、推送侧过期门剔除、research 侧 `target < 投票日` 不投票；
+  - `nweek` = **发布日 +7 天**所在 ISO 周最后交易日（周末说"下周"= 即将到来那一周）；
+  - `nweek_first` = 发布日 +7 天所在 ISO 周首个交易日（周五~周日发帖时 ≡ `t1`）。
+
+  非交易日的「回顾 vs 前瞻」之分**不在引擎而在判层**（前瞻 → `nweek`；回顾 → 不产行，
+  `opinion/prompts.py` §3 周期词表 + `SKILL.md` §3），引擎不再替模型猜"周末说的本周是哪一周"。
+  **对既有语料的量化影响**：全量 `data/direction_signals`（251 文件 / 27,094 条）中
+  `spec=week` 985 条 → 293 条终点位移、其中 286 条转为 `无效-过时`（冻结语料不重抽，
+  等于这 286 条退出计分）；`nweek` 零位移（canonical/mirror 本来就对）。推送侧 live
+  `rows_cache` 周末帖产出的是 `nweek`/`nweek_first`/`t1`/`long`、**零条 `week`**，故卡面
+  变化只有：周末 `nweek` 行的终点与锚定周段**各前移一周**（09-18 → 09-11）。
 - **⚠️ 不在推送时段内同步标注契约**（2026-09-10 教训，务必遵守）：改 `opinion/prompts.py`
   的判读文本（`DOCTRINE_NO_DIRECTION` / `DOCTRINE_REVIEW` / ANNOTATION prompt）会改变
   `annotation_fp_input()` 指纹 → 推送侧 `rows_cache` **全量作废、下一档整窗重抽**。重抽是
   LLM 调用，同一帖在新旧契约下**可能给出不同判定**（灰区帖尤甚）。2026-09-09 白天到晚间
   连续三次同步契约，导致同一位博主（智由智哉）的波段行在一天内"有→无→有"闪变三次，事后
   排查花了一整轮——**契约同步/暖场请在任务 Disabled 或非档位时段做**，做完再看效果。
+  本轮（2026-09-10 周口径修正）同样含 `opinion/prompts.py` 补条 → **指纹会变**，同步须等
+  `BriefingDay`（09:00–15:00 每 30 分）/`BriefingEvening`（16:00–22:00 每整点）档位之外。
+  **本轮实测记录（2026-09-10 13:12 部署，取 13:00 档跑完后的档间空档）**：
+  - 同步方式改为**只传改动文件清单**（`git show --name-only <commit>` → `tar -cf - -T 清单`，
+    86 个文件），不整仓打包——整仓打包会把未提交的假帖 WIP 一并带上生产机。传完逐个核对
+    SHA256 与 Mac 一致（86/86 ✓）。
+  - **随后补齐存量漂移**：再按 `git ls-files`（排除 `data/`、`briefing/data/`、`research/signals`
+    与 `*/reports/` 与 4 项假帖 WIP）取 146 个文件全量对齐，`0 / 146` 差异。清掉的漂移里有
+    **`research/config.py`**（Windows 侧陈旧，仍在 `TRADING_TICKS = list(_bcfg.TRADING_TICKS)`，
+    而 `briefing/scripts/config.py` 早已删掉该常量 → `test_watermark_coverage.py` 在 Windows 上
+    `AttributeError`）、`opinion/tests/test_*.py` 13 个从未同步过的测试、`archive/` 旧路径残留 10 个。
+    对齐后该测试在 Windows 上 **5 项断言全 PASS、退出码 0**。
+  - 随即暖场 `--dry-run --no-scrape --time 13:15 --board both`（约 2 分钟）：全量重抽 40 位
+    博主 + 复核 5 条裁决，缓存指纹落到 `75944d77`；**未推送、未改水位**。
+  - **本轮契约文件时间线**（说明为什么今天指纹动了两次）：`opinion/annotate.py` 10:53:46 →
+    第一版契约在 ~10:58 同步，指纹 `64693e11 → f9efdd23`；`opinion/prompts.py` 12:48:28 定稿
+    （补「回顾 vs 前瞻」之分＝用户本轮的核心要求），随 13:12 的 86 文件包同步，指纹
+    `f9efdd23 → 75944d77`。**即 13:00 档是在第一版契约下推的，13:30 档起才是定稿契约**——
+    盘中改了两次契约正是上一段警告的情形，本轮无法避免（修订指令本身是盘中和用户对齐的），
+    但**以后请把契约修订攒到非档位时段一次到位**。
+  - **周口径的可见效果符合预期**：周末帖的 `nweek` 行终点与锚定周段各前移一周（家有高中生2 /
+    知行合一 / 爱生活的荷叶Rp：终点 09-18 → **09-11**，anchor 下周 09-14~09-18 → 本周
+    09-07~09-11）；周中 `week` 行（赵红力 / 大盘蜂向标 / 我觉醒了）终点不变；**零条**周末
+    `week` 行——判层没有把周末"本周"误编成 `week`。
+  - **但卡面变化不止于此**：全量重抽连带把灰区/复核的判定也重掷了一次（上一段的机制），
+    当日波段卡上卡集合因此换掉 4 位（智由智哉、山顶望星空的诗人 下卡；四十二流光、诸葛不亮
+    换帖上卡），short 卡多 1 位（云帆观市）。**这与周口径无关，是"契约变更 = 全量重抽 =
+    判定重掷"的必然代价**，不是本次修正的缺陷——换口径就得接受它重掷一次。
+  - **⚠️ Windows 控制台是 GBK**：`opinion/tests/test_*.py` 17 个文件收尾都 print ✅/🔴/🟢，
+    在 GBK 控制台上会抛 `UnicodeEncodeError: 'gbk' codec can't encode character '✅'`——
+    **断言已全过，却让进程以非 0 退出**（假失败）。已在这 17 个文件的 `sys.path.insert` 之后统一加
+    `sys.stdout.reconfigure(encoding="utf-8", errors="replace")` 守卫；加后 Windows 上中文与
+    emoji 均正常输出、退出码 0。**新增测试文件请照抄这两行**。

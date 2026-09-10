@@ -1,5 +1,6 @@
 {
  "blogger": "云帆观市",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "云帆观市",
@@ -1415,8 +1416,8 @@
    "cat": "scored",
    "summary": "下周进入维稳阶段，大盘挖坑是低吸位置",
    "board": "swing",
-   "target": "2026-03-27",
-   "target_txt": "本周（至 03-27）"
+   "target": "2026-03-20",
+   "target_txt": "本周（至 03-20）"
   },
   {
    "blogger": "云帆观市",
@@ -4119,8 +4120,8 @@
    "cat": "scored",
    "summary": "下周A股有望迎来反弹行情",
    "board": "swing",
-   "target": "2026-07-31",
-   "target_txt": "本周（至 07-31）"
+   "target": "2026-07-24",
+   "target_txt": "本周（至 07-24）"
   },
   {
    "blogger": "云帆观市",
@@ -4236,8 +4237,8 @@
    "cat": "scored",
    "summary": "8月份第一周周线收阳可能性较大",
    "board": "swing",
-   "target": "2026-08-07",
-   "target_txt": "本周（至 08-07）"
+   "target": "2026-07-31",
+   "target_txt": "本周（至 07-31）"
   },
   {
    "blogger": "云帆观市",

@@ -1,5 +1,6 @@
 {
  "blogger": "三粒光",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "三粒光",
@@ -115,8 +116,8 @@
    "cat": "scored",
    "summary": "下周震荡上涨为主，周一收小阳线",
    "board": "swing",
-   "target": "2026-01-23",
-   "target_txt": "本周（至 01-23）"
+   "target": "2026-01-16",
+   "target_txt": "本周（至 01-16）"
   },
   {
    "blogger": "三粒光",
@@ -2273,8 +2274,8 @@
    "cat": "scored",
    "summary": "至暗时刻在周五，下周仍调整",
    "board": "swing",
-   "target": "2026-07-17",
-   "target_txt": "本周（至 07-17）"
+   "target": "2026-07-10",
+   "target_txt": "本周（至 07-10）"
   },
   {
    "blogger": "三粒光",
@@ -3365,8 +3366,8 @@
    "cat": "scored",
    "summary": "下周看调整，排除连续向上",
    "board": "swing",
-   "target": "2026-08-21",
-   "target_txt": "本周（至 08-21）"
+   "target": "2026-08-14",
+   "target_txt": "本周（至 08-14）"
   },
   {
    "blogger": "三粒光",

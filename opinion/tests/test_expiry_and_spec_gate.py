@@ -24,6 +24,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 BRIEFING = os.path.join(ROOT, "briefing")
 sys.path.insert(0, BRIEFING)      # scripts.summarize / scripts.render（包内相对 import）
 sys.path.insert(0, ROOT)
+try:                      # Windows GBK 控制台：断言已全过，别让收尾 emoji 崩掉退出码
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 from opinion import schema as sch              # noqa: E402
 import scripts.render as R                     # noqa: E402
@@ -92,32 +96,41 @@ NWEEK_CASE = row("swing", "nweek", "下周", "2026-09-07 09:30")
 assert S.resolve_anchors({"swing": {"测试博主": NWEEK_CASE}}, now("2026-09-14 09:00"))["swing"]
 print("[PASS] 门① 两板统一：波段本周行 09-11 盘后剔除 / 下周行 09-14 上卡")
 
-# ── 门① 与 anchor 同口径（2026-09-10 修正的周末 nweek 缺陷回归，用户案例）────────
-# 智由智哉 09-06（周日）帖「下周先抑后扬，整体看多」：anchor = 下周 09-14~09-18，
-# 则验证终点必须是 09-18（该周最后交易日）。修复前 endpoint 走 pub+7 取 ISO 周 → 09-11，
-# 卡面自相矛盾（"下周 09-14~09-18 · 终点 09-11 收盘"），且门① 会在 09-11 盘后提前一周剔除该行。
+# ── 门① 与 anchor 同口径（2026-09-10 周口径修正回归，用户案例）─────────────────
+# 智由智哉 09-06（周日）帖「下周先抑后扬，整体看多」：周日说的"下周"从发帖时点看就是
+# **即将到来的那一周** 09-07~09-11 → 验证终点 = 09-11（该周最后交易日）。
+# 修正前 push 走"博主视角周 +1 周"→ 终点 09-18、anchor「下周 09-14~09-18」——把周日说的
+# "下周"整整推迟一周验证（canonical/mirror 一直是 09-11，三份口径不一致）。
 ZYZZ = row("swing", "nweek", "下周", "2026-09-06 11:29")
-assert EP.endpoint_of(date(2026, 9, 6), "nweek") == date(2026, 9, 18), "周末 nweek 终点口径回退"
+assert EP.endpoint_of(date(2026, 9, 6), "nweek") == date(2026, 9, 11), "周末 nweek 终点口径回退"
 
 def _swing_out(t):
     return S.resolve_anchors({"swing": {"智由智哉": ZYZZ}}, now(t))["swing"].get("智由智哉")
 
-# 用户看到的那一档：卡 09-10 → anchor「下周 09-14~09-18」、终点 09-18（修复前误答 09-11）
-o = _swing_out("2026-09-10 09:00")
-assert o["anchor"] == "下周 09-14~09-18" and o["endpoint"] == date(2026, 9, 18), o
-# 跨档不变式：**终点日必须始终落在 anchor 展示的周段内**（卡面自洽；标签随卡片日变，周段不变）
-for t, want_anchor in (("2026-09-10 09:00", "下周 09-14~09-18"),
-                       ("2026-09-11 16:00", "下周 09-14~09-18"),   # 修复前 09-11 盘后即被误剔
-                       ("2026-09-14 09:00", "本周 09-14~09-18")):  # 进入目标周后改口径为「本周」
+# 跨档不变式：**终点日必须始终落在 anchor 展示的周段内**（卡面自洽；标签随卡片日变）
+for t, want_anchor in (("2026-09-06 12:00", "下周 09-07~09-11"),   # 发帖当天（周日）：目标周即"下周"
+                       ("2026-09-10 09:00", "本周 09-07~09-11"),   # 进入目标周后改口径为「本周」
+                       ("2026-09-11 14:30", "本周 09-07~09-11")):  # 目标周最后交易日盘中仍在卡上
     o = _swing_out(t)
     assert o, f"{t}：行被提前剔除（周末 nweek 终点算错 → 门① 早于目标周触发）"
     assert o["anchor"] == want_anchor, (t, o["anchor"])
-    lo, hi = (date(2026, 9, 14), date(2026, 9, 18))
+    lo, hi = (date(2026, 9, 7), date(2026, 9, 11))
     assert lo <= o["endpoint"] <= hi, f"{t}：终点 {o['endpoint']} 不在 anchor 周段 {lo}~{hi} 内"
-# 到真正的终点 09-18 15:00 收盘后才剔除
-assert _swing_out("2026-09-18 14:30")
-assert _swing_out("2026-09-18 20:00") is None
-print("[PASS] 门① 周末 nweek 与 anchor 同口径：09-11 盘后不再误剔、终点恒落在 anchor 周段内（用户案例）")
+# 到真正的终点 09-11 15:00 收盘后剔除（门①），此后目标周已整体过去（周段门）
+assert _swing_out("2026-09-11 16:00") is None, "终点 09-11 收盘后仍显示"
+assert _swing_out("2026-09-14 09:00") is None, "目标周已整体过去仍显示"
+print("[PASS] 门① 周末 nweek 与 anchor 同口径：终点恒落在 anchor 周段内、09-11 收盘后剔除（用户案例）")
+
+# ── 周口径修正的另一半：周末「本周」= 刚结束那一周（回顾）→ 两板都不显示 ──────────
+# 门① 按终点剔除（09-04 15:00 早于任何后续档），周段门按"目标周已整体过去"剔除；
+# 报告侧同判 `无效-过时`（run_direction calc ③：ep < 发布日）。**不再被挪进下一周计分。**
+WEEKEND_WEEK = row("swing", "week", "本周", "2026-09-06 11:29")   # 周日发的"本周"（复盘句）
+assert EP.endpoint_of(date(2026, 9, 6), "week") == date(2026, 9, 4) < date(2026, 9, 6), \
+    "周末「本周」终点必须落在发帖日之前（该周已收盘结束）"
+for t in ("2026-09-06 12:00", "2026-09-07 09:00", "2026-09-10 09:00"):
+    assert S.resolve_anchors({"swing": {"测试博主": WEEKEND_WEEK}}, now(t))["swing"] == {}, \
+        f"门① 失效：{t} 仍显示周末「本周」行（回顾句不该被当成对未来的预测上卡）"
+print("[PASS] 周末「本周」行两板一致剔除（终点早于发帖日 → 回顾句不参与展示/计分）")
 
 # long（无终点）不过门，不编造日期
 LONG_CASE = {"blogger": "测试博主", "post_id": "P1", "has_view": True, "stance": "多",
@@ -162,10 +175,10 @@ print(f"[PASS] 行头标注（超短无终点兜底）：{line1}")
 SWING_ROW = {"blogger": "智由智哉", "post_id": "P2", "has_view": True, "stance": "多",
              "horizon": "下周", "spec": "nweek", "summary": "先抑后扬，整体看多",
              "quote": "下周先抑后扬，整体看多", "quote_ts": ts("2026-09-06 11:29"),
-             "anchor": "下周 09-14~09-18", "endpoint": date(2026, 9, 18)}
+             "anchor": "本周 09-07~09-11", "endpoint": date(2026, 9, 11)}
 line1 = R._fmt_board_row("智由智哉", SWING_ROW).split("\n")[0]
 # 2026-09-10 用户裁决：波段周期段同样在有终点时省去（终点即该周最后交易日，重复陈述）
-assert line1 == "🔴 **智由智哉** 看多 · 终点 09-18 收盘 · spec nweek", line1
+assert line1 == "🔴 **智由智哉** 看多 · 终点 09-11 收盘 · spec nweek", line1
 print(f"[PASS] 行头标注（波段，用户案例，周期段已省）：{line1}")
 
 # 波段无终点（long / 更长）→ 周期段回落显示，不空着

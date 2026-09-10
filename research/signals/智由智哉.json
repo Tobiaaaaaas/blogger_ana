@@ -1,5 +1,6 @@
 {
  "blogger": "智由智哉",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "智由智哉",
@@ -141,8 +142,8 @@
    "cat": "scored",
    "summary": "节前最后一周继续向上反弹可期",
    "board": "swing",
-   "target": "2026-02-13",
-   "target_txt": "本周（至 02-13）"
+   "target": "2026-02-06",
+   "target_txt": "本周（至 02-06）"
   },
   {
    "blogger": "智由智哉",
@@ -908,8 +909,8 @@
    "cat": "scored",
    "summary": "下周将继续上攻，3731不可能跌破",
    "board": "swing",
-   "target": "2026-08-07",
-   "target_txt": "本周（至 08-07）"
+   "target": "2026-07-31",
+   "target_txt": "本周（至 07-31）"
   },
   {
    "blogger": "智由智哉",
@@ -973,8 +974,8 @@
    "cat": "scored",
    "summary": "下周重返趋势开启新一轮单边上涨",
    "board": "swing",
-   "target": "2026-08-14",
-   "target_txt": "本周（至 08-14）"
+   "target": "2026-08-07",
+   "target_txt": "本周（至 08-07）"
   },
   {
    "blogger": "智由智哉",
@@ -1025,8 +1026,8 @@
    "cat": "scored",
    "summary": "下周大阳收复趋势收复4000",
    "board": "swing",
-   "target": "2026-08-21",
-   "target_txt": "本周（至 08-21）"
+   "target": "2026-08-14",
+   "target_txt": "本周（至 08-14）"
   },
   {
    "blogger": "智由智哉",

@@ -1,5 +1,6 @@
 {
  "blogger": "股评老陈",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "股评老陈",
@@ -11,8 +12,8 @@
    "cat": "scored",
    "summary": "预判上证下周收盘K线小阳十字星",
    "board": "swing",
-   "target": "2026-01-09",
-   "target_txt": "本周（至 01-09）"
+   "target": "2025-12-31",
+   "target_txt": "本周（至 12-31）"
   },
   {
    "blogger": "股评老陈",
@@ -128,8 +129,8 @@
    "cat": "scored",
    "summary": "推测下周周K线小阳十字星，最高4259点附近",
    "board": "swing",
-   "target": "2026-01-16",
-   "target_txt": "本周（至 01-16）"
+   "target": "2026-01-09",
+   "target_txt": "本周（至 01-09）"
   },
   {
    "blogger": "股评老陈",
@@ -2299,8 +2300,8 @@
    "cat": "scored",
    "summary": "本周可能调整到4100点附近",
    "board": "swing",
-   "target": "2026-05-15",
-   "target_txt": "本周（至 05-15）"
+   "target": "2026-05-08",
+   "target_txt": "本周（至 05-08）"
   },
   {
    "blogger": "股评老陈",

@@ -1,5 +1,6 @@
 {
  "blogger": "我觉醒了",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "我觉醒了",
@@ -180,8 +181,8 @@
    "cat": "scored",
    "summary": "下周百分之八十向下调整杀跌",
    "board": "swing",
-   "target": "2026-01-23",
-   "target_txt": "本周（至 01-23）"
+   "target": "2026-01-16",
+   "target_txt": "本周（至 01-16）"
   },
   {
    "blogger": "我觉醒了",
@@ -258,8 +259,8 @@
    "cat": "scored",
    "summary": "下周大盘来一根大阴线板上钉钉，春节前杀跌概率80%",
    "board": "swing",
-   "target": "2026-01-30",
-   "target_txt": "本周（至 01-30）"
+   "target": "2026-01-23",
+   "target_txt": "本周（至 01-23）"
   },
   {
    "blogger": "我觉醒了",
@@ -349,8 +350,8 @@
    "cat": "scored",
    "summary": "下周震荡一二天后新的杀跌不可避免",
    "board": "swing",
-   "target": "2026-02-06",
-   "target_txt": "本周（至 02-06）"
+   "target": "2026-01-30",
+   "target_txt": "本周（至 01-30）"
   },
   {
    "blogger": "我觉醒了",
@@ -2598,8 +2599,8 @@
    "cat": "scored",
    "summary": "八月第一周跌破3741点板上钉钉",
    "board": "swing",
-   "target": "2026-08-07",
-   "target_txt": "本周（至 08-07）"
+   "target": "2026-07-31",
+   "target_txt": "本周（至 07-31）"
   },
   {
    "blogger": "我觉醒了",

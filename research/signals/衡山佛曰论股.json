@@ -1,5 +1,6 @@
 {
  "blogger": "衡山佛曰论股",
+ "extract_through": null,
  "signals": [
   {
    "blogger": "衡山佛曰论股",
@@ -1168,8 +1169,8 @@
    "cat": "scored",
    "summary": "节后首周承接跌势，缩量调整",
    "board": "swing",
-   "target": "2026-02-27",
-   "target_txt": "本周（至 02-27）"
+   "target": null,
+   "target_txt": "周期不明确"
   },
   {
    "blogger": "衡山佛曰论股",
@@ -3742,8 +3743,8 @@
    "cat": "scored",
    "summary": "4055一线下周必将告破",
    "board": "swing",
-   "target": "2026-06-05",
-   "target_txt": "本周（至 06-05）"
+   "target": "2026-05-29",
+   "target_txt": "本周（至 05-29）"
   },
   {
    "blogger": "衡山佛曰论股",
@@ -5523,8 +5524,8 @@
    "cat": "scored",
    "summary": "本周二次探底，极限低点3721~3741，反复筑底",
    "board": "swing",
-   "target": "2026-07-31",
-   "target_txt": "本周（至 07-31）"
+   "target": "2026-07-24",
+   "target_txt": "本周（至 07-24）"
   },
   {
    "blogger": "衡山佛曰论股",
@@ -5965,8 +5966,8 @@
    "cat": "scored",
    "summary": "本周3980都会是高点，但总体行情并未完",
    "board": "swing",
-   "target": "2026-08-14",
-   "target_txt": "本周（至 08-14）"
+   "target": "2026-08-07",
+   "target_txt": "本周（至 08-07）"
   },
   {
    "blogger": "衡山佛曰论股",

@@ -80,7 +80,7 @@ SYSTEM_PROMPT = o_prompts.ANNOTATION_SYSTEM_PROMPT
 # ——与共享 ANNOTATION_SYSTEM_PROMPT 同一文本），本后缀插值它（改教义 → 标注指纹变 → 推送 rows_cache
 # 作废重抽，机制接受）；下方【加减仓…】段只补报告特有的 spec 落地口径。批间同文 → 利于 DeepSeek prompt 缓存。
 _REPORT_EXTRACT_SUFFIX = """
-【周期口径】spec 一律按**交易日**理解：t1=发帖后的第 1 个交易日（周末/假日发的"明天"仍记 t1，日历换算由系统做）；"后天/两日后"→t2；"N 天后/未来几天"这类自然日表述 → 填对应的 tN（系统按 N 个交易日计）。本周→week、下周→nweek、**"下周一"→ 该日即发帖后首个交易日（周五/周六/周日发帖时通常如此）则 t1、否则 nweek_first**（2026-09-10 编码纠正：t1 的定义就是"发帖后第 1 个交易日"，"下周一"落在那一格时二者同义）、月底前→month、下月→nmonth；今年/下半年/年度/长期/未来几个月 → long（unscored）。只填 spec 档位，不要写具体日期。**未来具体日期（"X月X日"）同样只落档位、不写 d:YYYY-MM-DD**：带 本周/下周/月底 等词 → 就近 week/nweek（"下周一"按上述分叉落 t1 或 nweek_first）/month/nmonth，有词跟词；否则按该日期距发帖日的**自然日差**落 tN（如 8/10 发帖说"8月20日"→ t10），自然日差 >30 或明显远期（跨下月以后/跨年/"某日见顶见底"类远期节点）→ long（unscored）。
+【周期口径】spec 一律按**交易日**理解：t1=发帖后的第 1 个交易日（周末/假日发的"明天"仍记 t1，日历换算由系统做）；"后天/两日后"→t2；"N 天后/未来几天"这类自然日表述 → 填对应的 tN（系统按 N 个交易日计）。本周→week、下周→nweek、**"下周一"→ 该日即发帖后首个交易日（周五/周六/周日发帖时通常如此）则 t1、否则 nweek_first**（2026-09-10 编码纠正：t1 的定义就是"发帖后第 1 个交易日"，"下周一"落在那一格时二者同义）、**非交易日（周末/节假日）发帖说"本周"：`week` 的终点是"发帖日所在那一周"的最后交易日 → 该周已收盘结束，故指"刚结束那一周"的回顾句不产行、确指"即将到来那一周"的前瞻句必须编码 `nweek`（2026-09-10 周口径修正，非交易日一律不得产 `week`）**、月底前→month、下月→nmonth；今年/下半年/年度/长期/未来几个月 → long（unscored）。只填 spec 档位，不要写具体日期。**未来具体日期（"X月X日"）同样只落档位、不写 d:YYYY-MM-DD**：带 本周/下周/月底 等词 → 就近 week/nweek（"下周一"按上述分叉落 t1 或 nweek_first）/month/nmonth，有词跟词；否则按该日期距发帖日的**自然日差**落 tN（如 8/10 发帖说"8月20日"→ t10），自然日差 >30 或明显远期（跨下月以后/跨年/"某日见顶见底"类远期节点）→ long（unscored）。
 
 【发帖时刻行情注记】每条帖子下方可能附一行「[行情@发帖 …]」，列出该帖**发帖时刻**各指数现值（上证指数/创业板指/沪深300/上证50/中证500/中证1000/科创50）。用它做两件事：① 指数识别——某点位/方向句提到哪个指数，按注记里的指数现值对照（帖内未点名指数的，默认上证指数）；② 定多空——「博主所说点位 vs 注记里该指数现值」：说涨到/站上 4250 而现值 3940 → d=1 看多；说跌向/破位 3900 而现值 3940 → d=-1 看空。**用注记现值判断，不要凭旧记忆**；注记缺失（如行情数据未覆盖）的帖按正文语境推断。
 
@@ -701,11 +701,24 @@ def main():
         print("\n[部分运行] 仅处理前 %d 条，未写正式文件（加 --out 可写指定路径）" % args.limit)
         return
 
+    # ── 抽取水位线 extract_through（2026-09-10）──
+    # 语义 =「本博主的帖子已被方向抽取**处理到**的日期」= 本次所依据帖库的最新发帖日。
+    # 为什么需要它：research/poll.py 原先拿 LS（最后一条**信号**的 pub 日）当抽取前沿的代理，
+    # 但尾巴那几帖若本来就没有方向观点（脚本判"无实质内容/无明确方向"），LS 不会推进 →
+    # 覆盖率门把「已抽取但无信号」误判成「右侧漏抽」，整档判不干净、样本窗被无谓截断
+    # （实例：道术合一 尾段 4 帖抽出 0 条 → short 回测样本窗 158→140 日）。
+    # 水位线把「跑到哪天」这件事显式记下来，与「抽到几条」解耦。
+    # --limit 冒烟只处理前 N 条 → 不写满前沿，退化为已处理帖的最后一天（宁保守勿虚报）。
+    _processed = eval_posts if args.limit > 0 else all_posts
+    extract_through = max((p.get("publish_date") or "").strip()[:10]
+                          for p in _processed) if _processed else ""
+
     out_path = args.out or os.path.join(PROJECT_ROOT, "data", "direction_signals", f"{blogger}.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"blogger": blogger, "signals": signals}, f, ensure_ascii=False, indent=2)
-    print(f"输出: {out_path}（{len(signals)} 条信号）")
+        json.dump({"blogger": blogger, "extract_through": extract_through or None,
+                   "signals": signals}, f, ensure_ascii=False, indent=2)
+    print(f"输出: {out_path}（{len(signals)} 条信号；抽取水位线 {extract_through or '—'}）")
 
     # ── 可复现性记录（gitignored，仅本地溯源）──
     try:
@@ -720,6 +733,7 @@ def main():
                 "verify": not args.no_verify,
                 "posts_total": len(all_posts),
                 "posts_eval": total_eval,
+                "extract_through": extract_through or None,
                 "signals": len(signals),
                 "cat": dict(cat_counts),
                 "signals_with_target": sum(1 for s in signals if s.get("target") is not None),
