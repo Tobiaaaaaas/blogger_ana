@@ -12,7 +12,7 @@ ana/
 ├── .gitignore
 ├── .claude/                        Claude Code 技能定义
 │   └── skills/analyze-blogger/
-│       └── SKILL.md                博主分析主技能（Direction 方向预测评估）
+│       └── SKILL.md                博主择时能力打分
 │
 ├── knowledge/                      市场知识库（拐点目录）
 │   └── market_analysis.md          2024.06~2026.08 上证 zigzag 拐点链
