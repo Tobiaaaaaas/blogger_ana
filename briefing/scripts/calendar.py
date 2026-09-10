@@ -114,6 +114,43 @@ def trading_days(d: date, n: int) -> list:
     return sorted(out)
 
 
+def blogger_week_monday(d: date) -> date:
+    """博主视角「本周」的周一（2026-09-10 从 summarize._week_monday 上移，单一同源）。
+
+    周一~周五 → 当周周一（ISO 周）；**周六/日 → 下一周周一**——周末帖多在预判将临一周，
+    故周日说的"本周"指明天开始的那一周。此口径决定"下周"落在哪一周，是锚定展示与
+    验证终点**共用**的周定义（`endpoint.endpoint_of` 的 week/nweek 必须与
+    `summarize._anchor_row` 的 anchor 同口径，否则卡面会出现"下周 09-14~09-18 ·
+    终点 09-11 收盘"式的自相矛盾，且过期门会提前一周剔除该行）。
+    """
+    m = d - timedelta(days=d.weekday())
+    if d.weekday() >= 5:
+        m += timedelta(days=7)
+    return m
+
+
+def trading_days_in_iso_week(d: date) -> list:
+    """d 所在 ISO 周的交易日（升序；2026-09-10 新增，供验证终点 week/nweek 推算）。
+
+    实现只依赖 is_trading_day（JSON 缓存与内置 2026 规则两条路径同一份代码，无需 bisect）：
+    遍历该 ISO 周（周一~周日）7 个自然日，filter 出交易日。可能为空（整周假期，理论罕见）。
+    """
+    monday = d - timedelta(days=d.weekday())
+    return [monday + timedelta(days=i) for i in range(7)
+            if is_trading_day(monday + timedelta(days=i))]
+
+
+def trading_days_in_month(d: date) -> list:
+    """d 所在自然月的交易日（升序；2026-09-10 新增，供验证终点 month/nmonth 推算）。"""
+    cur = d.replace(day=1)
+    out = []
+    while cur.month == d.month:
+        if is_trading_day(cur):
+            out.append(cur)
+        cur += timedelta(days=1)
+    return out
+
+
 def n_trading_days_ago(d: date, n: int) -> date:
     """d 往前数第 n 个交易日那天（v14 交易日窗口起点；n=1 → 前一交易日）。
 

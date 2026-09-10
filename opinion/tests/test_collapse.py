@@ -284,7 +284,12 @@ w12 = ccol("swing", [_r12], ws=None)
 assert s12 is not None and s12["horizon"] == "明天", \
     f"C12: 周五下周一=nweek_first 应降级 short 且归一明天: {s12}"
 assert w12 is None, "C12: 周五下周一=nweek_first → swing 应无行"
-print("[PASS] C12 周五 nweek_first：降级 short(明天)、swing 无行")
+# 2026-09-10 补：降级行的 spec 一并等价归一 nweek_first→t1（与"下周一"编码分叉同构，
+# 使推送侧超短 spec 门 today/t1 能放行；两者端点同为发帖后首个交易日、评分等价）
+assert s12["spec"] == "t1", f"C12: 降级行 spec 应归一 t1: {s12}"
+print("[PASS] C12 周五 nweek_first：降级 short(明天)、spec 归一 t1、swing 无行")
+
+# C12b 见 C15 之后（依赖 C13/C14 的行）
 
 # C13：周一(09-07)发帖 spec=nweek_first horizon=下周（真·下周一周=隔 7 日）→ 仍 swing
 _p13 = post(1301, "2026-09-07 21:00", "下周展望",
@@ -310,6 +315,15 @@ print("[PASS] C14 周五 nweek 整周观点：留 swing、不进 short（不误�
 assert ccol("swing", [_r12], ws=None, cal=None) is not None, "C15: cal=None 旧行为 swing 上卡"
 assert ccol("short", [_r12], ws=None, cal=None) is None, "C15: cal=None 旧行为 short 无行"
 print("[PASS] C15 cal=None 回退：nweek_first 按字面词判层（swing 上卡）")
+
+# C12b（2026-09-10 补）：坍缩输出**必带 spec 键**（推送侧行头标注 + 超短 spec 门 + 验证终点
+# 推算的输入）；只有降级行才归一 nweek_first→t1，非降级行原样透传
+for _b, _rows, _want in [("short", [_r12], "t1"), ("swing", [_r14], "nweek"),
+                         ("swing", [_r13], "nweek_first")]:
+    _out = ccol(_b, _rows, ws=None)
+    assert _out is not None and _out["spec"] == _want, \
+        f"C12b: {_b} 坍缩输出 spec 应为 {_want!r}，得 {_out}"
+print("[PASS] C12b 坍缩输出带 spec：降级行归一 t1 / 非降级行原样透传（nweek/nweek_first）")
 
 # ── 主结论对象门（2026-09-09 衡山/诸葛复盘）──
 # 渲染底限：idx=上证 但摘要点名他指且全文无上证指向的自相矛盾行永不上上证卡（主结论对象不是

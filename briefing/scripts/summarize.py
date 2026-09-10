@@ -17,7 +17,9 @@ v15（波段窗口 3→5 交易日）→ **v16（2026-09-08 分层分解单趟�
      同一帖可同时产超短+波段两行，quote/summary 各引各层原句；混合帖/转述由 LLM 语义
      分解归位，不设内容正则闸门。带 rows_cache v3 增量：窗口帖集合（含正文指纹）未变
      且各所属层行未过期 → 跳过 DeepSeek 复用缓存行（row=None 也缓存省档）。
-  2. resolve_anchors：按引文发帖日锚定绝对目标（超短剔已过/未指今明，波段剔目标周已过）。
+  2. resolve_anchors：按引文发帖日锚定绝对目标 + 验证终点时效门（2026-09-10：两板统一
+     剔除**验证终点已过**者 + 超短只认 spec∈{today,t1}；超短另剔目标日不指今明、波段另剔
+     目标周已过）。
   3. board_counts：单板块多空计数。
   4. summarize_board(board_key, …)：单板块快照 + 本板块计数 → 一段本板块收敛总结。
   rows_cache v2→v3：{"boards":{board:{博主:{row}}} → {"bloggers":{博主:{posts:[指纹],
@@ -60,7 +62,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
-from . import calendar, config, paths
+from . import calendar, config, endpoint, paths
 
 # 2026-09-08 共享模块重构：判层 prompt 收敛为 opinion 单一共享逐帖标注（ANNOTATION_SYSTEM_PROMPT），
 # 读帖/清洗/DeepSeek 网关/标注缓存一并委派顶层 opinion/ 包（推送、报告、画像三场景同源）。
@@ -133,7 +135,8 @@ def _annotate_rows(name, posts):
 def _origin_matches(board, disp, r, downgrade_ok=False):
     """Pillar C 溯源：候选规范行 r 是否坍缩展示行 disp 的来源（2026-09-09 A4-1）。
 
-    展示行 disp = collapse_board 输出（无 spec 字段），源行 r 为窗口缓存规范行。精确 pass
+    展示行 disp = collapse_board 输出（2026-09-10 起带 spec/anchor/endpoint，本函数只用
+    post_id/quote_ts/horizon，与新增键无关），源行 r 为窗口缓存规范行。精确 pass
     (downgrade_ok=False)：post_id/quote_ts 相等 + idx=上证 + cat=scored + horizon 逐字相等 +
     horizon_spec_ok(disp.horizon, r.spec)。降级豁免 pass (downgrade_ok=True)：仅放行 short 板
     展示归一「明天」的交易日再分类行——周五~周日发帖 spec=nweek_first 的规范行（horizon=下周）
@@ -429,11 +432,12 @@ def _bj_date(ts):
 
 
 def _week_monday(d):
-    """博主视角"本周"周一：周一~周五取当周周一；周六/日取下一周一（周末帖多预判将临一周）。"""
-    m = d - timedelta(days=d.weekday())
-    if d.weekday() >= 5:
-        m += timedelta(days=7)
-    return m
+    """博主视角"本周"周一（2026-09-10 上移 calendar.blogger_week_monday，此处仅别名）。
+
+    锚定展示与验证终点**必须**同一周定义，否则卡面出现"下周 09-14~09-18 · 终点 09-11
+    收盘"式自相矛盾（详见 calendar.blogger_week_monday 与 endpoint 模块注释）。
+    """
+    return calendar.blogger_week_monday(d)
 
 
 def _fmt_week_range(monday):
@@ -451,14 +455,43 @@ def next_trading_day(d):
 # 日期，摘要再出现 今天/明天/本周 只会制造"昨天说的明天"式错位 → 一律剔除）。
 
 
-def _anchor_row(board_key, row, card):
-    """把单条板块行按卡片日解析出绝对目标 anchor + 过期过滤。
+def _anchor_row(board_key, row, card, now):
+    """把单条板块行按卡片日解析出绝对目标 anchor + 验证终点 + 过期过滤。
 
-    返回规整后的 row（带 anchor），或 None（该博主本板块不显示）。
+    返回规整后的 row（带 anchor / endpoint），或 None（该博主本板块不显示）。
+
+    v18（2026-09-10 用户需求）两道**时效门**，两板块统一：
+    ① **验证终点过期门**：行的 spec → 验证终点日（`endpoint.endpoint_of`），终点时刻 =
+       该日 15:00 收盘；已 ≤ 现在 → 该预测的验证时点已经发生，不再显示
+       （"9月9日晚上发的、预测 9.9 下午三点收盘"即此类）。`long`（不计分/无期限）无终点、
+       不过此门（不编造日期）。
+    ② **超短 spec 门**：超短板只认 `spec ∈ {today, t1}`（1 个交易日内的预测能力），
+       其余档位即使 horizon 被归到 今天/明天 也不上超短卡。
+    通过的行带 endpoint（date），供 render 行头标注与 summarize 快照引用。
     """
     horizon = row.get("horizon") or "未提"
+    spec = row.get("spec")
     qd = _bj_date(row.get("quote_ts"))
+    # ── 门①（两板统一）：验证终点已过 → 不显示 ──
+    ep, ep_dt = None, None
+    if qd is not None and spec:
+        try:
+            ep = endpoint.endpoint_of(qd, spec)
+            ep_dt = endpoint.endpoint_dt(qd, spec)
+        except ValueError:
+            log.warning("  %s [%s] 未知 spec=%r，无法推算验证终点（行不过期门，放行）",
+                        row.get("blogger"), board_key, spec)
+    if ep_dt is not None and ep_dt <= now:
+        log.info("  %s [%s] %s spec=%s 验证终点 %s 15:00 已过（卡 %s %s）→ 不显示",
+                 row.get("blogger"), board_key, horizon, spec,
+                 ep.strftime("%m-%d"), card, now.strftime("%H:%M"))
+        return None
     if board_key == "short":
+        # ── 门②：超短只认 today/t1（预测能力 = 1 个交易日内）──
+        if spec not in ("today", "t1"):
+            log.warning("  %s [short] spec=%r 不在 {today,t1} → 不上超短卡",
+                        row.get("blogger"), spec)
+            return None
         if qd is None:
             return None  # 无引文发帖时间无法解析目标日，不外显（防编造）
         target = qd if horizon == "今天" else next_trading_day(qd)  # 明天 = 下一交易日
@@ -468,6 +501,8 @@ def _anchor_row(board_key, row, card):
             return None
         out = dict(row)
         out["anchor"] = target.strftime("%m-%d")
+        if ep is not None:
+            out["endpoint"] = ep
         return out
     # 波段
     if horizon in ("本周", "下周"):
@@ -489,24 +524,28 @@ def _anchor_row(board_key, row, card):
             word = ""  # 极端情况只留日期段
         out = dict(row)
         out["anchor"] = f"{word} {_fmt_week_range(mon)}" if word else _fmt_week_range(mon)
+        if ep is not None:
+            out["endpoint"] = ep
         return out
     out = dict(row)
     out["anchor"] = horizon if horizon != "未提" else ""
+    if ep is not None:
+        out["endpoint"] = ep
     return out
 
 
 def resolve_anchors(rows_by_board, now):
-    """按卡片日对两板块行做日期锚定 + 过期剔除 → {key: {博主: 规整行(带 anchor)}}。
+    """按卡片日对两板块行做日期锚定 + 时效过滤 → {key: {博主: 规整行(带 anchor/endpoint)}}。
 
-    now 为北京时 datetime（卡片日 = now.date()）。超短剔除目标已过/未指向今明者；
-    波段剔除目标周已过者。
+    now 为北京时 datetime（卡片日 = now.date()）。两板块统一：验证终点已过者剔除
+    （见 _anchor_row 门①）；超短另剔非 today/t1 档与目标日不指向今明者；波段另剔目标周已过者。
     """
     card = now.date()
     out = {}
     for key in config.PANEL_KEYS:
         live = {}
         for name, row in (rows_by_board.get(key) or {}).items():
-            resolved = _anchor_row(key, row, card)
+            resolved = _anchor_row(key, row, card, now)
             if resolved is not None:
                 live[name] = resolved
         out[key] = live
@@ -541,13 +580,13 @@ def board_counts(rows_by_board):
 # 日；swing：波段目标不可能是今明，本周/下周 周段见锚点）、无任何"板块即两层 /
 # 前 8 位双板块博主 / 跨板块层叠禁对立"等跨板块句子。
 
-SHORT_SUMMARY_SYSTEM_PROMPT = """你是财经观点收敛总结助手。给你「超短板块」博主的方向观点快照：每行 = 一位博主的最新**超短(0-1日)**表态 —— 多/空 · 目标日(anchor，如 ·09-03) · 一句核心 · 引文发帖时间；外加**系统统计的本板块权威计数**（X 多/Y 空、N/M 人表态）与大盘行情。
+SHORT_SUMMARY_SYSTEM_PROMPT = """你是财经观点收敛总结助手。给你「超短板块」博主的方向观点快照：每行 = 一位博主的最新**超短(0-1日)**表态 —— 多/空 · 目标日(anchor，如 ·09-03) · 验证终点(如 终点 09-03 收盘) · 一句核心 · 引文发帖时间；外加**系统统计的本板块权威计数**（X 多/Y 空、N/M 人表态）与大盘行情。
 
 口径（本卡只有超短这一层，不存在另一板块）：
 - 快照成员都是只对 今天/明天 做过方向表态、且目标日落在【日期锚点】的 卡片日/下一交易日 的博主；行头 anchor 即系统按发帖日换算的绝对目标日（如 ·09-03），引文时间为发帖时刻。
 - 同板块内真反向（同对今/明：有人看反弹、有人看续跌）才算方向分歧、才可点出；清一色同向、或仅 1~2 人表态时直接陈述方向，不要为凑"分歧"而硬造。
 - 同方向但操作取向相反（都看反弹、一个持有、一个反弹减仓）→ 写"反弹共识下的操作分化"，不算方向对立。
-- **日期纪律**：卡片日与下一交易日见【日期锚点】。涉及某位博主的目标日**只能照抄该行 anchor 或引文日期**，禁止自己用 今天/明天/今日 等词推算任何博主表态所指的日子（原话再怎么写也别展开）；拿不准就只讲方向/逻辑/应对。板块整体措辞可写 今日/明日，但必须对应【日期锚点】的 卡片日/下一交易日；结尾操作句不必带日期。
+- **日期纪律**：卡片日与下一交易日见【日期锚点】。涉及某位博主的目标日**只能照抄该行 anchor 或引文日期**，禁止自己用 今天/明天/今日 等词推算任何博主表态所指的日子（原话再怎么写也别展开）；拿不准就只讲方向/逻辑/应对。板块整体措辞可写 今日/明日，但必须对应【日期锚点】的 卡片日/下一交易日；结尾操作句不必带日期。行头 `终点 MM-DD 收盘` 是系统算好的**验证终点**（该预测兑现/结算的时刻），**可照抄引用、禁止自行推算或改写**，不得把它写成别的日期。
 
 输出**一段收敛总结**（≤240 字，中文流畅一段；不要分点/列表/小标题）：
 ① 开头用系统给的**本板块计数**陈述版图（如：超短板块 X 多 Y 空、N 人表态，多数看今日反弹…）；
@@ -557,13 +596,13 @@ SHORT_SUMMARY_SYSTEM_PROMPT = """你是财经观点收敛总结助手。给你�
 输出严格 JSON：{"summary": "收敛总结一段(≤240字)"}。只输出 JSON，无其他文字。"""
 
 
-SWING_SUMMARY_SYSTEM_PROMPT = """你是财经观点收敛总结助手。给你「波段板块」博主的方向观点快照：每行 = 一位博主的最新**波段(2日+)**表态 —— 多/空 · 目标周/周期(anchor，如 本周 08-31~09-04，或 近日/更长 原词) · 一句核心 · 引文发帖时间；外加**系统统计的本板块权威计数**（X 多/Y 空、N/M 人表态）与大盘行情。
+SWING_SUMMARY_SYSTEM_PROMPT = """你是财经观点收敛总结助手。给你「波段板块」博主的方向观点快照：每行 = 一位博主的最新**波段(2日+)**表态 —— 多/空 · 目标周/周期(anchor，如 本周 08-31~09-04，或 近日/更长 原词) · 验证终点(如 终点 09-04 收盘) · 一句核心 · 引文发帖时间；外加**系统统计的本板块权威计数**（X 多/Y 空、N/M 人表态）与大盘行情。
 
 口径（本卡只有波段这一层，不存在另一板块）：
 - 快照成员都是对 近日/本周/下周/更长 做过方向表态、且目标周未整体过去的博主；行头 anchor 是系统按发帖日锚定的绝对周段（本周/下周 = 周一~周五日期段）或 近日/更长 原词。
 - 同板块内真反向才算方向分歧、才可点出；清一色同向、或仅 1~2 人表态时直接陈述方向，不要为凑"分歧"而硬造。
 - 同方向但操作取向相反（都看震荡调整、一个减仓、一个等待低吸）→ 写"共识下的操作分化"，不算方向对立。
-- **日期纪律**：卡片日与 本周/下周 周段见【日期锚点】。波段目标不可能是 今天/明天 这类超短词——涉及某位博主的目标周**只能照抄该行 anchor 或引文日期**，禁止自己用 本周/下周/周X 推算；近日/更长 表态只讲方向逻辑、不补具体日期。板块整体可写 本周/下周，但必须对应【日期锚点】的周段；结尾操作句不必带日期。
+- **日期纪律**：卡片日与 本周/下周 周段见【日期锚点】。波段目标不可能是 今天/明天 这类超短词——涉及某位博主的目标周**只能照抄该行 anchor 或引文日期**，禁止自己用 本周/下周/周X 推算；近日/更长 表态只讲方向逻辑、不补具体日期。板块整体可写 本周/下周，但必须对应【日期锚点】的周段；结尾操作句不必带日期。行头 `终点 MM-DD 收盘` 是系统算好的**验证终点**（该预测兑现/结算的时刻），**可照抄引用、禁止自行推算或改写**，不得把它写成别的日期。
 
 输出**一段收敛总结**（≤240 字，中文流畅一段；不要分点/列表/小标题）：
 ① 开头用系统给的**本板块计数**陈述版图（如：波段板块 X 多 Y 空、N 人表态，多数认为…）；
@@ -611,7 +650,9 @@ def summarize_board(board_key, rows, counts, market_text, date_str,
         if lab is None:  # 兜底：未锚定的历史行退回周期词
             h = r.get("horizon") or "未提"
             lab = "" if h == "未提" else h
-        lines.append(f"▍{b}：{r['stance']}" + (f"·{lab}" if lab else "")
+        ep = r.get("endpoint")
+        ep_txt = f"·终点 {ep:%m-%d} 收盘" if ep else ""
+        lines.append(f"▍{b}：{r['stance']}" + (f"·{lab}" if lab else "") + ep_txt
                      + f"｜{r.get('summary')}｜引文 {t}")
     snapshot_txt = "\n".join(lines)
     counts_txt = config.format_board_count(board_key, c)

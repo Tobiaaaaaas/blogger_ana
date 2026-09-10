@@ -474,14 +474,22 @@ def collapse_board(board_key, blogger, rows, window_start=None, cal=None):
     if best is None:
         return None
     out_horizon = best.get("horizon")
+    out_spec = best.get("spec")
     if (board_key == "short" and out_horizon not in schema.PANEL_HORIZONS["short"]):
         out_horizon = "明天"  # 降级行：目标即下一交易日 → 展示归一为明天
+        if out_spec == "nweek_first":
+            # 2026-09-10 等价归一：降级行的目标日就是"发帖后首个交易日"，与 t1 同义同终点、
+            # 评分等价（见 prompts.py"下周一"编码纠正）→ spec 一并归一为 t1，使推送侧
+            # 超短 spec 门（today/t1）能放行；理论上新契约下不会再产这种组合，此处是兜底。
+            log.info("  %s [short] nweek_first 降级行（目标=发帖后首个交易日）→ spec 归一 t1", blogger)
+            out_spec = "t1"
     return {
         "blogger": blogger,
         "post_id": best.get("post_id"),   # 溯源（Pillar C：复核/失败回退按帖定位原文）
         "has_view": True,
         "stance": "多" if best.get("d") == 1 else "空",
         "horizon": out_horizon,
+        "spec": out_spec,                 # 2026-09-10：推送侧行头标注 + 超短 spec 门 / 终点推算用
         "summary": text.strip_rel_time((best.get("summary") or "").strip())[:50],
         "quote": (best.get("quote") or "").strip()[:60],
         "quote_ts": best.get("quote_ts"),

@@ -115,6 +115,10 @@ def _fmt_board_row(name, row):
     超短行 = 今天/明天 并列锚定目标日（如 `看多 · 明天(09-04)`）；波段行 anchor 已
     含周词/周期词（本周 09-07~09-11 / 近日 / 更长）→ 直接沿用；周期未提（horizon=
     未提 / 无 anchor）→ 显示 `周期未提`，不再空着。
+
+    2026-09-10（用户需求②）：行头再追加**验证终点与 spec 编码**（`· 终点 MM-DD 收盘
+    · spec <code>`，由 resolve_anchors 算好的 endpoint 提供；无终点（long/无法推算）
+    则省去终点段）——让每条推送自带"这句话按什么口径、什么时候被验证"。
     """
     emoji = STANCE_EMOJI.get(row.get("stance"), "")
     stext = STANCE_TEXT.get(row.get("stance"), row.get("stance") or "")
@@ -129,6 +133,11 @@ def _fmt_board_row(name, row):
         label = period
     if label:
         line1 += f" · {label}"
+    ep = row.get("endpoint")
+    if ep:
+        line1 += f" · 终点 {ep:%m-%d} 收盘"
+    if row.get("spec"):
+        line1 += f" · spec {row['spec']}"
     lines = [line1]
     if row.get("quote"):
         t = fmt_post_time(row.get("quote_ts"))

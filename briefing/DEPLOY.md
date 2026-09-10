@@ -132,3 +132,16 @@ tar --exclude='__pycache__' --exclude='*.pyc' --exclude='briefing/data' \
 - **头条风控**：若 Windows IP 触发"网络环境无法查看"，考虑放缓节流或换网络。
 - **窗口口径（v14 交易日，用户修正；v15 波段 3→5）**：超短 = 前一交易日 00:00 至 now、波段 = 前 5 个交易日 00:00 至 now（`config.WINDOW_TRADING_DAYS` + `calendar.n_trading_days_ago`），非自然日——周一早晨窗口天然含上周五帖，无 v13"周一漏帖"取舍。
 - 交易日历：akshare 拉取失败时回退内置 2026 节假日规则；跨年需更新 `calendar.py`。
+- **⚠️ 验证终点既有三份实现，改一处必同步**（2026-09-10）：`scripts/eval/run_direction.py`
+  （canonical/打分）/ `research/trading_cal.py`（mirror）/ `briefing/scripts/endpoint.py`（推送）。
+  `opinion/tests/test_endpoint_consistency.py` 702 组网格三方比对钉死，改任一份即红。
+  **已知 1 处有意分歧**：`周六/日 × nweek`——canonical/mirror 用 `pub+7 天` 取 ISO 周，
+  而 ISO 周是周一~周日，周末 +7 天落进的那一周正是 `week` 顺延后落进的同一周，于是
+  "本周"与"下周"**撞成同一天**；推送侧已改用博主视角周（与卡面 `下周 MM-DD~MM-DD`
+  同口径，否则卡面自相矛盾且过期门提前一周剔行）。canonical 参与历史打分，**未改**。
+- **⚠️ 不在推送时段内同步标注契约**（2026-09-10 教训，务必遵守）：改 `opinion/prompts.py`
+  的判读文本（`DOCTRINE_NO_DIRECTION` / `DOCTRINE_REVIEW` / ANNOTATION prompt）会改变
+  `annotation_fp_input()` 指纹 → 推送侧 `rows_cache` **全量作废、下一档整窗重抽**。重抽是
+  LLM 调用，同一帖在新旧契约下**可能给出不同判定**（灰区帖尤甚）。2026-09-09 白天到晚间
+  连续三次同步契约，导致同一位博主（智由智哉）的波段行在一天内"有→无→有"闪变三次，事后
+  排查花了一整轮——**契约同步/暖场请在任务 Disabled 或非档位时段做**，做完再看效果。

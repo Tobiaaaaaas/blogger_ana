@@ -72,6 +72,22 @@ _has(P,
      label="共享 prompt R1/R2 多周期各行 + 输出区正例")
 _has(SUFFIX, "周期词不救形态", "每个周期各产一行（必做）", label="报告后缀 R1/R2 同达")
 
+# ── 2026-09-10 裁决①：同期形态 + 泛净方向句 = 产行（灰区判死，不再摇摆）──
+_has(P,
+     "同期形态 + 泛净方向句 = 产行", "2026-09-10 裁决", "定死不摇摆",
+     "下周先抑后扬，整体看多",                   # 用户原句（智由智哉 09-06 帖）
+     "必须含净方向词", "不得**只截",              # quote 纪律：不许只截形态半句
+     "全帖再无该周期方向句",                      # 反例：只有形态仍不产行
+     label="共享 prompt 灰区产行（Q4 裁决）")
+_has(P, "整体看多", "下周探底回升", label="共享 prompt 灰区正例/反例并存")
+
+# ── 2026-09-10 编码纠正②：「下周一」按是否为发帖后首个交易日分叉 t1 / nweek_first ──
+_has(P,
+     "按该日是否为发帖日之后的首个交易日判定", "2026-09-10 编码纠正",
+     "周五/周六/周日发帖说", "语义等于", "周一~周四发帖",
+     label="共享 prompt 「下周一」编码分叉")
+_not_has(P, '"下周一" → nweek_first', label="共享 prompt 无「下周一」一律 nweek_first 旧编码")
+
 # ── 具体日期口径（D3 一致）：不产 d:YYYY-MM-DD，自然日差落 tN / 远期 long ──
 _has(P, "不写 d:YYYY-MM-DD", "自然日差", "t10", label="共享 prompt 具体日期落档位")
 _not_has(P, "→ d:YYYY-MM-DD", label="共享 prompt 无具体日期→d: 旧指令")
@@ -86,6 +102,16 @@ _has(V_PUSH,
      "还剩4成",
      label="推送 verify 新教义")
 _not_has(V_PUSH, "仓位自述/无明确方向", label="推送 verify 无旧一刀切桶")
+
+# ── 2026-09-10 复核镜像：灰区产行行必须 keep/fix、不得被复核 drop（不镜像=新行当档即被 drop）──
+_has(V_PUSH,
+     "同期形态 + 泛净方向句（2026-09-10 裁决）", "下周先抑后扬，整体看多",
+     "该行**成立**", "**不 drop**",
+     label="推送 verify 灰区镜像（Q4 keep 分支）")
+_has(V_REPORT, "下周先抑后扬，整体看多", label="报告 verify 灰区镜像同达")
+assert "同期形态 + 泛净方向句" in o_prompts.DOCTRINE_REVIEW, \
+    "DOCTRINE_REVIEW 应含 2026-09-10 灰区 keep 条目"
+print("[PASS] 同源：2026-09-10 灰区裁决已镜像进 DOCTRINE_REVIEW（双复核同达）")
 
 # ── 推送复核判定要点 1 按行周期限定：一帖多周期各行独立，不 cross-fix ──
 _has(V_PUSH,
