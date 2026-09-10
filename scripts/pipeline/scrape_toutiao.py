@@ -101,8 +101,10 @@ def parse_items(data):
         if not content or not isinstance(content, str) or len(content.strip()) < 5:
             continue
 
-        # 使用 publish_time（真正的发布时间），fallback到create_time，最后behot_time
-        pub_time = item.get("publish_time") or item.get("create_time") or item.get("behot_time", 0)
+        # 只认真实发布时间：publish_time → create_time。behot_time 是 feed 的"热度游标"≈抓取时刻，
+        # 绝非发帖时间；缺真实时间戳的条目一律视为时间未知(0)，不得用游标冒充（曾致假"09-08 14:54
+        # 发帖"——跳转流/兜底他人帖被盖成抓取时刻上卡）。
+        pub_time = item.get("publish_time") or item.get("create_time") or 0
         if isinstance(pub_time, (int, float)):
             if pub_time > 1e12:
                 pub_time = int(pub_time / 1000)
@@ -162,6 +164,37 @@ def parse_items(data):
             "read_count": item.get("read_count", 0) or item.get("display_count", 0),
         })
     return posts
+
+
+def _filter_foreign_posts(posts, explicit_name, existing_ids, dominant):
+    """跳转流/兜底他人帖防混入——返回 (保留帖列表, 说明 str|None)。
+
+    - explicit_name 指定抓取（简报窗口/定向，2026-09-09 起）**严格只认本人**：
+      feed 必须有 user==目标博主 的本人帖，有则只保留本人帖（他人/无身份一律弃）；
+      完全没有本人身份帖时，退回"连续性背书"——页面须含 ≥1 条本人已知 post_id
+      （兼容 feed 本身不带 user 的账号，如 枫叶/时间合伙人）；
+      两者皆无 → 判定为头条跳转流/兜底他人内容，返回空（调用方拒绝产出当本人数据）。
+      曾致 时间轨迹 假"09-08 14:54 发帖"上波段卡。
+    - 非指定抓取（自动探测/全量补爬）：维持原"主体用户"粗过滤，兼容无 user 条目。
+    """
+    if explicit_name:
+        own = [p for p in posts if p.get("user") == explicit_name]
+        if own:
+            out = [p for p in posts if p.get("user") == explicit_name]
+            note = (f"身份过滤：仅保留「{explicit_name}」本人帖 {len(posts)} → {len(out)} 条"
+                    if len(out) < len(posts) else None)
+            return out, note
+        if existing_ids and any(p.get("post_id") in existing_ids for p in posts):
+            note = f"feed 无本人 user 身份，靠既有历史重叠背书（{len(posts)} 条）" if posts else None
+            return posts, note
+        return [], (f"⚠️ 无任何「{explicit_name}」本人身份帖且与既有历史无重叠"
+                    "（疑似头条跳转流/兜底他人内容），拒绝当本人新帖")
+    with_user = [p for p in posts if p.get("user")]
+    if with_user and dominant:
+        out = [p for p in posts if not p.get("user") or p["user"] == dominant]
+        return out, (f"按主体用户「{dominant}」过滤：{len(posts)} → {len(out)} 条"
+                     if len(out) < len(posts) else None)
+    return posts, None
 
 
 FINANCE_KW = [
@@ -466,15 +499,15 @@ def main():
             if others:
                 user_info["_other_users_in_feed"] = others
 
-        # 帖子级过滤：feed 中混入他人帖子时，只保留主体用户的帖子
-        with_user = [p for p in all_posts if p.get("user")]
-        if with_user and dominant:
-            before = len(all_posts)
-            all_posts = [p for p in all_posts if not p.get("user") or p["user"] == dominant]
-            if len(all_posts) < before:
-                print(f"  按主体用户「{dominant}」过滤：{before} → {len(all_posts)} 条")
-        for p in all_posts:
-            p.pop("user", None)
+        # 帖子级身份过滤（防跳转流/兜底他人内容被当本人新帖 —— 曾致 时间轨迹 假"09-08 14:54 发帖"）
+        all_posts, ident_note = _filter_foreign_posts(all_posts, explicit_name, _existing_ids, dominant)
+        if ident_note:
+            print(f"  {ident_note}")
+        if explicit_name and not all_posts:
+            print("  ❌ 判定为跳转流/他人内容（0 条本人帖），拒绝产出当本人数据。请换用博主本人原创帖链接重试。")
+            browser.close()
+            sys.exit(1)
+        # 保留每帖 user（不再弹出）：供 merge 侧二次身份校验与事后溯源
 
         # Determine output filename: --out > explicit --name > auto-detected name > fallback
         blogger_name = explicit_name or user_info.get("name", "").strip()

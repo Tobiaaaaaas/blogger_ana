@@ -54,8 +54,12 @@ def _seed_url(posts_file):
     return None, None
 
 
-def _merge_window(main_file, window_file):
-    """把 window 文件里的新帖（按 post_id 去重）并入主文件，返回 (新帖列表, 主数据 dict)。"""
+def _merge_window(main_file, window_file, blogger=None):
+    """把 window 文件里的新帖（按 post_id 去重）并入主文件，返回 (新帖列表, 主数据 dict)。
+
+    blogger 非空时做身份二次兜底：window 帖若带 user 且 ≠ 目标博主，一律不并入
+    （爬虫侧已严格过滤，此处防其它路径漏网/手工 window 文件）。
+    """
     with open(main_file, encoding="utf-8") as f:
         main = json.load(f)
     with open(window_file, encoding="utf-8") as f:
@@ -65,13 +69,19 @@ def _merge_window(main_file, window_file):
     for p in main.get("posts", []):
         existing[p.get("post_id")] = p
 
+    dropped = 0
     new_posts = []
     for p in win.get("posts", []):
         pid = p.get("post_id")
         if not pid or pid in existing:
             continue
+        if blogger and p.get("user") and p["user"] != blogger:
+            dropped += 1
+            continue
         existing[pid] = p
         new_posts.append(p)
+    if dropped:
+        log.warning("  _merge_window 身份过滤：弃 %d 条显式非「%s」帖（防跳转流混入）", dropped, blogger)
 
     if not new_posts:
         return [], main, new_posts
@@ -122,7 +132,7 @@ def fetch_blogger_new_posts(blogger, since_str, timeout=240):
             return [], f"feed 主体用户与 {blogger} 不一致（疑抓错账号）"
         return [], "爬虫未产出窗口文件"
 
-    new_posts, main, _ = _merge_window(main_file, window_file)
+    new_posts, main, _ = _merge_window(main_file, window_file, blogger)
     os.remove(window_file)
     if not new_posts:
         return [], ""  # 无新帖不是错误
