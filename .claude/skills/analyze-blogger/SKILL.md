@@ -4,6 +4,8 @@
 
 **一句话定位**：全量读取博主帖子，逐条提取其中"对某板块或某指数未来的方向预测"（信号），用市场实际走势验证方向对错，并打分，最后汇总成个体报告与全博主横向榜单（下文五环节表即此线）。
 
+本文是已冻结的上游真源，不接受自动篡改。
+
 ## 五环节流水线（逐人评估）
 
 | 环节 | 做什么 | 产物 |
@@ -125,7 +127,7 @@ python scripts/pipeline/extract_signals_direction.py <博主名>
 
 ### §2 信号标注字段
 
-信号写入 `data/direction_signals/<博主名>.json`（schema 见下表，引擎 `scripts/eval/run_direction.py` 直接读取）。本目录是**已冻结的上游真源**：推送 / 报告两链直接读它；`research/`（波段回测）读的是它的**派生副本** `research/signals/`（由 `python -m research.corpus` 生成，另补 `board`/`target`/`target_txt` 键）——改本文件的 schema 须同步重跑 `research.corpus`，口径见 `Swing_Timing.md` §1「数据来源」：
+信号写入 `data/direction_signals/<博主名>.json`（schema 见下表，引擎 `scripts/eval/run_direction.py` 直接读取）。本目录是已冻结的上游真源，不接受自动篡改。
 
 ```json
 {"blogger": "博主名", "signals": [{"pub": "2026-01-04 15:16", "d": 1, "s": 1, "idx": "上证指数", "spec": "t1", "summary": "指数开门红的概率大", "cat": "scored"}]}
@@ -140,8 +142,6 @@ python scripts/pipeline/extract_signals_direction.py <博主名>
 | `spec` | `time_horizon` | 预测周期编码，见 §3 表（`today`/`t1`/`t2`/`t3`/`t5`/`tN`/`week`/`nweek`/`nweek_first`/`month`/`nmonth`/`long`/`d:YYYY-MM-DD`）。**精准对应帖子中预测本身的时间周期**，不从宽泛分类中选取——LLM 必须从原文提取博主明确说的时间，按 §3 转换 |
 | `summary` | 信号内容摘要 | ≤50 字的预测关键句概括 |
 | `cat` | 参与状态 | 只有两个值：`scored` 参与打分；`unscored` 不计分（**spec=`long` 的信号一律 `cat=unscored`**）。**`待验证`/`报错` 不需 LLM 手写**：终点超出数据覆盖、或过时（终点 ≤ 发布日且已收盘），则 cat=unscored |
-
-> **模型行 vs 入库行**：上表是**入库**的最小键集（report 侧 `normalize_signal` 产物）。**模型判读时产生的信号**（共享标注 prompt 输出、校验前）另含 `post_n`（帖序号）、`horizon`（推送展示词）、`quote`（预测原句逐字截取 ≤60 字，unscored 留空）——**入库时裁掉的是 `post_n`（`pub` 全文替换它）、`horizon`、`quote`**；另有可选 `target`（数值）**保留入库**（`extract_signals_direction.py:normalize_signal` 落 `sig["target"]`），用途是让提取脚本自校验 d 与目标位方向一致，**报告引擎不读它**（`run_direction.py` 只取 pub/d/s/idx/spec/summary/cat）。仅**无条件净方向的移动目标**才填 `target`——条件式/区间锚句不产生信号、不填 d、不填 target。
 
 **⚠️ 语义理解原则（关键）**：预测周期必须通过**语义理解**提取，不是关键词匹配。帖子中出现"明天"二字不代表这就是对明天市场的预测：
 - "明天会怎样，**先看4000反击**" → ❌ **条件/观察句**，不产生信号（出现"明天"≠有可提取的明天预测）
