@@ -58,7 +58,15 @@ WINDOW_TRADING_DAYS = _bcfg.WINDOW_TRADING_DAYS   # {"short": 1, "swing": 5}
 # 若要跟随 live v15 统一节奏（两板块同 20 档），属 research 语义改动，需另行确认后整体重跑。
 TRADING_TICKS = ["09:30", "10:00", "10:30", "11:00", "11:30",
                  "13:00", "13:30", "14:00", "14:30", "15:00"]
-SWING_TICKS = sorted({"09:30", "11:00", "14:30"})  # 波段仅在这 3 档额外推（⊂ TRADING_TICKS）
+# ⚠️ 遗留死代码（2026-09-10 标注）：下面的 swing 三档**不是**波段现在的决策节奏。
+#   · 波段真实节奏 = **每干净日一票，时点 14:30**（research/combo/daygrid.py:SNAP_TICK 硬编码），
+#     成交 = 中证1000 当日 15:00 日线收盘；滞回口径见 Swing_Timing.md。
+#   · 「波段仅在这 3 档额外推」是 **v15 之前父仓库**的语义，live 已于 2026-09-07 删除该不对称
+#     （briefing/scripts/config.py:74 起两板块统一判定）——此注释此前与 live 相反，现改正。
+#   · 本常量今天只经 GRID_TICKS → poll.tick_times("swing") 才可达，而该路径实际无调用者：
+#     backtest.run 自 2026-09-06 起仅供 short（见 research/backtest/backtest.py 模块 docstring），
+#     decision_datetimes() 全仓**零调用者**。保留仅为冻结 09-06 基线、不动研究语义（见上）。
+SWING_TICKS = sorted({"09:30", "11:00", "14:30"})  # 遗留：旧父仓库波段档（⊂ TRADING_TICKS），已死
 GRID_TICKS = {"short": TRADING_TICKS, "swing": SWING_TICKS}
 
 # ---- 父仓库数据路径 ----

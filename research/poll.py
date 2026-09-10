@@ -156,8 +156,11 @@ def poll_tick(index: CorpusIndex, board: str, dt):
         for r in _lookup(index, blogger, dt, wstart):   # pub 最新 → 最旧；同 pub 行序最后先遇到
             if config.board_of_spec(r["spec"]) != board:
                 continue              # today/t1→short；其余（含 long）→swing
-            if board == "swing" and r["spec"] == "long":
-                continue              # 波段投票候选剔除 long（长线/年度目标不是波段观点）
+            if board == "swing" and r["cat"] != "scored":
+                continue              # 波段投票候选剔除不计分行（长线/年度目标 = long/unscored，不是波段观点）
+                                      # 2026-09-10 对齐：判据从 spec=="long" 改为 cat，与文档口径
+                                      # （Swing_Timing「scored 且 spec≠today/t1」）一致；实测两判据
+                                      # 在 research/signals 全量上等价（分歧 0 行），行为中性
             if r["_target"] is not None and r["_target"] < d:
                 continue              # 目标已过（短：目标日≠今/明；波：目标周已过）
             chosen = r
