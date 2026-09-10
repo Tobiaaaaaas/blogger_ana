@@ -52,6 +52,15 @@ v15（波段窗口 3→5 交易日）→ **v16（2026-09-08 分层分解单趟�
   不反转 / I2 无变化不缩水 结构性成立）。idx≠上证 的 fix 持久化后 collapse 自动挡在上证 卡外 → 持久
   删除式效果（相较此前"显示一档后回弹"是有意语义升级）。复核触发集不变（仍只对本 tick 新标注帖产出的
   上卡行）；不改缓存格式，无需 bump _ROWS_CACHE_VERSION。
+**v22（2026-09-10 上卡行复核盲区回填，B8）**：v21 的触发集有个洞——只复核「本 tick 新标注帖产出且
+  坍缩后真上卡」的行，于是**出自旧帖缓存的上卡行永不复核**：本档复核 drop 后顶上来当冠军的旧帖行、
+  以及冠军过期后才顶上的行都属此类。2026-09-10 的编造行（大盘蜂向标 09-07 帖，通篇无方向词却配
+  d=1/summary"整体看多"）正是靠这个盲区连续多档上卡。修法：**每档对最终上卡的冠军行做一次「是否
+  复核过」检查**——源行带 `rv` 标记（随逐帖缓存持久化）= 已裁决（keep/fix/drop 都算；err 不算，
+  下档重试）；未标记的补一轮复核（同一 review_candidates 通道、同 v21 固化语义），每档上限
+  REVIEW_BACKFILL_MAX 条，超出 loud log 下档续。只查冠军行 → 候选集 ≤ 板数×博主数，且不触发
+  重抽（`rv` 是缓存行新增键，不影响 `annotation_fp_input` 指纹、不 bump 版本：旧缓存无此键 =
+  未复核，首档起逐档收敛）。
 v12 跨板块 summarize_boards / SUMMARY_SYSTEM_PROMPT 与旧 v8 全板共识路径（POINTS_SYSTEM_PROMPT /
 SYNTH_SYSTEM_PROMPT / extract_points / synthesize）已于 2026-09-09 C1 一并移除（git 历史与
 archive/20260909-legacy 可恢复）；v9/v10 的 18 行名单路径已整段替换。
@@ -114,6 +123,15 @@ call_json = o_ds.call_json
 # 改它们**不**作废缓存。v6：default_horizon t5 兜底改「未提」（A4-2）影响已缓存行语义。
 _ROWS_CACHE_VERSION = 6
 
+# 上卡行复核盲区回填每档上限（v22 / B8，2026-09-10）。上线首档存量上卡行全无 `rv` 标记 →
+# 无上限会在一个档里补审数十条（review_candidates 串行调 LLM → 直接拖长推送档）；有上限则
+# 逐档收敛（每档 ≤ 上限，几档内清零）。取 6 ≈ 最坏几十秒~1 分钟，不影响档位时效。
+REVIEW_BACKFILL_MAX = 6
+# 同一行回填复核最多尝试次数（`err` = 复核不可用，如调用失败/fix 字段不合法）：超过即放弃并
+# loud log。防某一行永久占住每档名额（starvation）；代价是复核侧连续故障时少数行会带着
+# "未裁决"状态留在卡上——以 loud log 留痕，不改上卡与否（仍按坍缩结果）。
+REVIEW_BACKFILL_ATTEMPTS = 2
+
 
 def _annotate_rows(name, posts):
     """一位博主窗口帖 → 规范行（共享 ANNOTATION prompt）。None = 调用失败/结构异常（不缓存）。
@@ -157,6 +175,22 @@ def _origin_matches(board, disp, r, downgrade_ok=False):
     return o_schema.horizon_spec_ok(disp.get("horizon"), spec)
 
 
+def _resolve_origin(board, disp, rows):
+    """坍缩展示行 disp → 其来源规范行（两段溯源，A4-1；v22 起复核两轮共用）。无匹配 → None。
+
+    先精确 pass（horizon 逐字相等，防降级豁免误抓到同帖真 t1 行）；不中再放行降级豁免——
+    short 板展示归一「明天」的交易日再分类行（源行 spec=nweek_first、horizon=下周）。
+    坍缩输出恒为 idx=上证/cat=scored/is a window row → 正常必命中；None = 真异常（供调用方 loud log）。
+    """
+    for r in rows or ():
+        if _origin_matches(board, disp, r):
+            return r
+    for r in rows or ():
+        if _origin_matches(board, disp, r, downgrade_ok=True):
+            return r
+    return None
+
+
 def _row_board_layer(r, cal):
     """缓存规范行归属板别（2026-09-09 v21：复核 drop 剔层行用，判层同 collapse_board 的 _row_layer 门）。"""
     horizon = r.get("horizon")
@@ -180,6 +214,9 @@ def extract_layers(work, starts=None):
       keep/fix/drop，主结论句 doctrine）；fix/drop 裁决**固化进逐帖缓存**（v21：fix 覆写源行、
       drop 剔该板层行、余空保 entry），随后统一重坍缩——修正后缓存行成为后续所有档的坍缩输入，
       杜绝"无新增却反转 / 该在的少了"的跨档闪变。
+    - v22（2026-09-10 B8）：**上卡行复核盲区回填**——fresh 门只看本 tick 新帖，出自旧帖缓存、
+      被 drop/顶替后才当上冠军的行永不复核（编造行即由此连续上卡）。现每档对最终上卡的冠军行
+      查源行 `rv` 标记，未复核的补一轮复核（每档上限 REVIEW_BACKFILL_MAX，超出 log 下档续）。
     同帖同层多行 → 目标日更近优先（collapse_board 内 HORIZON_RANK）。返回 rows_by_board =
     {board_key: {博主: 行}}，行 = {blogger, post_id, has_view, stance, horizon,
     summary(已剔相对词), quote, quote_ts}。
@@ -286,58 +323,36 @@ def extract_layers(work, starts=None):
 
     _collapse_all()
 
-    # ── Pillar C：推送复核——只复核「本 tick 新标注帖产出、坍缩后真上卡」的少数行 ──
-    # 触发集 = 卡面某行 quote_ts/post_id 溯源到本 tick 新标注帖（fresh_ids）；纯缓存命中的
-    # 旧行、窗口滑动/过期等确定性变化不触发。quote 非逐字/主结论取错已由 annotate 层两道门
-    # 挡掉，这里只兜 idx 对象/周期与主结论句的一致性（报告侧 verify 同构 doctrine 轻量复核）。
-    fresh_ids = {nm: set(fresh_posts[nm]) for nm in fresh_posts}  # 键即 str(post_id)
-    candidates = []
-    if fresh_ids:
-        for b, m in rows_by_board.items():
-            for name, disp in m.items():
-                pid = str(disp.get("post_id") or "")
-                if pid not in fresh_ids.get(name, ()):
-                    continue                      # 出自旧帖缓存 → 非本 tick 新产出，不复核
-                post = (fresh_posts.get(name) or {}).get(pid)
-                if post is None:
-                    continue
-                # 定位坍缩选中的规范行（给复核方看 idx/spec/d/s/horizon/quote/summary 全字段）。
-                # 两段溯源（A4-1）：先精确命中（horizon 逐字相等，防降级豁免误抓到同帖真 t1 行）；
-                # 不中再放行降级豁免——short 板展示归一「明天」的交易日再分类行（源行 spec=nweek_first、
-                # horizon=下周，collapse_board 把展示词归一为明天）否则永不匹配、最需复核的行逃复核。
-                origin = None
-                for r in (win_rows.get(name) or []):
-                    if _origin_matches(b, disp, r):
-                        origin = r
-                        break
-                if origin is None:
-                    for r in (win_rows.get(name) or []):
-                        if _origin_matches(b, disp, r, downgrade_ok=True):
-                            origin = r
-                            break
-                if origin is None:
-                    continue                      # 溯源失败不硬复核（宁缺）
-                # full_text = 出处帖文本（o_verify.post_text = 标题 + middle 1200 正文，与给复核
-                # 方看的口径**完全同一**）——复核 fix 的 quote 逐字校验用同口径，防 head/middle 截断
-                # 分叉：复核方依 middle 文本引了中后部原话，却拿 head 截断文本逐字比对被误拒
-                pt = o_verify.post_text(post)
-                candidates.append({"board": b, "blogger": name, "row": origin,
-                                   "post_text": pt, "full_text": pt})
-    if candidates:
-        decisions, vstats = o_verify.review_candidates(candidates, label="briefing:card")
-        log.info("  推送复核 %d 条新帖上卡行 → keep=%d fix=%d drop=%d err=%d",
-                 len(candidates), vstats["keep"], vstats["fix"], vstats["drop"], vstats["err"])
-        # v21（2026-09-09 复核裁决固化逐帖缓存）：fix/drop mutate 源规范行——源行与 win_rows /
-        # 缓存条目 rows 是**同一批 dict 对象**，随 wrote→save 持久化。不再只 patch 当档展示行，
-        # 否则下一档坍缩从复核前原始行把旧观点捞回 → 恰是"无新增却反转 / 该在的少了"。
-        applied = 0
-        for dec, cand in zip(decisions, candidates):
+    def _apply_reviews(decisions, cands, tag=""):
+        """复核裁决 → 固化进逐帖缓存（v21）+ 打「已复核」标记（v22），两轮复核共用。
+
+        v21（2026-09-09）：fix/drop mutate 源规范行——源行与 win_rows / 缓存条目 rows 是
+        **同一批 dict 对象**，随 wrote→save 持久化。不再只 patch 当档展示行，否则下一档坍缩
+        从复核前原始行把旧观点捞回 → 恰是"无新增却反转 / 该在的少了"。
+        v22（2026-09-10）：keep/fix/drop 都算**已裁决** → 源行打 `rv=1`（随缓存持久化，回填轮
+        不再重复投喂同一行）；`err` = 复核不可用 → 按 keep 保留、只记一次尝试（`rv_try`），
+        下档回填重试，连续 REVIEW_BACKFILL_ATTEMPTS 次仍不可用则放弃并 loud log（防一行永久
+        占住回填名额）。返回 (applied, touched)：applied = fix/drop 实际生效数，touched = 缓存
+        行被改动（打标记/计数）的条数——调用方据此决定是否落盘。
+        """
+        applied = touched = 0
+        for dec, cand in zip(decisions, cands):
             b, nm, act = dec["board"], dec["blogger"], dec["action"]
+            origin = cand["row"]
+            if act == "err":
+                n = int(origin.get("rv_try") or 0) + 1
+                origin["rv_try"] = n
+                touched += 1
+                if n >= REVIEW_BACKFILL_ATTEMPTS:
+                    log.warning("  %s/%s 复核连续 %d 次不可用 → 放弃回填（该行保持未裁决，"
+                                "是否上卡仍按坍缩结果）", nm, b, n)
+            else:
+                origin["rv"] = 1
+                touched += 1
             if act in ("keep", "err"):
-                log.info("    复核 %s/%s %s%s", b, nm, act,
+                log.info("    %s复核 %s/%s %s%s", tag, b, nm, act,
                          "" if act == "keep" else f"（保留原行）：{dec['reason']}")
                 continue
-            origin = cand["row"]
             disp = rows_by_board.get(b, {}).get(nm)
             # 防御：复核定位的源行须与卡面展示行同帖同时刻（防裁决套到错补的行上丢 fix/drop）
             if (disp is None
@@ -361,13 +376,14 @@ def extract_layers(work, starts=None):
                 origin.update(fx)     # 就地改：origin ∈ win_rows 且 ∈ 缓存条目 rows（同对象引用）
                 applied += 1
                 if fixed.get("idx") != "上证指数":
-                    log.info("    复核 fix %s/%s → idx=%s（上证 卡外，持久不再上卡）：%s",
-                             b, nm, fixed.get("idx"), dec["reason"])
+                    log.info("    %s复核 fix %s/%s → idx=%s（上证 卡外，持久不再上卡）：%s",
+                             tag, b, nm, fixed.get("idx"), dec["reason"])
                 else:
-                    log.info("    复核 fix %s/%s horizon→%s d=%s：%s",
-                             b, nm, origin.get("horizon"), origin.get("d"), dec["reason"])
+                    log.info("    %s复核 fix %s/%s horizon→%s d=%s：%s",
+                             tag, b, nm, origin.get("horizon"), origin.get("d"), dec["reason"])
             else:                     # act == "drop"（review_candidates 只出 keep/fix/drop/err）
-                # 定位含源行的缓存条目：源行必为本 tick 新标注写入（fresh 门），按身份找免 key 重算
+                # 定位含源行的缓存条目：源行或为本 tick 新标注写入（fresh 门），或为旧帖缓存行
+                # （v22 回填门，冠军行由旧帖顶上）；两种都按**对象身份**找条目，免 key 重算。
                 posts_map = (bloggers.get(nm) or {}).get("posts") or {}
                 entry = next((e for e in posts_map.values()
                               if any(r is origin for r in (e.get("rows") or []))), None)
@@ -386,12 +402,95 @@ def extract_layers(work, starts=None):
                 entry["rows"] = [r for r in (entry.get("rows") or []) if id(r) not in drop_ids]
                 pid = str(origin.get("post_id") or "")
                 applied += 1
-                log.info("    复核 drop %s/%s post_id=%s 剔该板 %d 行：%s",
-                         b, nm, pid, len(drop_rows), dec["reason"])
+                log.info("    %s复核 drop %s/%s post_id=%s 剔该板 %d 行：%s",
+                         tag, b, nm, pid, len(drop_rows), dec["reason"])
+        return applied, touched
+
+    # ── Pillar C：推送复核——只复核「本 tick 新标注帖产出、坍缩后真上卡」的少数行 ──
+    # 触发集 = 卡面某行 quote_ts/post_id 溯源到本 tick 新标注帖（fresh_ids）；纯缓存命中的
+    # 旧行、窗口滑动/过期等确定性变化不触发。quote 非逐字/主结论取错已由 annotate 层两道门
+    # 挡掉，这里只兜 idx 对象/周期与主结论句的一致性（报告侧 verify 同构 doctrine 轻量复核）。
+    fresh_ids = {nm: set(fresh_posts[nm]) for nm in fresh_posts}  # 键即 str(post_id)
+    candidates = []
+    if fresh_ids:
+        for b, m in rows_by_board.items():
+            for name, disp in m.items():
+                pid = str(disp.get("post_id") or "")
+                if pid not in fresh_ids.get(name, ()):
+                    continue                      # 出自旧帖缓存 → 非本 tick 新产出，不复核
+                post = (fresh_posts.get(name) or {}).get(pid)
+                if post is None:
+                    continue
+                # 定位坍缩选中的规范行（给复核方看 idx/spec/d/s/horizon/quote/summary 全字段）
+                origin = _resolve_origin(b, disp, win_rows.get(name))
+                if origin is None:
+                    continue                      # 溯源失败不硬复核（宁缺）
+                # full_text = 出处帖文本（o_verify.post_text = 标题 + middle 1200 正文，与给复核
+                # 方看的口径**完全同一**）——复核 fix 的 quote 逐字校验用同口径，防 head/middle 截断
+                # 分叉：复核方依 middle 文本引了中后部原话，却拿 head 截断文本逐字比对被误拒
+                pt = o_verify.post_text(post)
+                candidates.append({"board": b, "blogger": name, "row": origin,
+                                   "post_text": pt, "full_text": pt})
+    if candidates:
+        decisions, vstats = o_verify.review_candidates(candidates, label="briefing:card")
+        log.info("  推送复核 %d 条新帖上卡行 → keep=%d fix=%d drop=%d err=%d",
+                 len(candidates), vstats["keep"], vstats["fix"], vstats["drop"], vstats["err"])
+        applied, touched_f = _apply_reviews(decisions, candidates)
         if applied:
             _collapse_all()           # 用 mutate 后的 win_rows（缓存同对象）重坍缩全部板
-            wrote = True
             log.info("  复核裁决 %d 条已固化进逐帖缓存并重坍缩（后续档坍缩输入 = 修正后行）", applied)
+        wrote = wrote or bool(touched_f)
+
+    # ── v22（2026-09-10 B8）：上卡行复核盲区回填 ────────────────────────────────
+    # 上面的 fresh 门只覆盖「本 tick 新标注帖产出、坍缩后真上卡」的行，于是两类行**永不复核**：
+    #   ① 本档复核 drop / 被新帖顶替之后才当上冠军的**旧帖缓存行**——2026-09-10 的编造行
+    #      （大盘蜂向标 09-07 帖：通篇零方向词却被配上 d=1/summary"整体看多"）正是靠它连续
+    #      多档上卡：它出自旧帖，一旦顶上来就再也不进复核触发集；
+    #   ② 新帖当档未夺冠、后续档因冠军过期才顶上的行。
+    # 这里对**最终上卡的冠军行**做一次「是否复核过」检查（源行 `rv` 标记），未复核 → 补一轮
+    # 复核（同一 review_candidates 通道、同 v21 固化语义）。只查冠军行 → 候选集 ≤ 板数×博主数。
+    # 每档上限 REVIEW_BACKFILL_MAX 条防 rollout 首档把存量全量重审（串行 LLM 调用拖长推送档），
+    # 超出部分 loud log 下档续；单轮不级联（本档重坍缩新顶上的行留给下档，档位延迟有界）。
+    # 只查不写盘：`rv` 是缓存行新增键，不在 annotation_fp_input 指纹域 → 不作废 rows_cache。
+    attempted = {id(c["row"]) for c in candidates}
+    post_index = {nm: {str(p.get("post_id") or ""): p for p in (_v.get("posts") or [])}
+                  for nm, _v in work.items()}
+    stale = []
+    for _b in sorted(rows_by_board):
+        for _nm in sorted(rows_by_board.get(_b) or {}):
+            _disp = rows_by_board[_b][_nm]
+            _pid = str(_disp.get("post_id") or "")
+            _origin = _resolve_origin(_b, _disp, win_rows.get(_nm))
+            if _origin is None:
+                log.warning("  %s/%s 上卡行（post_id=%s）溯不到源规范行 → 本档无法补复核",
+                            _nm, _b, _pid)
+                continue
+            if (id(_origin) in attempted or _origin.get("rv")
+                    or int(_origin.get("rv_try") or 0) >= REVIEW_BACKFILL_ATTEMPTS):
+                continue                      # 本档已复核 / 历史已复核 → 无需回填
+            _post = (post_index.get(_nm) or {}).get(_pid)
+            if _post is None:
+                log.warning("  %s/%s 上卡行（post_id=%s）不在本档窗口帖内 → 本档无法补复核",
+                            _nm, _b, _pid)
+                continue
+            _pt = o_verify.post_text(_post)   # 与 fresh 门同口径（标题 + middle 1200 正文）
+            stale.append({"board": _b, "blogger": _nm, "row": _origin,
+                          "post_text": _pt, "full_text": _pt})
+    if stale:
+        if len(stale) > REVIEW_BACKFILL_MAX:
+            log.warning("  上卡行复核盲区回填：本档待补 %d 条，本档补 %d 条（余 %d 条下档续）",
+                        len(stale), REVIEW_BACKFILL_MAX, len(stale) - REVIEW_BACKFILL_MAX)
+            batch = stale[:REVIEW_BACKFILL_MAX]
+        else:
+            batch = stale
+        decisions, vstats = o_verify.review_candidates(batch, label="briefing:backfill")
+        log.info("  回填复核 %d 条未复核过的上卡行 → keep=%d fix=%d drop=%d err=%d",
+                 len(batch), vstats["keep"], vstats["fix"], vstats["drop"], vstats["err"])
+        applied_b, touched_b = _apply_reviews(decisions, batch, tag="回填")
+        if applied_b:
+            _collapse_all()
+            log.info("  回填复核裁决 %d 条已固化进逐帖缓存并重坍缩", applied_b)
+        wrote = wrote or bool(touched_b)
 
     if wrote:
         # 安全修剪：含波段窗口的本档才做——早于波段窗口下界的帖永不回窗（窗口只前移），

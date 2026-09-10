@@ -31,10 +31,14 @@ paths_mod = None
 
 
 def _cached_row(blogger, pid, ts, d=1, spec="t1", horizon="明天", summary="s", quote="q",
-                cat="scored"):
-    return {"blogger": blogger, "post_id": pid, "quote_ts": ts, "post_n": 0,
-            "pub": "2026-09-07 09:00", "d": d, "s": 1, "idx": "上证指数", "spec": spec,
-            "cat": cat, "horizon": horizon, "quote": quote, "summary": summary}
+                cat="scored", rv=None):
+    """预置缓存规范行。rv=1 = 已复核过（v22 上卡行回填门据此跳过）；默认 None = 未复核。"""
+    r = {"blogger": blogger, "post_id": pid, "quote_ts": ts, "post_n": 0,
+         "pub": "2026-09-07 09:00", "d": d, "s": 1, "idx": "上证指数", "spec": spec,
+         "cat": cat, "horizon": horizon, "quote": quote, "summary": summary}
+    if rv is not None:
+        r["rv"] = rv
+    return r
 
 
 def _post(pid, ts, title="标题", content="正文"):
@@ -99,10 +103,14 @@ blog_a = {"posts": {o_cache.post_key(old_post): {"ts": ts_old, "at": "t",
 _write_cache(cache_file, {"A": blog_a})
 ann_handlers["A"] = None            # rows=None = 标注失败
 new_post = _post("p_fresh", ts_new)
+# 回退顶上的旧行此前从未复核（无 rv）→ v22 会补一轮复核（keep 即维持原行）
+review_map[("short", "A", "p_old")] = {"board": "short", "blogger": "A",
+                                       "action": "keep", "fix": None, "reason": "fake keep"}
 rbb, errs, calls = run_extract(cache_file, {"A": {"posts": [new_post, old_post], "boards": ["short"]}})
 assert errs == ["A"], errs
 row = rbb["short"].get("A")
 assert row is not None and row["post_id"] == "p_old", f"失败应回退缓存旧行 p_old，got {row}"
+assert calls["review"] == [1], calls["review"]     # v22 回填：回退顶上来的旧行补一次复核
 print("[PASS] Pillar D：标注失败回退窗口内已缓存旧行续显（记 errors），非置空")
 
 # 全 fresh 且失败 → 无缓存行可回退 → 该板置空
@@ -111,14 +119,14 @@ rbb, errs, calls = run_extract(cache_file, {"A": {"posts": [new_post], "boards":
 assert errs == ["A"] and rbb["short"].get("A") is None
 print("[PASS] Pillar D：失败且无缓存行 → 该板置空")
 
-# ── Pillar C 触发集：全缓存命中 → 零复核 ─────────────────────────────────
+# ── Pillar C 触发集：全缓存命中 → 零复核（该行此前已复核过，rv=1；v22 回填门据此跳过）──
 blog_d = {"posts": {o_cache.post_key(old_post): {"ts": ts_old, "at": "t",
-                                                 "rows": [_cached_row("D", "p_old", ts_old)]}}}
+                                                 "rows": [_cached_row("D", "p_old", ts_old, rv=1)]}}}
 _write_cache(cache_file, {"D": blog_d})
 rbb, errs, calls = run_extract(cache_file, {"D": {"posts": [old_post], "boards": ["short"]}})
 assert calls["review"] == [], calls["review"]
 assert rbb["short"]["D"]["post_id"] == "p_old"
-print("[PASS] Pillar C 触发集：纯缓存命中不触发复核")
+print("[PASS] Pillar C 触发集：纯缓存命中 + 行已复核 → 零复核")
 
 # ── Pillar C drop：新帖行上卡被 drop → 剔除重坍缩续显更早行 ───────────────
 blog_b = {"posts": {o_cache.post_key(old_post): {"ts": ts_old, "at": "t",
@@ -128,9 +136,12 @@ fresh_b = _post("p_newb", ts_new)
 ann_handlers["B"] = lambda posts: [_cached_row("B", "p_newb", ts_new)]
 review_map[("short", "B", "p_newb")] = {"board": "short", "blogger": "B",
                                         "action": "drop", "fix": None, "reason": "fake drop"}
+# 顶上来的旧行 p_old 未复核 → v22 同档补复核（keep = 维持续显）
+review_map[("short", "B", "p_old")] = {"board": "short", "blogger": "B",
+                                       "action": "keep", "fix": None, "reason": "fake keep"}
 rbb, errs, calls = run_extract(cache_file, {"B": {"posts": [fresh_b, old_post], "boards": ["short"]}})
-assert calls["review"] == [1], calls["review"]
-assert rbb["short"]["B"]["post_id"] == "p_old", f"drop 后应重坍缩续显 p_old，got {rows['short']['B']}"
+assert calls["review"] == [1, 1], calls["review"]     # [本 tick 新帖触发, v22 盲区回填]
+assert rbb["short"]["B"]["post_id"] == "p_old", f"drop 后应重坍缩续显 p_old，got {rbb['short']['B']}"
 print("[PASS] Pillar C drop：剔除新帖行重坍缩续显更早合格行")
 
 # ── Pillar C fix：fix 落到卡面展示行 ─────────────────────────────────────
