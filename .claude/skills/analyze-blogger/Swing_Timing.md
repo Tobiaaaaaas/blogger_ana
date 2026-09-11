@@ -17,17 +17,6 @@
 
 > **数据来源**：所有博主的所有波段信号、观点以及对应的具体时间已经存在于 `data/direction_signals/<博主名>.json`，请直接提取。
 
-**信号字段**（语义同 SKILL.md §2）：
-
-| JSON 键 | 语义字段 | 取值 |
-|:---|:---|:---|
-| `pub` | `publish_time` | 帖子发布时间（posts JSON 中对应 `publish_date` 字段，格式 `YYYY-MM-DD HH:MM`，用于定位参考价 bar） |
-| `d` | `direction` | `1` = bullish 看多；`-1` = bearish 看空 |
-| `idx` | `target_index` | 数据 key 名（默认"上证指数"）；若帖子明确提到某指数/板块则按 SKILL.md §2 映射表标注对应指数 |
-| `spec` | `time_horizon` | 预测周期编码，见 SKILL.md §3 表 |
-| `summary` | 信号内容摘要 | ≤50 字的预测关键句概括 |
-| `cat` | 参与状态 | 只有两个值：`scored` = 参与打分；`unscored` = 不计分 |
-
 **阈值参数**
 
 | 参数 | 值 | 触发条件 |
