@@ -16,8 +16,9 @@ POSTS_DIR = DATA / "posts"            # 01 抓取的产物：<博主名>.json
 SIGNALS_DIR = DATA / "signals"        # 02 解析的产物：<博主名>.json
 MARKET_DIR = DATA / "market"
 STATE_DIR = DATA / "state"            # 辅助记录，不是产物
-REPORTS_DIR = ROOT / "reports"        # 03 的产物：<博主名>.md
-COMPARE_DIR = ROOT / "compare"        # 04 的产物：博主对比.md —— 与 reports/ 分开
+REPORTS_DIR = ROOT / "reports"        # 产物根：03 与 04 都落这儿
+PER_BLOGGER_DIR = REPORTS_DIR / "per_blogger"   # 03 的产物：<博主名>.md
+COMPARE_FILE = REPORTS_DIR / "博主对比.md"       # 04 的产物
 BACKTEST_RUNS = ROOT / "backtest" / "runs"    # 05 的产物：<日期>_<时刻>/ 一个夹子
 BRIEFINGS_DIR = DATA / "briefings"    # 06 的留档：<日期>_<时刻>_<板块>.json
 
@@ -57,7 +58,4 @@ def parse_cache_file(blogger: str) -> Path:
 
 
 def report_file(blogger: str) -> Path:
-    return REPORTS_DIR / f"{blogger}.md"
-
-
-COMPARE_FILE = COMPARE_DIR / "博主对比.md"
+    return PER_BLOGGER_DIR / f"{blogger}.md"
