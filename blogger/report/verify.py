@@ -60,8 +60,9 @@ def _state(pub: str, spec: str, ep: str | None, epc: float | None) -> str:
     # ② 非交易日说「今天」—— 这句话本身就不成立
     if spec == "today" and not market.is_trading_day(pub[:10]):
         return ERROR
-    # ③ 发帖时该周期已经收盘了 —— 说在事后，不算数
-    if ep and f"{ep} {CLOSE_AT}" < pub[:16]:
+    # ③ 发帖时该周期已经收盘了 —— 说在事后，不算数。
+    # **边界取等**：发帖正好是收盘那一刻（15:00:00）→ 算「晚于」，照样是 STALE（02§4.2）
+    if ep and f"{ep} {CLOSE_AT}" <= pub[:16]:
         return STALE
     # ④ 算不出来：终点还没到、或行情还没覆盖到那天（**是算不出，不是算错**）
     if ep is None or epc is None or ep > date.today().isoformat():

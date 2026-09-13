@@ -217,17 +217,16 @@ def pub_note(pub: str) -> str | None:
 # ── 验证终点与终点价 ────────────────────────────────────────────────────
 
 def _last_td_of_week(d: str) -> str | None:
-    iso = date.fromisoformat(d).isocalendar()
-    days = [x for x in CAL
-            if date.fromisoformat(x).isocalendar()[:2] == iso[:2]]
-    return days[-1] if days else None
+    """`d` 所在那一周的最后交易日。
 
-
-def _first_td_of_week(d: str) -> str | None:
-    iso = date.fromisoformat(d).isocalendar()
-    days = [x for x in CAL
-            if date.fromisoformat(x).isocalendar()[:2] == iso[:2]]
-    return days[0] if days else None
+    **整周一个交易日都没有**（春节那一周）时，「最后交易日」不存在 —— 退到该周之后最近的
+    一个交易日。不退的话这条永远算不出终点，只能挂在「待验证」里。
+    """
+    y, w, _ = date.fromisoformat(d).isocalendar()
+    days = [x for x in CAL if date.fromisoformat(x).isocalendar()[:2] == (y, w)]
+    if days:
+        return days[-1]
+    return next_td(date.fromisocalendar(y, w, 7).isoformat())
 
 
 def _settle(x: str | None) -> str | None:
@@ -281,9 +280,9 @@ def endpoint(pub: str, spec: str) -> str | None:
 
     if spec == "week":
         return _last_td_of_week(day)
-    if spec in ("nweek", "nweek_first"):
+    if spec == "nweek":
         nxt = (date.fromisoformat(day) + timedelta(days=7)).isoformat()
-        return _first_td_of_week(nxt) if spec == "nweek_first" else _last_td_of_week(nxt)
+        return _last_td_of_week(nxt)
     if spec == "month":
         return _last_td_of_month(day)
     if spec == "nmonth":
@@ -350,9 +349,12 @@ def span_bucket(n: int) -> str:
 VALID_IDX = {"上证指数", "上证50", "沪深300", "中证500", "中证1000", "创业板指", "科创50", "双创"}
 
 # spec 全表。`tN` 的 N 走数字，`d:` 的日期要真实存在，其余是固定值。
-FIXED_SPECS = ({"today", "week", "nweek", "nweek_first", "month", "nmonth", "long"}
+FIXED_SPECS = ({"today", "week", "nweek", "month", "nmonth", "long"}
                | set(WEEKDAY_SPECS)
                | {f"n{k}" for k in WEEKDAY_SPECS})
+
+# `tN` 的 N 上界 —— 20 个交易日约合一个月，超过就不算可验证的短期周期（超过落 `long`）
+T_MAX = 20
 
 
 def spec_ok(spec: str) -> bool:
@@ -361,7 +363,7 @@ def spec_ok(spec: str) -> bool:
     if spec in FIXED_SPECS:
         return True
     if spec.startswith("t") and spec[1:].isdigit():
-        return 1 <= int(spec[1:]) <= 30
+        return 1 <= int(spec[1:]) <= T_MAX
     if spec.startswith("d:"):
         return _ok_date(spec[2:])
     return False
