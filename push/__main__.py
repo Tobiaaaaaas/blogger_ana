@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """06 的命令行。
 
-    python -m push <板块> [--init] [--dry-run]
+    python -m push <板块> [--init] [--dry-run] [--force]
 
-`--init` 建窗口（只跑一次），`--dry-run` 只看不发（06§4、06§8）。
+`--init` 建窗口（只跑一次），`--dry-run` 只看不发，`--force` 补一档
+（不在时刻表上也当一档推出去）—— 见 06§4、06§5.1、06§8。
 """
 
 import sys

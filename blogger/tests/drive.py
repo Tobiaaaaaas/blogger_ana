@@ -58,24 +58,19 @@ print("  %d 条 → %s" % (len(rows), paths.signals_file(BLOGGER)))
 print("[④ 事后验证]")
 scored = [verify.evaluate(r) for r in rows]
 
-print("[⑤ 清库]")
-kept, dropped = flow._prune(judged, scored)
-if dropped:
-    cache.save(BLOGGER, judged)
-    store.save(BLOGGER, kept)
-    print("  删掉 %d 条「无效-过时」" % len(dropped))
-else:
-    print("  没有要删的")
+print("[⑤ 单列]")
+unscored = [r for r in scored if r["note"] != verify.SCORED]
+print("  计分 %d 条｜没算分 %d 条（行照留，不删）" % (len(scored) - len(unscored), len(unscored)))
 
 print("[⑥ 统计]")
-flow._write_report(BLOGGER, kept, posts, print)
+flow._write_report(BLOGGER, scored, posts, print)
 
-print("[⑦ 过滤清单]")
-flow._report_dropped(tally, no_note, dropped, print)
+print("[⑦ 清单]")
+flow._report_dropped(tally, no_note, unscored, print)
 
 print("\n" + "=" * 70)
-print("产出的 %d 条观点信号：" % len(kept))
-for r in sorted(kept, key=lambda x: x["pub"]):
+print("产出的 %d 条观点信号：" % len(scored))
+for r in sorted(scored, key=lambda x: x["pub"]):
     ep = market.endpoint(r["pub"], r["spec"]) or "—"
     print("  %s %-8s %+d  %-22s 终点 %s  %s"
           % (r["pub"], r["spec"], r["d"], r["idx"], ep, r["quote"][:44].replace("\n", " ")))

@@ -43,13 +43,32 @@ def evaluate(sig: dict) -> dict:
     epc = market.ep_close(idx, ep) if ep else None
     span = market.span(pub, ep) if ep else None
 
-    ret = (epc / ref - 1) if (epc is not None and ref) else None
+    ret = _ret(idx, pub, ep, ref, epc)
     score = (sig["d"] * ret * 100) if ret is not None else None
 
     note = _state(pub, spec, ep, epc)
     return {**sig, "ref": ref, "ep": ep, "epc": epc, "span": span,
             "ret": ret, "score": score, "note": note,
             "intraday": note == SCORED and spec == "today" and _in_session(pub)}
+
+
+def _ret(idx: str, pub: str, ep: str | None, ref, epc) -> float | None:
+    """**收益率** —— 03§3.5 的「终点价 / 参考价 − 1」。
+
+    **双创例外**（03§3.3）：两个指数**各算各的收益率**再取算术平均 ——
+    不是把两个指数的均价拿来相除。`ref`／`epc` 两个展示值仍是两指数的均值。
+    """
+    if idx in market.COMBO:
+        if ep is None:
+            return None
+        rs = []
+        for one in market.COMBO[idx]:
+            a, b = market.ref_price(one, pub), market.ep_close(one, ep)
+            if a is None or b is None:
+                return None
+            rs.append(b / a - 1)
+        return sum(rs) / len(rs)
+    return (epc / ref - 1) if (epc is not None and ref) else None
 
 
 def _state(pub: str, spec: str, ep: str | None, epc: float | None) -> str:
@@ -83,9 +102,4 @@ def _in_session(pub: str) -> bool:
         market.SESSION_PM[0] <= mins <= market.SESSION_PM[1]
 
 
-def is_stale(rec: dict) -> bool:
-    """这条要不要从库里删掉（§3.7 清库）。"""
-    return rec["note"] == STALE
-
-
-__all__ = ["evaluate", "is_stale", "SCORED", "UNSCORED", "PENDING", "ERROR", "STALE"]
+__all__ = ["evaluate", "SCORED", "UNSCORED", "PENDING", "ERROR", "STALE"]

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """06§5 的主流程 —— 每一档推送的九步。
 
-    python -m push <板块> [--init] [--dry-run]
+    python -m push <板块> [--init] [--dry-run] [--force]
 
 | 步 | 做什么 | 不在档上／出岔子时 |
 |:---:|:---|:---|
-| ① | 不在档上就直接退出 | 打印一行说明是哪个规则挡下的，**什么都不碰** |
+| ① | 不在档上就直接退出 | 打印一行说明是哪个规则挡下的，**什么都不碰**（`--force` 是唯一的例外，见 06§5.1） |
 | ② | 拿进程锁 | 上一档还在跑 → 直接退出 |
 | ③ | 备料行情 | 核对到本档时刻，达不到 → **硬失败、本档不推** |
 | ④ | 抓增量帖 | 某位抓失败只影响他自己 |
@@ -40,7 +40,8 @@ CLOSE = "15:00"
 BAR_ENDS = ("10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00")
 
 
-def run(board: str, init: bool = False, dry_run: bool = False, log=print) -> int:
+def run(board: str, init: bool = False, dry_run: bool = False, force: bool = False,
+        log=print) -> int:
     """推一档（或建一次窗口）。返回 0 成功、1 这一档没推成、2 出错。"""
     cfg = conf.load(board)
     if not cfg["pool"]:
@@ -52,6 +53,7 @@ def run(board: str, init: bool = False, dry_run: bool = False, log=print) -> int
     day, hhmm = now.strftime("%Y-%m-%d"), now.strftime("%H:%M")
 
     log(f"[{cfg['name']}板] {stamp}" + ("　（初始化）" if init else "")
+        + ("　（补一档）" if force and not init else "")
         + ("　（只看不发）" if dry_run else ""))
 
     if not _calendar(log):
@@ -62,7 +64,7 @@ def run(board: str, init: bool = False, dry_run: bool = False, log=print) -> int
         log(f"  交易日历不可用：{e}")
         return 2
 
-    if not init:
+    if not init and not force:
         ok, why = _on_grid(cfg, day, hhmm, trading)
         if not ok:
             log(f"  {why}")
@@ -436,11 +438,17 @@ def _write_briefing(cfg: dict, stamp: str, day: str, hhmm: str, wstart: str,
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     init, dry = "--init" in args, "--dry-run" in args
-    rest = [a for a in args if a not in ("--init", "--dry-run")]
+    force = "--force" in args
+    flags = ("--init", "--dry-run", "--force")
+    rest = [a for a in args if a not in flags]
     if len(rest) != 1 or rest[0] not in conf.BOARDS:
-        print(f"用法：python -m push {{{'|'.join(conf.BOARDS)}}} [--init] [--dry-run]")
+        print(f"用法：python -m push {{{'|'.join(conf.BOARDS)}}} "
+              f"[--init] [--dry-run] [--force]")
         return 2
-    return run(rest[0], init=init, dry_run=dry)
+    if force and init:
+        print("`--force` 与 `--init` 一起带没有意义 —— 初始化本来就不看时刻表（06§4）。")
+        return 2
+    return run(rest[0], init=init, dry_run=dry, force=force)
 
 
 __all__ = ["run", "main"]

@@ -38,7 +38,7 @@ def head(people: list[dict], failed: list[str]) -> list[str]:
          + (f"｜本轮更新失败 {len(failed)} 位" if failed else ""), ""]
     L += ["**资格线**", "",
           f"- 参与对比：帖子跨度 ≥ {s.get('span_months', 6)} 个月 且 "
-          f"观点信号 > {s.get('signals', 10)} 条",
+          f"计分信号 > {s.get('signals', 10)} 条",
           f"- 总榜：{idx}计分信号 ≥ {rank.get('min_signals', 30)} 条 且 "
           f"平均分 > {rank.get('min_avg', 0):g}",
           f"- 分榜／方向榜：该组信号 ≥ {grp.get('min_signals', 10)} 条 且 "

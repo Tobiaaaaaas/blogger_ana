@@ -40,7 +40,7 @@ def collect(names: list[str], failed: list[str], log) -> list[dict]:
         days = sorted(p["pub"][:10] for p in flow.load_posts(name) if p.get("pub"))
         t = stats.tally(rows)
         months = render.months_between(days)
-        short = render.sample_short(months, t["total"])
+        short = render.sample_short(months, t["scored"])
         scored = [r for r in rows if r["note"] == verify.SCORED]
         out.append({
             "name": name,
@@ -48,7 +48,7 @@ def collect(names: list[str], failed: list[str], log) -> list[dict]:
             "scored": scored,
             "board": [r for r in scored if r["idx"] == idx],
             "months": months,
-            "signals": t["total"],
+            "signals": t["scored"],
             "short": short,
             "in": not short,          # 够不够参与对比（04§4.1）
         })

@@ -187,9 +187,9 @@ def ref_price(idx: str, pub: str) -> float | None:
 
     双创 = 创业板指与科创50 各占一半。
     """
-    if idx == "双创":
-        a, b = ref_price("创业板指", pub), ref_price("科创50", pub)
-        return (a + b) / 2 if a is not None and b is not None else None
+    if idx in COMBO:
+        vals = [ref_price(one, pub) for one in COMBO[idx]]
+        return sum(vals) / len(vals) if all(v is not None for v in vals) else None
     return _intraday_price(idx, pub)[0]
 
 
@@ -324,9 +324,9 @@ def _ok_date(s: str) -> bool:
 
 def ep_close(idx: str, ep: str) -> float | None:
     """**终点价** —— 验证终点那天的收盘价。取不到返回 None。"""
-    if idx == "双创":
-        a, b = ep_close("创业板指", ep), ep_close("科创50", ep)
-        return (a + b) / 2 if a is not None and b is not None else None
+    if idx in COMBO:
+        vals = [ep_close(one, ep) for one in COMBO[idx]]
+        return sum(vals) / len(vals) if all(v is not None for v in vals) else None
 
     want = normalize_idx(idx)
     # 主指数先用 30 分钟线的当日末根；没有就走日线收盘
@@ -362,6 +362,9 @@ def span_bucket(n: int) -> str:
 # ── 合法域 ──────────────────────────────────────────────────────────────
 
 VALID_IDX = {"上证指数", "上证50", "沪深300", "中证500", "中证1000", "创业板指", "科创50", "双创"}
+
+# 组合指数 = 哪几个单指数各占一半。`ref`／`epc` 取两者的均值；`ret` 由 03 各算各的再平均（03§3.3）。
+COMBO = {"双创": ("创业板指", "科创50")}
 
 # spec 全表。`tN` 的 N 走数字，`d:` 的日期要真实存在，其余是固定值。
 FIXED_SPECS = ({"today", "week", "nweek", "month", "nmonth", "long"}

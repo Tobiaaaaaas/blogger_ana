@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""03 的主流程 —— 定位 → 备料 → 解析 → 保存 → 事后验证 → 清库 → 统计（见 03§1）。
+"""03 的主流程 —— 定位 → 备料 → 解析 → 保存 → 事后验证 → 单列 → 统计（见 03§1）。
 
 **只有「解析」这一步要用模型。** 其余全是纯计算，什么都不落盘。
 
@@ -58,20 +58,16 @@ def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
     log("[④ 事后验证]")
     scored_rows = [verify.evaluate(r) for r in rows]
 
-    log("[⑤ 清库]")
-    kept, dropped = _prune(judged, scored_rows)
-    if dropped:
-        cache.save(blogger, judged)
-        store.save(blogger, kept)
-        log(f"  删掉 {len(dropped)} 条「无效-过时」")
-    else:
-        log("  没有要删的")
+    log("[⑤ 单列]")
+    unscored = [r for r in scored_rows if r["note"] != verify.SCORED]
+    log(f"  计分 {len(scored_rows) - len(unscored)} 条｜没算分 {len(unscored)} 条"
+        "（行照留，不删）")
 
     log("[⑥ 统计]")
-    _write_report(blogger, kept, posts, log)
+    _write_report(blogger, scored_rows, posts, log)
 
-    log("[⑦ 过滤清单]")
-    _report_dropped(tally, no_note, dropped, log)
+    log("[⑦ 清单]")
+    _report_dropped(tally, no_note, unscored, log)
     return 0
 
 
@@ -236,51 +232,31 @@ def judge_posts(blogger: str, posts: list[dict], runs: int, log
     return judged, tally, no_note
 
 
-# ── ⑦ 过滤清单 ──────────────────────────────────────────────────────────
+# ── ⑦ 清单 ──────────────────────────────────────────────────────────────
 
-def _report_dropped(tally: dict, no_note: list[dict], stale: list[dict], log) -> None:
-    """把**没能进到报告里**的观点信号逐条报出来（03§3.8）。
+def _report_dropped(tally: dict, no_note: list[dict], unscored: list[dict], log) -> None:
+    """把**没能进到统计里**的观点信号逐条报出来（03§3.8）。
 
     **只打印在命令行，不写进报告** —— 报告是给人看结论的，不是流水账。
     但这一份必须报：不报，读者只会看到「信号比上次少了」，却不知道少在哪一步。
     """
     lost = tally.get("丢弃清单") or []
 
-    if not (lost or stale or no_note):
-        log("  没有过滤掉的")
+    if not (lost or unscored or no_note):
+        log("  没有没能进统计的")
         return
 
     if lost:
         log(f"  解析阶段：{len(lost)} 条没能成为观点信号")
         for s in lost:
             log(f"    {s}")
-    for r in stale:
-        log(f"  清库：{r['pub']} {r['post_id']}｜无效-过时"
+    for r in unscored:
+        log(f"  没算分：{r['pub']} {r['post_id']}｜{r['note']}"
             f"（{r['idx']} {r['spec']} {r['d']:+d}｜{r['quote'][:20]}…）")
     if no_note:
         log(f"  行情注记取不到：{len(no_note)} 条帖这一轮压根没判")
         for p in no_note:
             log(f"    {p['pub']} {p['post_id']}")
-
-
-# ── ⑤ 清库 ──────────────────────────────────────────────────────────────
-
-def _prune(judged: dict, rows: list[dict]) -> tuple[list[dict], list[dict]]:
-    """把 `note` 是「无效-过时」的**从库里删掉**（03§3.7）。
-
-    删的是**行**，文件还是 6 键 —— **不写状态、不加字段**。
-
-    **缓存里也要删，而且是就地删调用方手上这一份** —— 信号文件是由缓存派生的，
-    只删文件、或删了另一份缓存，下次一跑这条又会长回来。
-    """
-    stale = [r for r in rows if verify.is_stale(r)]
-    if not stale:
-        return rows, []
-    keys = {(r["post_id"], r["idx"], r["spec"], r["d"]) for r in stale}
-    for pid, entry in judged.items():
-        entry["signals"] = [s for s in (entry.get("signals") or [])
-                            if (pid, s["idx"], s["spec"], s["d"]) not in keys]
-    return [r for r in rows if not verify.is_stale(r)], stale
 
 
 # ── ⑥ 统计 ──────────────────────────────────────────────────────────────

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """统计 —— 从现算出来的那些数字算出报告要写的东西（见 03§4）。
 
-**只用「计分」的信号。** 不计分／报错／待验证**单列**，不进任何指标；
-「无效-过时」在清库那一步就被删了，到不了这里。
+**只用「计分」的信号。** 不计分／无效-过时／待验证／报错**单列**，不进任何指标 ——
+它们照常留在信号文件里（03§3.7 不删行），只是到不了这里。
 
-口径与旧报告一致（样本标准差、平局不入分母），这样新旧报告能逐格对账。
+口径与旧报告一致（样本标准差），这样新旧报告能逐格对账。
 """
 
 from __future__ import annotations
@@ -20,14 +20,13 @@ BUCKET_SPAN = params.get("report.bucket_span", 2)   # 交易日跨度 ≥ 2 归�
 
 
 def accuracy(rows: list[dict]) -> tuple[int, int, float]:
-    """正确率 —— 返回 `(得分正的条数, 参与分母的条数, 百分比)`。
+    """正确率 —— 返回 `(得分正的条数, 计分信号数, 百分比)`。
 
-    **得分为 0 的算「平」，不计入分子也不计入分母。**
+    **分母就是计分信号数** —— 得分为 0 的算在分母里，不算「平」（03§4.1）。
     """
     win = sum(1 for r in rows if r["score"] > 0)
-    flat = sum(1 for r in rows if r["score"] == 0)
-    denom = len(rows) - flat
-    return win, denom, (win / denom * 100 if denom else 0.0)
+    n = len(rows)
+    return win, n, (win / n * 100 if n else 0.0)
 
 
 def mean_score(rows: list[dict]) -> float:
@@ -53,8 +52,8 @@ def info_ratio(rows: list[dict]) -> float | None:
 
 def summarize(rows: list[dict]) -> dict:
     """一组的五个数：信号数／平均分／正确率／波动率／信息比率。"""
-    win, denom, acc = accuracy(rows)
-    return {"n": len(rows), "avg": mean_score(rows), "win": win, "denom": denom,
+    win, n, acc = accuracy(rows)
+    return {"n": n, "avg": mean_score(rows), "win": win,
             "acc": acc, "vol": volatility(rows), "ir": info_ratio(rows)}
 
 
@@ -142,11 +141,12 @@ def _month_gaps(months: list[str]) -> list[int]:
 # ── 汇总 ────────────────────────────────────────────────────────────────
 
 def tally(rows: list[dict]) -> dict:
-    """按状态分堆。`rows` 是清库之后、全部信号（含单列的）。"""
+    """按状态分堆。`rows` 是**全部信号**（含没算分的那些）。"""
     counts = Counter(r["note"] for r in rows)
     return {"total": len(rows),
             "scored": counts.get(verify.SCORED, 0),
             "unscored": counts.get(verify.UNSCORED, 0),
+            "stale": counts.get(verify.STALE, 0),
             "error": counts.get(verify.ERROR, 0),
             "pending": counts.get(verify.PENDING, 0)}
 
