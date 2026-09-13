@@ -20,7 +20,7 @@ REPORTS_DIR = ROOT / "reports"        # 03 的产物：<博主名>.md
 
 MARKET_DAILY = MARKET_DIR / "market_data.json"      # 日线
 MARKET_INTRADAY_DIR = MARKET_DIR / "intraday"       # 30 分钟线
-MARKET_CAL = MARKET_DIR / "trade_cal.json"          # 官方交易日历 —— 只当核对的尺子（01§10.4）
+MARKET_CAL = MARKET_DIR / "trade_cal.json"          # 官方交易日历 —— 就是系统日历（01§10.3）
 
 DONE_IDS = STATE_DIR / "done_posts.json"            # 已完成记录：视频帖与置顶帖（01§1）
 LEGACY_DONE_IDS = STATE_DIR / "video_posts.json"    # 旧的「已完成记录」，只认不写

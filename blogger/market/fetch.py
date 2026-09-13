@@ -53,61 +53,43 @@ def due_day(until: str = "") -> str:
 
     `until` 传了具体日期就是在回溯，只管「不晚于它」，不看收盘没有。
 
-    **走官方日历** —— 只跳周末的话，长假里会连报七天假警。
-    官方日历取不到就退回只跳周末，**退得响**（`flow` 会把这件事打出来）。
+    **走官方日历** —— 它是数日子的唯一依据（01§10.3）。**日历缺失或过期 → 硬失败**，
+    不退回只跳周末：凑合出来的日子会把长假算成缺、把缺算成休市。
     """
     day = (until or date.today().isoformat())[:10]
     days = official_days()
-    if days:
-        if not until and day in set(days) and datetime.now().hour >= CLOSE_HOUR:
-            return day
-        earlier = [d for d in days if d <= day]
-        return earlier[-1] if earlier else day
-    return _weekday_on_or_before(day)
+    if not days:
+        raise RuntimeError(
+            f"交易日历不可用（本地这份没覆盖到 {date.today().isoformat()}）—— "
+            f"日历是数日子的唯一依据，没有退路。先跑：python -m blogger.market"
+        )
+    if not until and day in set(days) and datetime.now().hour >= CLOSE_HOUR:
+        return day
+    earlier = [d for d in days if d <= day]
+    return earlier[-1] if earlier else day
 
 
 def missing_days(after: str, want: str) -> list[str]:
     """`after` 之后、`want` 之前（含 `want`）的交易日 —— **逐个列名**用，不报个「差 N 天」。
 
-    有官方日历就用它，**长假不会被算成缺**。
+    走官方日历，**长假不会被算成缺**。
     """
     if not after:
         return []
-    days = official_days()
-    if days:
-        return [d for d in days if after < d <= want]
-    out, d, hi = [], date.fromisoformat(after) + timedelta(days=1), date.fromisoformat(want)
-    while d <= hi:
-        if d.weekday() < 5:
-            out.append(d.isoformat())
-        d += timedelta(days=1)
-    return out
+    return [d for d in official_days() if after < d <= want]
 
 
-def _weekday_on_or_before(day: str) -> str:
-    """`day` 或其之前最近的一个工作日（只跳周末）。官方日历取不到时的退路。"""
-    d = date.fromisoformat(day)
-    while d.weekday() >= 5:
-        d -= timedelta(days=1)
-    return d.isoformat()
+# ── 官方日历 ────────────────────────────────────────────────────────────
 
-
-# ── 官方日历：核对的尺子 ────────────────────────────────────────────────
-
-_CAL: tuple[str, ...] = ()
 
 
 def official_days() -> tuple[str, ...]:
-    """官方交易日历（升序）。**只当核对的尺子**，系统日历仍是「有上证行情的那天」（01§10.3）。
+    """官方交易日历（升序）。**它就是系统日历**（01§10.3）—— 数日子与核对共用这一份，不是两把尺子。
 
-    **拿数据比数据，数据缺了会自己证明自己齐全** —— 所以核对必须另有一份不同源的日历。
-
-    本地这份没覆盖到今天就算**过期**，返回空 —— 调用方退回只跳周末。
-    退得响，好过拿一份过期的尺子量出「齐了」。
+    本地这份**没覆盖到今天**就算过期，返回空 —— 调用方据此触发重抓，而不是拿一份过期的日子凑合。
+    **日历缺了没有退路**（01§10.3）：过期 → 重抓；重抓不到 → 硬失败。
     """
-    if not _CAL:
-        _load_cal()
-    days = _CAL
+    days = market.CAL
     if not days or days[-1] < date.today().isoformat():
         return ()
     return days
@@ -117,25 +99,14 @@ def calendar_stale() -> bool:
     return not official_days()
 
 
-def _load_cal() -> None:
-    global _CAL
-    try:
-        doc = json.loads(paths.MARKET_CAL.read_text(encoding="utf-8")) or {}
-    except (ValueError, OSError):
-        _CAL = ()
-        return
-    _CAL = tuple(sorted(str(d)[:10] for d in (doc.get("days") or [])))
-
-
 def _fetch_calendar(progress=None) -> int:
-    """抓官方交易日历 → `data/market/trade_cal.json`。"""
+    """抓官方交易日历 → `data/market/trade_cal.json`。**抓不到就抛** —— 日历是硬前提。"""
     import akshare as ak
     df = _try("官方日历", ak.tool_trade_date_hist_sina)
     days = sorted({str(d)[:10] for d in df["trade_date"]})
     _write_json(paths.MARKET_CAL, {"scrape_time": time.strftime("%Y-%m-%d %H:%M:%S"),
                                    "days": days})
-    global _CAL
-    _CAL = tuple(days)
+    market.reload()
     if progress:
         progress(f"  官方日历：{len(days)} 天，{days[0]} ~ {days[-1]}")
     return len(days)
@@ -144,23 +115,25 @@ def _fetch_calendar(progress=None) -> int:
 # ── 抓 ──────────────────────────────────────────────────────────────────
 
 def needs_refresh(until: str = "") -> bool:
-    """日历够不够到**该到的那天**（01§10.4）。够就不必再抓。"""
+    """要不要抓一次（01§10.4）。**日历过期也算要抓** —— 它得先补上，下游才数得出日子。"""
+    if calendar_stale():
+        return True
     return market.LAST_DATE < due_day(until)
 
 
 def refresh(until: str = "", progress=None) -> dict:
-    """把日线、30 分钟线与官方日历补到 `until`（默认今天）。返回补了什么。"""
+    """把官方日历、日线、30 分钟线补到 `until`（默认今天）。返回补了什么。
+
+    **日历第一个抓** —— 后面的「该到哪天」要拿它算；抓不到就抛（01§10.3）。
+    """
+    if calendar_stale():
+        _fetch_calendar(progress)
     target = until or date.today().isoformat()
     daily = _fetch_daily(target, progress)
     intraday = _fetch_intraday(progress)
-    if calendar_stale():
-        try:
-            _fetch_calendar(progress)
-        except Exception as e:
-            print(f"  官方日历没抓到：{e}")     # 不中断 —— 核对时退回只跳周末并注明
     market.reload()
-    return {"日线": daily, "30分钟": intraday, "日历到": market.LAST_DATE,
-            "官方日历": official_days()[-1] if official_days() else ""}
+    return {"日线": daily, "30分钟": intraday, "行情到": market.LAST_DATE,
+            "日历到": official_days()[-1] if official_days() else "**没有**"}
 
 
 def _try(label: str, fn):

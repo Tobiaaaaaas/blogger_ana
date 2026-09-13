@@ -20,9 +20,10 @@ MAX_LIST = 10        # 缺的日子最多列几个，再多就只报个数
 
 def run(until: str = "", log=print) -> int:
     """① 抓 → ② 核对 → 报账。全齐 0，有缺 1。"""
-    log(f"[① 抓] 该到 {fetch.due_day(until)}｜官方日历 {_cal_note()}")
+    log("[① 抓]")
     got = fetch.refresh(until, progress=log)
-    log(f"  日线 +{got['日线']} 根、30 分钟线 +{got['30分钟']} 根，日历到 {got['日历到']}")
+    log(f"  该到 {fetch.due_day(until)}｜官方日历 {_cal_note()}")
+    log(f"  日线 +{got['日线']} 根、30 分钟线 +{got['30分钟']} 根，行情到 {got['行情到']}")
     log("")
     return 0 if not confirm(until, log) else 1
 
@@ -33,7 +34,7 @@ def confirm(until: str = "", log=print) -> int:
     log(f"[② 核对] 该到 {want}")
     short = _shortfalls(want)
     if not short:
-        log("  三样都对上了。")
+        log("  两样都对上了。")
         return 0
     for what, why in short:
         log(f"  **没到位** {what}：{why}")
@@ -43,9 +44,13 @@ def confirm(until: str = "", log=print) -> int:
 
 def survey(log=print) -> int:
     """只看不抓（`--check`）—— **不联网、不写盘**。返回差了几项。"""
-    want = fetch.due_day("")
-    log(f"系统交易日历　止于 {market.LAST_DATE or '空（一条都没有）'}")
+    log(f"行情水位　　　止于 {market.LAST_DATE or '空（一条都没有）'}")
     log(f"官方日历　　　{_cal_note()}")
+    try:
+        want = fetch.due_day("")
+    except RuntimeError as e:
+        log(f"该到　　　　　**算不出** —— {e}")
+        return 1
     log(f"该到　　　　　{want}")
     log("")
     log("| 指数 | 日线到 | 30 分钟线到 |")
@@ -57,13 +62,20 @@ def survey(log=print) -> int:
     return len(_shortfalls(want))
 
 
+def _cal_note() -> str:
+    """官方日历覆盖到哪天 —— **它现在是系统日历，不是备用的尺子**（01§10.3）。"""
+    days = fetch.official_days()
+    return f"止于 {days[-1]}" if days else "**缺失或已过期 —— 硬失败，不退回只跳周末**"
+
+
 # ── 核对 ────────────────────────────────────────────────────────────────
 
 def _shortfalls(want: str) -> list[tuple[str, str]]:
-    """**比三样**：日历末个交易日、每个指数的日线末根、每个指数的 30 分钟线末根。"""
+    """**比两样**：每个指数的日线末根、每个指数的 30 分钟线末根（01§10.4）。
+
+    「该到哪天」是拿**官方日历**算的 —— 尺子与被量的东西不同源，量得出缺口。
+    """
     out = []
-    if market.LAST_DATE < want:
-        out.append(("交易日历", _why(market.LAST_DATE, want)))
     for _, name in fetch.INDICES:
         last = _daily_last(name)
         if last < want:
@@ -83,11 +95,6 @@ def _why(last: str, want: str) -> str:
     if len(miss) <= MAX_LIST:
         return f"止于 {last}，缺 {'、'.join(miss)}"
     return f"止于 {last}，缺 {len(miss)} 个交易日（{miss[0]} … {miss[-1]}）"
-
-
-def _cal_note() -> str:
-    days = fetch.official_days()
-    return f"止于 {days[-1]}" if days else "**取不到或已过期，核对退回只跳周末**"
 
 
 def _daily_last(name: str) -> str:

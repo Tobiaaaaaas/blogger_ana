@@ -5,9 +5,13 @@
 必须**同源同值** —— 模型据以判方向的数字，就是引擎据以打分的数字。所以两边都调这里的
 `ref_price()`，绝不各算各的。
 
-两个数据源：
-- `data/market/market_data.json` —— 日线，**交易日历以「上证指数」的日期序列为唯一基准**
+三个数据源：
+- `data/market/trade_cal.json` —— **交易日历**，官方日历、含未来。数日子只认它
+- `data/market/market_data.json` —— 日线，给出**行情水位**（数据到哪天）。算价只认它
 - `data/market/intraday/<指数>_30min.json` —— 30 分钟线，只在算「发帖时刻现值」时用
+
+**日历与行情是两件事，不许互相倒推**（01§10.3）：日历缺一天是休市，行情缺一天是缺口。
+合在一起时后者会被前者悄悄吃掉 —— 那天既算不出价、也数不进日子。
 """
 
 from __future__ import annotations
@@ -54,12 +58,39 @@ def _load_intraday() -> dict:
 
 
 DAILY = _load_daily()
-# 交易日历：有上证行情的那天就是交易日。**全系统只此一份**。
-CAL = sorted(r["日期"] for r in DAILY["上证指数"])
-CAL_SET = set(CAL)
 INTRADAY = _load_intraday()
 
-LAST_DATE = CAL[-1] if CAL else ""
+# **交易日历**（哪天开市）—— 官方日历，含未来。数日子（验证终点、交易日跨度）只认它。
+CAL: tuple[str, ...] = ()
+CAL_SET: set[str] = set()
+CAL_ERR = ""
+
+# **行情水位**（数据到哪天）—— 上证日线的末根。算价只认它。**与日历是两件事**。
+LAST_DATE = DAILY["上证指数"][-1]["日期"] if DAILY.get("上证指数") else ""
+
+
+def _load_cal() -> None:
+    """读官方日历 → `CAL` / `CAL_SET` / `CAL_ERR`。**读不出不抛** —— 抓日历那一步还得跑。"""
+    global CAL, CAL_SET, CAL_ERR
+    try:
+        doc = json.loads(paths.MARKET_CAL.read_text(encoding="utf-8")) or {}
+        days = tuple(sorted({str(d)[:10] for d in (doc.get("days") or [])}))
+    except (ValueError, OSError) as e:
+        CAL, CAL_SET, CAL_ERR = (), set(), f"{type(e).__name__}: {e}"
+        return
+    CAL, CAL_SET, CAL_ERR = days, set(days), "" if days else "日历里一天都没有"
+
+
+_load_cal()
+
+
+def _require_cal() -> None:
+    """**日历是数日子的唯一依据，缺了硬失败**（01§10.3）—— 不许拿行情倒推一份凑合。"""
+    if CAL_ERR:
+        raise RuntimeError(
+            f"交易日历不可用（{CAL_ERR}）。交易日历与行情是两件事，缺了不许拿行情倒推一份 —— "
+            f"先跑：python -m blogger.market"
+        )
 
 
 def reload() -> None:
@@ -67,20 +98,21 @@ def reload() -> None:
 
     **补行情之后必须调一次**，否则同一进程里算出来的还是补之前的那份。
     """
-    global DAILY, CAL, CAL_SET, INTRADAY, LAST_DATE
+    global DAILY, INTRADAY, LAST_DATE
     DAILY = _load_daily()
-    CAL = sorted(r["日期"] for r in DAILY["上证指数"])
-    CAL_SET = set(CAL)
     INTRADAY = _load_intraday()
-    LAST_DATE = CAL[-1] if CAL else ""
+    LAST_DATE = DAILY["上证指数"][-1]["日期"] if DAILY.get("上证指数") else ""
+    _load_cal()
 
 
 def is_trading_day(d: str) -> bool:
+    _require_cal()
     return d in CAL_SET
 
 
 def prev_td(d: str) -> str | None:
     """d 之前最近一个交易日（不含 d）。"""
+    _require_cal()
     for x in reversed(CAL):
         if x < d:
             return x
@@ -89,6 +121,7 @@ def prev_td(d: str) -> str | None:
 
 def next_td(d: str) -> str | None:
     """d 之后最近一个交易日（不含 d）。"""
+    _require_cal()
     for x in CAL:
         if x > d:
             return x
@@ -112,21 +145,6 @@ def _minutes(pub: str) -> int | None:
         return None
 
 
-def _anchorable(pub_day: str) -> bool:
-    """发帖日能不能用「上一交易日收盘」当现值锚。
-
-    日历覆盖范围内的非交易日 = 真周末/假日 → 行。日历末日之后的**周末** → 也行（博主谈的就是
-    最新收盘）。但日历末日之后的**工作日**没法确认是不是交易日（可能已经开盘了）→ 宁可不给价，
-    也不锚一个陈旧价上去。
-    """
-    if pub_day <= LAST_DATE:
-        return True
-    try:
-        return date.fromisoformat(pub_day).weekday() >= 5
-    except ValueError:
-        return False
-
-
 def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
     """单指数（不含双创）的现值，附快照性质。
 
@@ -142,8 +160,6 @@ def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
         return None, None
 
     if not is_trading_day(pub_day) or hm < SESSION_AM[0]:
-        if not is_trading_day(pub_day) and not _anchorable(pub_day):
-            return None, None
         prev = prev_td(pub_day)
         if prev is None:
             return None, None
@@ -190,8 +206,6 @@ def snapshot_label(pub: str) -> str | None:
     if hm is None or len(hhmm) < 5:
         return None
     if not is_trading_day(pub_day) or hm < SESSION_AM[0]:
-        if not is_trading_day(pub_day) and not _anchorable(pub_day):
-            return None
         return "上一交易日收盘(盘前或休市)"
     if SESSION_AM[0] <= hm < SESSION_AM[1] or SESSION_PM[0] <= hm < SESSION_PM[1]:
         return f"{hhmm}盘中(30分钟线当根开盘)"
@@ -222,6 +236,7 @@ def _last_td_of_week(d: str) -> str | None:
     **整周一个交易日都没有**（春节那一周）时，「最后交易日」不存在 —— 退到该周之后最近的
     一个交易日。不退的话这条永远算不出终点，只能挂在「待验证」里。
     """
+    _require_cal()
     y, w, _ = date.fromisoformat(d).isocalendar()
     days = [x for x in CAL if date.fromisoformat(x).isocalendar()[:2] == (y, w)]
     if days:
@@ -247,6 +262,7 @@ WEEKDAY_SPECS = {"monday": 1, "tuesday": 2, "wednesday": 3, "thursday": 4, "frid
 
 
 def _last_td_of_month(d: str) -> str | None:
+    _require_cal()
     ym = d[:7]
     days = [x for x in CAL if x[:7] == ym]
     return days[-1] if days else None
@@ -260,8 +276,10 @@ def _next_month(ym: str) -> str:
 def endpoint(pub: str, spec: str) -> str | None:
     """**验证终点** —— 这条观点信号该看哪一天。
 
-    找不到（`long`、或算出来超出日历覆盖）返回 None。
+    日历**含未来**（01§10.3），所以「明天」「下周」这类终点都算得出；找不到的只有两种：
+    `long` 没有终点，以及终点落到日历覆盖之外。
     """
+    _require_cal()
     day = pub[:10]
     base = base_day(day)
     if base is None:
@@ -333,6 +351,7 @@ def span(pub: str, ep: str) -> int | None:
 
     从发帖日的锚（发帖日是交易日就用它，否则前一交易日）起算。
     """
+    _require_cal()
     base = base_day(pub[:10])
     if base is None or ep not in CAL_SET or base not in CAL_SET:
         return None
