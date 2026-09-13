@@ -14,13 +14,13 @@ import json
 import time
 from datetime import date
 
-from blogger.common import ds, market
+from blogger.common import ds, market, params
 from blogger.parse import prompts, schema
 
-BATCH_SIZE = 15          # 一批最多几条帖
-BATCH_CHAR_BUDGET = 30000
-PER_POST_LIMIT = 4000    # 单帖正文截断长度（保头 60% 尾 40%）
-BATCH_PAUSE = 0.5        # 批与批之间的间隔（秒）
+BATCH_SIZE = params.get("parse.batch_size", 15)     # 一批最多几条帖
+BATCH_CHAR_BUDGET = params.get("parse.batch_char_budget", 30000)
+PER_POST_LIMIT = params.get("parse.per_post_limit", 4000)   # 单帖正文截断长度（保头 60% 尾 40%）
+BATCH_PAUSE = params.get("parse.batch_pause", 0.5)  # 批与批之间的间隔（秒）
 
 WEEKDAY_CN = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 

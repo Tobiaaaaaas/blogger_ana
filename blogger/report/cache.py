@@ -19,13 +19,18 @@ from __future__ import annotations
 import hashlib
 import json
 
-from blogger.common import paths
+from blogger.common import params, paths
 from blogger.parse import prompts
 
 
 def rule_fingerprint() -> str:
-    """当前这版读帖规则的指纹。规则文本一改，指纹就变。"""
-    blob = (prompts.ANNOTATION_SYSTEM_PROMPT + "\x00" + prompts.RECONCILE_SYSTEM_PROMPT)
+    """当前这版读帖规则的指纹。**规则文本或模型名一改，指纹就变。**
+
+    **模型名也认**（02§11）—— 换模型等于换了个读法，旧的判断不能接着用。
+    只认规则文本的话，换了模型会静悄悄地拿着上一版读法的结论往下跑。
+    """
+    blob = (prompts.ANNOTATION_SYSTEM_PROMPT + "\x00" + prompts.RECONCILE_SYSTEM_PROMPT
+            + "\x00" + str(params.get("parse.model", "")))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
 

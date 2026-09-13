@@ -11,10 +11,12 @@ from __future__ import annotations
 
 from collections import Counter
 
+from blogger.common import params
 from blogger.report import verify
 
 # 分档标签
 BUCKETS = ("超短期", "波段")
+BUCKET_SPAN = params.get("report.bucket_span", 2)   # 交易日跨度 ≥ 2 归「波段」，否则「超短期」
 
 
 def accuracy(rows: list[dict]) -> tuple[int, int, float]:
@@ -64,9 +66,14 @@ def by_index(rows: list[dict]) -> dict[str, list[dict]]:
 
 
 def by_bucket(rows: list[dict]) -> dict[str, list[dict]]:
-    """按**两档**分组 —— 用交易日跨度分（跨度 ≤1 超短期、≥2 波段）。"""
-    return _group(rows, lambda r: BUCKETS[1] if r["span"] >= 2 else BUCKETS[0],
-                  only=("超短期", "波段"))
+    """按**两档**分组 —— 用交易日跨度分（§3.4）。
+
+    **跨度为 `None` 的分不了档，直接不进这张表** —— `long` 就是这种（它判「不计分」，
+    本来就到不了这里），另外发帖日或终点日不在交易日历上的也分不了。
+    """
+    return _group([r for r in rows if r["span"] is not None],
+                  lambda r: BUCKETS[1] if r["span"] >= BUCKET_SPAN else BUCKETS[0],
+                  only=BUCKETS)
 
 
 def by_direction(rows: list[dict]) -> dict[str, list[dict]]:
@@ -98,21 +105,26 @@ def concentration(rows: list[dict]) -> list[tuple[str, str]]:
     if not rows:
         return out
 
+    high = params.get("warn.high", 0.50)
+    mild = params.get("warn.mild", 0.33)
+    gap_severe = params.get("warn.gap_severe", 3)
+    gap_mild = params.get("warn.gap_mild", 1)
+
     months = Counter(r["pub"][:7] for r in rows)
     total = len(rows)
     for m, c in months.most_common(1):
         share = c / total
-        if share >= 0.50:
+        if share >= high:
             out.append(("高度集中", f"{m} 一个月占了 {share:.0%}（{c}/{total} 条）"))
-        elif share >= 0.33:
+        elif share >= mild:
             out.append(("轻度集中", f"{m} 一个月占了 {share:.0%}（{c}/{total} 条）"))
 
     span = _month_gaps(sorted(months))
     if span:
         worst = max(span)
-        if worst >= 3:
+        if worst >= gap_severe:
             out.append(("严重缺口", f"相邻月份之间最多缺 {worst} 个月"))
-        elif worst >= 1:
+        elif worst >= gap_mild:
             out.append(("提示", f"相邻月份之间最多缺 {worst} 个月"))
     return out
 

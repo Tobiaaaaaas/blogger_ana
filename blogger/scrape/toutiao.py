@@ -22,7 +22,7 @@ from datetime import datetime
 import requests
 from playwright.sync_api import sync_playwright
 
-from blogger.common import config, paths
+from blogger.common import config, params, paths
 
 # ── 常量 ────────────────────────────────────────────────────────────────
 
@@ -47,14 +47,14 @@ PLAYER_MARK = "xgplayer"
 # 视频帖的第四个判据：链接域名
 CDN_HOST = "toutiaoimg"
 
-MAX_PAGES = 400          # 翻页上限（高密度博主回溯 6 个月需 200+ 页）
-TARGET_POSTS = 5000      # 累计到这么多就停
-EMPTY_PAGE_LIMIT = 5     # 连续这么多页没新帖就停
+MAX_PAGES = params.get("scrape.max_pages", 400)     # 翻页上限（高密度博主回溯 6 个月需 200+ 页）
+TARGET_POSTS = params.get("scrape.target_posts", 5000)   # 累计到这么多就停
+EMPTY_PAGE_LIMIT = params.get("scrape.empty_page_limit", 5)   # 连续这么多页没新帖就停
 
-DETAIL_RETRY = 3         # 详情页重试次数
-DETAIL_INTERVAL = 1.2    # 详情页之间的间隔（秒），防风控
-EMPTY_RUN_PAUSE = 5      # info 接口连续空响应这么多次 → 暂停
-EMPTY_RUN_SLEEP = 60     # 暂停多久（秒）
+DETAIL_RETRY = params.get("scrape.detail_retry", 3)   # 详情页重试次数
+DETAIL_INTERVAL = params.get("scrape.detail_interval", 1.2)   # 详情页之间的间隔（秒），防风控
+EMPTY_RUN_PAUSE = params.get("scrape.empty_run_pause", 5)   # info 接口连续空响应这么多次 → 暂停
+EMPTY_RUN_SLEEP = params.get("scrape.empty_run_sleep", 60)   # 暂停多久（秒）
 
 
 def log(msg: str) -> None:

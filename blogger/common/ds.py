@@ -14,15 +14,17 @@ import time
 
 from openai import OpenAI
 
-MODEL = "deepseek-v4-flash"
-BASE_URL = "https://api.deepseek.com"
-MAX_RETRIES = 3
-RETRY_DELAY = 5
+from blogger.common import params
+
+MODEL = params.get("parse.model", "deepseek-v4-flash")
+BASE_URL = params.get("parse.base_url", "https://api.deepseek.com")
+MAX_RETRIES = params.get("parse.max_retries", 3)
+RETRY_DELAY = params.get("parse.retry_delay", 5)
 
 # 硬性 wall-clock 超时（秒）。服务端偶尔会拖着连接不回，SDK 自己的 timeout 只对「完全没数据」
 # 生效 —— 服务端持续发字节会把读超时一次次重置，于是无限挂起。所以用守护线程硬切：
 # 单次调用绝不超这个数。
-CALL_DEADLINE = 180
+CALL_DEADLINE = params.get("parse.call_deadline", 180)
 
 
 class ModelError(RuntimeError):

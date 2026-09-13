@@ -17,7 +17,6 @@ from blogger.parse import extract
 from blogger.report import cache, render, store, verify
 from blogger.scrape import toutiao
 
-BATCH_SIZE = 15          # 03§2.2：一次喂 15 帖
 RUNS = 1                 # 03§2.2：一条帖跑 1 遍
 
 
@@ -41,14 +40,14 @@ def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
 
     log(f"[① 备料] {'新博主入库' if not blogger else blogger}")
     if refresh:
-        _market(log)
+        market_refresh(log)
     blogger = _scrape(blogger, url, start, log)
     if not blogger:
         return 2
 
     log("[② 解析]")
-    posts = _load_posts(blogger)
-    judged, tally, no_note = _parse(blogger, posts, runs, log)
+    posts = load_posts(blogger)
+    judged, tally, no_note = judge_posts(blogger, posts, runs, log)
 
     log("[③ 保存]")
     ids = {p["post_id"] for p in posts}
@@ -76,28 +75,37 @@ def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
     return 0
 
 
-def report_all(begin_date: str = "", runs: int = RUNS, refresh: bool = True,
-               log=print) -> int:
-    """全库 —— **所有抓过的博主**，各更新一遍。
+def roster() -> list[str]:
+    """名单 —— **所有抓过的博主**：`data/posts/` 下的每一位（03§6）。
 
-    名单取 `data/posts/` 下的每一位，**不是**已有信号文件的博主 ——
-    否则新博主一旦还没解析过，就永远进不了名单（03§6）。
+    03／04／01 的对齐总览用的是同一份名单，只算一处 —— 实现落在 `paths.roster`。
     """
-    names = sorted(p.stem for p in paths.POSTS_DIR.glob("*.json")) \
-        if paths.POSTS_DIR.exists() else []
+    return paths.roster()
+
+
+def report_all(begin_date: str = "", runs: int = RUNS, refresh: bool = True,
+               log=print, on_done=None) -> int:
+    """全库 —— 每位各更新一遍。`on_done(博主名, 成没成)` 每一位跑完调一次。"""
+    names = roster()
     if not names:
         log("库里一位博主都没有。先给一条帖子链接把博主引进来。")
         return 2
 
     log(f"全库 {len(names)} 位")
     if refresh:
-        _market(log)
+        market_refresh(log)
 
     bad = 0
     for i, name in enumerate(names, 1):
         log(f"\n{'=' * 60}\n[{i}/{len(names)}] {name}")
-        if report_one(name, begin_date, runs, refresh=False, log=log) != 0:
-            bad += 1
+        try:
+            ok = report_one(name, begin_date, runs, refresh=False, log=log) == 0
+        except Exception as e:           # **一位跑不成不牵连其余的** —— 单列出来就行（04§2）
+            log(f"  这一位没跑成：{e!r}")
+            ok = False
+        bad += 0 if ok else 1
+        if on_done:
+            on_done(name, ok)
     log(f"\n全库跑完：{len(names) - bad} 位成功，{bad} 位出错")
     return 1 if bad else 0
 
@@ -136,9 +144,8 @@ def _locate(locator: str, begin_date: str, log) -> tuple[str, str, str] | None:
 
 
 def _start_of(doc: dict) -> str:
-    """续抓起点 = **上次抓取截止所在那一日的零点**（01§2／01§5）。"""
-    stamp = doc.get("scrape_time") or ""
-    return f"{stamp[:10]} 00:00" if stamp else ""
+    """续抓起点（01§5）。算法落在 `config.resume_start`，补齐那边调的是同一个。"""
+    return config.resume_start(doc)
 
 
 def _blogger_of_post(pid: str) -> str:
@@ -174,10 +181,12 @@ def _scrape(blogger: str, url: str, start: str, log) -> str:
     return got
 
 
-def _market(log) -> None:
-    """补行情 —— 日线（算交易日历）＋ 30 分钟线（算参考价与终点价）。见 01§10。
+def market_refresh(log) -> None:
+    """**备料行情** —— 日线（算交易日历）＋ 30 分钟线（算参考价与终点价）。见 01§10。
 
     已经补到**该到的那天**就不重复抓。**这里不核对** —— 核对是 `blogger.market` 的事。
+
+    03／04 在跑之前调它；05 在 `backtest.update` 关掉时**只调它、不动库**（05§8）。
     """
     if not fetch.needs_refresh():
         log(f"  行情已到 {market.LAST_DATE}，不必补")
@@ -189,11 +198,14 @@ def _market(log) -> None:
 
 # ── ② 解析 ──────────────────────────────────────────────────────────────
 
-def _parse(blogger: str, posts: list[dict], runs: int, log
-           ) -> tuple[dict, dict, list[dict]]:
+def judge_posts(blogger: str, posts: list[dict], runs: int, log
+                ) -> tuple[dict, dict, list[dict]]:
     """只判**还没判过的帖**；判过的直接从缓存取行（03§2.2）。
 
     排序：从新到旧。返回 `(缓存, 这一轮的解析统计, 缺行情注记没判的帖)`。
+
+    03 每跑一次调它一遍；06 每档对**这一轮新抓回来的帖**调它一遍（06§5.5）——
+    批大小、字数预算、单帖上限、排序方向都是同一套参数，两边读帖的方式必须一致。
     """
     cached = cache.load(blogger)
     judged = cached["judged"]
@@ -217,7 +229,7 @@ def _parse(blogger: str, posts: list[dict], runs: int, log
                 judged[p["post_id"]] = {"pub": p["pub"],
                                         "signals": by_post.get(p["post_id"], [])}
 
-        _, tally = extract.extract(ready, runs=runs, batch_size=BATCH_SIZE,
+        _, tally = extract.extract(ready, runs=runs,
                                    on_judged=remember,
                                    progress=lambda i, n, k: log(f"    批 {i}/{n} → {k} 条"))
         cache.save(blogger, judged)
@@ -293,8 +305,9 @@ def _load_doc(blogger: str) -> dict:
         return {}
 
 
-def _load_posts(blogger: str) -> list[dict]:
+def load_posts(blogger: str) -> list[dict]:
     return _load_doc(blogger).get("posts") or []
 
 
-__all__ = ["report_one", "report_all", "looks_like_url", "_prune"]
+__all__ = ["report_one", "report_all", "roster", "looks_like_url", "load_posts",
+           "judge_posts", "market_refresh"]

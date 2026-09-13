@@ -11,12 +11,12 @@ from __future__ import annotations
 
 import re
 
-from blogger.common import market, text
+from blogger.common import market, params, text
 
 
 # ── ±10% 兜底：核心预测句未点名指数时，点位须落在上证现值 ±10% 内（02§5.4／§10.1） ──
 
-BAND = 0.10            # 「合理范围」的半宽
+BAND = params.get("parse.band", 0.10)          # 「合理范围」的半宽
 POINT_MIN, POINT_MAX = 1000.0, 20000.0    # 点位量级：低于 1000 的是「还有 X 点空间」，不是点位
 
 # 02§5.2 映射表的关键词 —— 引文里出现任一个，这一处就算**点名了对象**，本规则不适用

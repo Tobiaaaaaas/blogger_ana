@@ -20,9 +20,9 @@ import sys
 from collections import Counter
 from datetime import datetime, timedelta
 
-from blogger.common import config, paths
+from blogger.common import config, params, paths
 
-GAP_DAYS = 7      # 按日缺口阈值：博主停更属正常，只提示
+GAP_DAYS = params.get("scrape.gap_days", 7)   # 按日缺口阈值：博主停更属正常，只提示
 
 
 def verify(blogger: str, begin_date: str = "") -> int:

@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 from datetime import date, timedelta
 
-from blogger.common import paths
+from blogger.common import params, paths
 
 # 八个合法对象的别名归一（板块 → 指数）
 IDX_ALIASES = {"上证综指": "上证指数", "上证": "上证指数", "综指": "上证指数"}
@@ -146,10 +146,14 @@ def _minutes(pub: str) -> int | None:
 
 
 def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
-    """单指数（不含双创）的现值，附快照性质。
+    """单指数（不含双创）的现值，附快照性质 —— **发帖前最后收完的那根的收盘价**（02§2.1）。
 
-    快照性质分四种：`session` 盘中当根开盘 / `lunch` 午休 11:30 收盘 /
-    `after` 盘后 15:00 收盘 / `prev` 上一交易日收盘（盘前或休市）。
+    快照性质两种：`bar` 取到了当天某一根的收盘（附那根的结束时刻）／`prev` 上一交易日收盘
+    （盘前，或刚开盘那半小时 —— 当天一根都还没收出来）。
+
+    **只取已经收出来的那根**，不去要还没收出来的下一根：同一根 K 线的收盘与下一根的开盘
+    是同一个时点、数值只差最后一笔的零头，但前者当场就取得到。推送一档一推、随时要拿
+    发帖时刻的现值做注记，等不起那半小时（06§5.3）。
     """
     days = INTRADAY.get(normalize_idx(idx))
     if not days:
@@ -159,32 +163,22 @@ def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
     if hm is None or len(hhmm) < 5:
         return None, None
 
-    if not is_trading_day(pub_day) or hm < SESSION_AM[0]:
-        prev = prev_td(pub_day)
-        if prev is None:
-            return None, None
+    if is_trading_day(pub_day) and hm >= SESSION_AM[0]:
         for day, rows in days:
-            if day == prev:
-                return rows[-1][1]["close"], "prev"
-        return None, None
+            if day != pub_day:
+                continue
+            done = [(t, b) for t, b in rows if t <= hhmm]
+            if done:
+                t, b = done[-1]
+                return b["close"], f"bar:{t}"
+            break                                 # 当天一根都还没收出来 → 退回上一交易日
 
+    prev = prev_td(pub_day)
+    if prev is None:
+        return None, None
     for day, rows in days:
-        if day != pub_day:
-            continue
-        if SESSION_AM[0] <= hm < SESSION_AM[1] or SESSION_PM[0] <= hm < SESSION_PM[1]:
-            # 盘中 → 所处那根 30 分钟 bar 的开盘价。
-            # 取**严格大于**：整点发帖（如 10:00）拿的是刚开盘那根 = 此刻现价，
-            # 不用 `>=` 回落上一根（那会让 10:00 拿到的价比 10:01 还旧一档）。
-            for t, b in rows:
-                if t > hhmm:
-                    return b["open"], "session"
-            return None, None
-        if SESSION_AM[1] <= hm < SESSION_PM[0]:
-            for t, b in rows:
-                if t == "11:30":
-                    return b["close"], "lunch"
-            return None, None
-        return rows[-1][1]["close"], "after"      # 盘后 → 当日 15:00 收盘
+        if day == prev:
+            return rows[-1][1]["close"], "prev"
     return None, None
 
 
@@ -200,18 +194,17 @@ def ref_price(idx: str, pub: str) -> float | None:
 
 
 def snapshot_label(pub: str) -> str | None:
-    """发帖时刻的快照性质，写进行情注记的头部。"""
-    pub_day, hhmm = pub[:10], pub[11:16]
-    hm = _minutes(pub)
-    if hm is None or len(hhmm) < 5:
+    """发帖时刻的快照性质，写进行情注记的头部（02§2.1）。
+
+    取到当天某根 → `10:00 收盘(发帖前最后收完的一根)`；当天一根都还没收出来 → `上一交易日收盘`。
+    """
+    if len(pub[11:16]) < 5 or _minutes(pub) is None:
         return None
-    if not is_trading_day(pub_day) or hm < SESSION_AM[0]:
-        return "上一交易日收盘(盘前或休市)"
-    if SESSION_AM[0] <= hm < SESSION_AM[1] or SESSION_PM[0] <= hm < SESSION_PM[1]:
-        return f"{hhmm}盘中(30分钟线当根开盘)"
-    if SESSION_AM[1] <= hm < SESSION_PM[0]:
-        return "午休(11:30收盘)"
-    return "盘后(15:00收盘)"
+    _, snap = _intraday_price("上证指数", pub)
+    if snap is None:
+        return None
+    return (f"{snap[4:]} 收盘(发帖前最后收完的一根)" if snap.startswith("bar:")
+            else "上一交易日收盘")
 
 
 def pub_note(pub: str) -> str | None:
@@ -359,8 +352,11 @@ def span(pub: str, ep: str) -> int | None:
 
 
 def span_bucket(n: int) -> str:
-    """按跨度分两档：`span ≤1` 超短期 / `span ≥2` 波段。"""
-    return "超短期" if n <= 1 else "波段"
+    """按跨度分两档（03§3.4）：跨度 `< 2` 超短期，`≥ 2` 波段。
+
+    **边界只有这一处** —— 与 03、04 的两档表读的是同一个配置键。
+    """
+    return "波段" if n >= params.get("report.bucket_span", 2) else "超短期"
 
 
 # ── 合法域 ──────────────────────────────────────────────────────────────

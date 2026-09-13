@@ -7,11 +7,12 @@
 
 from __future__ import annotations
 
+from blogger.common import params
 from blogger.report import stats, verify
 
-QUOTE_LIMIT = 60        # 逐条汇总表里引文的截断长度
-SAMPLE_MONTHS = 6       # §5 的样本线：帖子跨度 ≥ 6 个月
-SAMPLE_SIGNALS = 10     # §5 的样本线：观点信号 > 10 条
+QUOTE_LIMIT = params.get("report.quote_limit", 60)          # 逐条汇总表里引文的截断长度
+SAMPLE_MONTHS = params.get("sample.span_months", 6)         # §5 的样本线：帖子跨度 ≥ 6 个月
+SAMPLE_SIGNALS = params.get("sample.signals", 10)           # §5 的样本线：观点信号 > 10 条
 
 
 def report(blogger: str, rows: list[dict], posts: list[dict]) -> str:
@@ -41,19 +42,31 @@ def _head(blogger: str, rows: list[dict], posts: list[dict]) -> list[str]:
 
 def _sample_warning(days: list[str], t: dict) -> list[str]:
     """§5：**每一位博主都出报告**，样本不足只在头部写明，指标照算照列。"""
-    months = _months_between(days[0], days[-1]) if len(days) >= 2 else 0
-    short = []
-    if months < SAMPLE_MONTHS:
-        short.append(f"跨度 {months} 个月（要 ≥{SAMPLE_MONTHS} 个月）")
-    if t["total"] <= SAMPLE_SIGNALS:
-        short.append(f"信号 {t['total']} 条（要 >{SAMPLE_SIGNALS} 条）")
+    short = sample_short(months_between(days), t["total"])
     if not short:
         return []
     return [f"> **样本不足，指标仅供参考** —— {'；'.join(short)}。", ""]
 
 
-def _months_between(a: str, b: str) -> int:
+def months_between(days: list[str]) -> int:
+    """帖子跨度 —— 首末两天之间隔了几个自然月。"""
+    if len(days) < 2:
+        return 0
+    a, b = days[0], days[-1]
     return (int(b[:4]) - int(a[:4])) * 12 + (int(b[5:7]) - int(a[5:7]))
+
+
+def sample_short(months: int, signals: int) -> list[str]:
+    """样本线（§5）：差在哪几项，逐条列出来。**一条都不差就是空的。**
+
+    04§4.1 用的是同一条线 —— 两处读同一份配置、同一段判断。
+    """
+    short = []
+    if months < SAMPLE_MONTHS:
+        short.append(f"跨度 {months} 个月（要 ≥{SAMPLE_MONTHS} 个月）")
+    if signals <= SAMPLE_SIGNALS:
+        short.append(f"信号 {signals} 条（要 >{SAMPLE_SIGNALS} 条）")
+    return short
 
 
 # ── 汇总指标 ────────────────────────────────────────────────────────────
@@ -216,14 +229,16 @@ def _notes(rows: list[dict]) -> list[str]:
     L.append(f"- 看多 {len([r for r in scored if r['d'] > 0])} 条、"
              f"看空 {len([r for r in scored if r['d'] < 0])} 条："
              + _side_note(scored))
-    L.append(f"- 最强的一档：{_top(stats.by_bucket(scored))}；"
-             f"最弱的一档：{_bottom(stats.by_bucket(scored))}")
-    L.append(f"- 最强的一只：{_top(stats.by_index(scored))}；"
-             f"最弱的一只：{_bottom(stats.by_index(scored))}")
-    L.append(f"- 命中最狠：{best['pub'][:10]} {_quote(best['quote'])}"
-             f"（{best['idx']} {best['spec']}，{best['score']:+.2f}）")
-    L.append(f"- 失误最大：{worst['pub'][:10]} {_quote(worst['quote'])}"
-             f"（{worst['idx']} {worst['spec']}，{worst['score']:+.2f}）")
+    L.append(_listing("档", stats.by_bucket(scored)))
+    L.append(_listing("指数", stats.by_index(scored)))
+    if best is worst:
+        L.append(f"- 唯一一条计分信号：{best['pub'][:10]} {_quote(best['quote'])}"
+                 f"（{best['idx']} {best['spec']}，{best['score']:+.2f}）")
+    else:
+        L.append(f"- 命中最狠：{best['pub'][:10]} {_quote(best['quote'])}"
+                 f"（{best['idx']} {best['spec']}，{best['score']:+.2f}）")
+        L.append(f"- 失误最大：{worst['pub'][:10]} {_quote(worst['quote'])}"
+                 f"（{worst['idx']} {worst['spec']}，{worst['score']:+.2f}）")
     singles = []
     if t["unscored"]:
         singles.append(f"不计分 {t['unscored']} 条")
@@ -248,18 +263,18 @@ def _side_note(scored: list[dict]) -> str:
             "看空平均分更高。" if s > b else "两边平均分一样。")
 
 
-def _top(groups: dict) -> str:
+def _listing(unit: str, groups: dict) -> str:
+    """分档／分指数**逐个列出平均分**（03§4.6）。
+
+    **不评谁强谁弱** —— 实测两档只差 0.01 也报成「最强／最弱」，是误导。
+
+    顺序照分组本身的顺序（分档＝超短期→波段；分指数＝报告表里出现的先后），
+    **不按分数排** —— 排了就等于又评了一遍强弱。
+    """
     if not groups:
-        return "—"
-    k = max(groups, key=lambda x: stats.summarize(groups[x])["avg"])
-    return f"{k}（{stats.summarize(groups[k])['avg']:+.2f}）"
+        return f"- 分不出{unit}：一条都算不出。"
+    items = "；".join(f"{k}（{stats.summarize(v)['avg']:+.2f}）" for k, v in groups.items())
+    return f"- 分{unit}平均分：{items}"
 
 
-def _bottom(groups: dict) -> str:
-    if not groups:
-        return "—"
-    k = min(groups, key=lambda x: stats.summarize(groups[x])["avg"])
-    return f"{k}（{stats.summarize(groups[k])['avg']:+.2f}）"
-
-
-__all__ = ["report"]
+__all__ = ["report", "months_between", "sample_short"]
