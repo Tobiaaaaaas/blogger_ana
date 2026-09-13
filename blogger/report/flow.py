@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import json
 
-from blogger.common import config, market, market_fetch, paths
+from blogger.common import config, market, paths
+from blogger.market import fetch
 from blogger.parse import extract
 from blogger.report import cache, render, store, verify
 from blogger.scrape import toutiao
@@ -174,15 +175,15 @@ def _scrape(blogger: str, url: str, start: str, log) -> str:
 
 
 def _market(log) -> None:
-    """补行情 —— 日线（算交易日历）＋ 30 分钟线（算参考价与终点价）。
+    """补行情 —— 日线（算交易日历）＋ 30 分钟线（算参考价与终点价）。见 01§10。
 
-    已经补到今天就不重复抓。
+    已经补到**该到的那天**就不重复抓。**这里不核对** —— 核对是 `blogger.market` 的事。
     """
-    if not market_fetch.needs_refresh():
+    if not fetch.needs_refresh():
         log(f"  行情已到 {market.LAST_DATE}，不必补")
         return
     log(f"  补行情（现在到 {market.LAST_DATE}）…")
-    got = market_fetch.refresh(progress=log)
+    got = fetch.refresh(progress=log)
     log(f"  行情到 {got['日历到']}")
 
 
