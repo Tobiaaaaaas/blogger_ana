@@ -29,7 +29,6 @@ def report(people: list[dict], failed: list[str], boards: list[dict]) -> str:
 # ── ① 头部 ──────────────────────────────────────────────────────────────
 
 def head(people: list[dict], failed: list[str]) -> list[str]:
-    idx = params.get("compare.index", "上证指数")
     s = params.get("sample", {})
     rank = params.get("compare.rank_board", {})
     grp = params.get("compare.group_board", {})
@@ -39,7 +38,7 @@ def head(people: list[dict], failed: list[str]) -> list[str]:
     L += ["**资格线**", "",
           f"- 参与对比：帖子跨度 ≥ {s.get('span_months', 6)} 个月 且 "
           f"计分信号 > {s.get('signals', 10)} 条",
-          f"- 总榜：{idx}计分信号 ≥ {rank.get('min_signals', 30)} 条 且 "
+          f"- 总榜：计分信号 ≥ {rank.get('min_signals', 30)} 条 且 "
           f"平均分 > {rank.get('min_avg', 0):g}",
           f"- 分榜／方向榜：该组信号 ≥ {grp.get('min_signals', 10)} 条 且 "
           f"平均分 > {grp.get('min_avg', 0.1):g}",
@@ -69,17 +68,18 @@ def not_ranked(people: list[dict], failed: list[str]) -> list[str]:
 # ── ③④⑤ 一张榜 ─────────────────────────────────────────────────────────
 
 def board_section(b: dict) -> list[str]:
-    """**每张榜的标题都写明「只考察 上证指数」**（04§3.1）。"""
-    idx = params.get("compare.index", "上证指数")
+    """**每张榜的标题都不带指数限定**（04§3.1）。"""
     one = b["title"] in DIRECTION_BOARDS
-    L = [f"## {b['title']} · 只考察 {idx}", ""]
+    L = [f"## {b['title']}", ""]
     L += _table(b["board"]["hit"], drop_sides=one)
     if b["board"]["out"]:
+        cols = COLUMNS + (() if one else SIDES) + ("差在哪",)
         L += ["", "**榜尾** —— 参与对比但没上榜的：", "",
-              "| 排名 | 博主 | 计分信号 | 正确率 | 平均分 | 波动率 | 信息比率 | 差在哪 |",
-              "|:---:|:---|---:|---:|---:|---:|---:|:---|"]
+              "| " + " | ".join(cols) + " |",
+              "|:---:|:---|---:|---:|---:|---:|---:|"
+              + ("" if one else "---:|---:|") + ":---|"]
         for r in b["board"]["out"]:
-            L.append(_row(r, rank="—") + f" {r['why']} |")
+            L.append(_row(r, rank="—", with_sides=not one) + f" {r['why']} |")
     L.append("")
     return L
 
@@ -114,7 +114,7 @@ def _row(r: dict, rank: str, with_sides: bool = False) -> str:
 def warning_section(people: list[dict]) -> list[str]:
     L = ["## 集中度与缺口警告", "",
          "**必须提出来，不许闷着** —— 样本高度集中的榜，均分再好看也不作数。"
-         "算的是榜上那份样本（上证计分信号）。", ""]
+         "算的是榜上那份样本（计分信号）。", ""]
     warns = B.warnings(people)
     if not warns:
         L += ["没有需要提示的。", ""]

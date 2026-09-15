@@ -51,8 +51,8 @@ def _with_deadline(fn, deadline: int, label: str):
 
 
 def call_json(system_prompt: str, user_message: str, label: str = "call",
-              thinking: bool = False) -> dict | None:
-    """调模型，返回解析好的 dict。返回 None = 三次都没拿到合法 JSON。
+              thinking: bool = False) -> dict:
+    """调模型，返回解析好的 dict。**拿不到合法 JSON 就重试，全失败抛 `ModelError`**（02§11）。
 
     每次尝试都建全新的 client —— 不复用可能已被拖死的连接。
     """

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """④ 筛资格 · ⑤ 排榜 · ⑥ 集中度与缺口警告（见 04§4、§5.2、§6）。
 
-**三张榜全部只考察上证指数**，一律按**平均分**降序，**信息比率只列不排**。
+**榜不分指数** —— 一张榜吃这位博主的全部计分信号（04§3.1）。一律按**平均分**降序，
+**信息比率只列不排**。
 门槛、取几名全从 `config.json` 读（04§8）—— 这里一个数都不写死。
 """
 
@@ -56,13 +57,23 @@ def board(people: list[dict], pick, min_signals: int, min_avg: float) -> dict:
 def _why(rows: list[dict], s: dict, min_signals: int, min_avg: float) -> str:
     """没上榜的原因 —— 差条数还是差均分，一样都不达标就都写。"""
     if not rows:
-        return "这个榜里一条信号都没有"
+        return "这个榜里一条计分信号都没有"
     miss = []
     if s["n"] < min_signals:
-        miss.append(f"信号 {s['n']} 条（要 ≥{min_signals} 条）")
+        miss.append(f"计分信号 {s['n']} 条（要 ≥{min_signals} 条）")
     if not s["avg"] > min_avg:
-        miss.append(f"平均分 {s['avg']:+.2f}（要 >{min_avg:g}）")
+        miss.append(f"平均分 {_avg(s['avg'])}（要 >{min_avg:g}）")
     return "；".join(miss)
+
+
+def _avg(x: float) -> str:
+    """榜尾原因里的平均分 —— **印到能看出与门槛的差别为止**（04§4.2）。
+
+    判据走全精度。榜表里印两位是给人扫的，这里也印两位的话，
+    `0.09576` 会印成 `+0.10`，与同一句里的「要 >0.1」当场打架。
+    """
+    s = f"{x:+.4f}".rstrip("0")
+    return s + "00" if s.endswith(".") else s       # 至少留两位，与榜表同面孔
 
 
 # ── 三张榜 ──────────────────────────────────────────────────────────────
@@ -78,13 +89,13 @@ def all_boards(people: list[dict]) -> list[dict]:
     bucket_span = params.get("report.bucket_span", 2)
 
     out = [{"title": "总榜", "board": board(
-        people, lambda p: p["board"],
+        people, lambda p: p["scored"],
         rank.get("min_signals", 30), rank.get("min_avg", 0))}]
 
     for label, want_swing in ((stats.BUCKETS[0], False), (stats.BUCKETS[1], True)):
         out.append({"title": f"{label}榜", "board": board(
             people,
-            lambda p, w=want_swing: [r for r in p["board"]
+            lambda p, w=want_swing: [r for r in p["scored"]
                                      if r["span"] is not None
                                      and (r["span"] >= bucket_span) == w],
             grp.get("min_signals", 10), grp.get("min_avg", 0.1))})
@@ -92,7 +103,7 @@ def all_boards(people: list[dict]) -> list[dict]:
     for label, d in (("看多榜", 1), ("看空榜", -1)):
         out.append({"title": label, "board": board(
             people,
-            lambda p, dd=d: [r for r in p["board"] if r["d"] == dd],
+            lambda p, dd=d: [r for r in p["scored"] if r["d"] == dd],
             grp.get("min_signals", 10), grp.get("min_avg", 0.1))})
     return out
 
@@ -102,14 +113,14 @@ def all_boards(people: list[dict]) -> list[dict]:
 def warnings(people: list[dict]) -> list[tuple[str, str]]:
     """逐位过一遍，命中才列（04§6）。
 
-    **算的是榜上那份样本（上证计分信号）** —— 与单博主报告里那一节（算该博主全部信号）
-    可能不同，以这里为准。
+    **算的是榜上那份样本（计分信号）** —— 单博主报告那一节算的是该博主的**信号**
+    （计分与不计分两档都算，03§4.4），两边可能不同，以这里为准。
     """
     out: list[tuple[str, str]] = []
     for p in people:
         if not p["in"]:
             continue
-        for level, what in stats.concentration(p["board"]):
+        for level, what in stats.concentration(p["scored"]):
             out.append((p["name"], f"**{level}**：{what}"))
     return out
 

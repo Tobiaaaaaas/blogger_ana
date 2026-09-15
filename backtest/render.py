@@ -67,6 +67,8 @@ def _params(cfg: dict, named: dict) -> list[str]:
          f"| 博主池 | {'、'.join(cfg['pool'])} |",
          f"| 跑之前重跑全库 | {'是' if cfg['update'] else '**否** —— 只刷了行情'} |",
          f"| 回看窗口 | 前 {cfg['window']} 个交易日 |",
+         f"| 档表 | 交易日 {len(cfg['grid'])} 档 |",
+         f"| 两档边界 | 交易日跨度 ≥ {cfg['bucket_span']} 归波段 |",
          f"| 多头标的 | {cfg['long_symbol']} |",
          f"| 空头标的 | {cfg['short_symbol']} |",
          f"| 区间 | {cfg['begin'] or '（空）'} ~ {cfg['end'] or '（空）'} |",

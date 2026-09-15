@@ -5,10 +5,9 @@
 必须**同源同值** —— 模型据以判方向的数字，就是引擎据以打分的数字。所以两边都调这里的
 `ref_price()`，绝不各算各的。
 
-三个数据源：
+两个数据源：
 - `data/market/trade_cal.json` —— **交易日历**，官方日历、含未来。数日子只认它
-- `data/market/market_data.json` —— 日线，给出**行情水位**（数据到哪天）。算价只认它
-- `data/market/intraday/<指数>_30min.json` —— 30 分钟线，只在算「发帖时刻现值」时用
+- `data/market/intraday/<指数>_30min.json` —— 30 分钟线，算参考价、终点价，并给出**行情水位**（数据到哪天）
 
 **日历与行情是两件事，不许互相倒推**（01§10.3）：日历缺一天是休市，行情缺一天是缺口。
 合在一起时后者会被前者悄悄吃掉 —— 那天既算不出价、也数不进日子。
@@ -21,8 +20,19 @@ from datetime import date, timedelta
 
 from blogger.common import params, paths
 
-# 八个合法对象的别名归一（板块 → 指数）
-IDX_ALIASES = {"上证综指": "上证指数", "上证": "上证指数", "综指": "上证指数"}
+# 八个合法对象的别名归一（板块 → 指数）—— 02§5.2 的映射表，逐行对着抄。
+# 本名不列，`normalize_idx` 对它们本来就是恒等。
+IDX_ALIASES = {
+    "创业板": "创业板指", "创业板ETF": "创业板指",
+    "科创": "科创50", "科创板": "科创50",
+    "半导体": "科创50", "芯片": "科创50",
+    "小盘": "中证1000", "成长": "中证1000",
+    "50ETF": "上证50", "老登": "上证50", "大金融": "上证50",
+    "银行": "上证50", "保险": "上证50", "券商": "上证50",
+    "证券": "上证50", "白酒": "上证50", "酒": "上证50",
+    "上证综指": "上证指数", "上证": "上证指数", "综指": "上证指数",
+    "大盘": "上证指数",
+}
 
 # 有 30 分钟线的主指数（双创不单列，由创业板指与科创50 各半合成）
 NOTE_INDICES = ["上证指数", "创业板指", "沪深300", "上证50", "中证500", "中证1000", "科创50"]
@@ -36,11 +46,6 @@ def normalize_idx(idx: str) -> str:
 
 
 # ── 装载 ────────────────────────────────────────────────────────────────
-
-def _load_daily() -> dict:
-    with open(paths.MARKET_DAILY, encoding="utf-8") as f:
-        return json.load(f)
-
 
 def _load_intraday() -> dict:
     """{指数: [(日期, [(hhmm, bar), …]), …]}，按日期升序。缺文件跳过。"""
@@ -57,7 +62,6 @@ def _load_intraday() -> dict:
     return out
 
 
-DAILY = _load_daily()
 INTRADAY = _load_intraday()
 
 # **交易日历**（哪天开市）—— 官方日历，含未来。数日子（验证终点、交易日跨度）只认它。
@@ -65,8 +69,8 @@ CAL: tuple[str, ...] = ()
 CAL_SET: set[str] = set()
 CAL_ERR = ""
 
-# **行情水位**（数据到哪天）—— 上证日线的末根。算价只认它。**与日历是两件事**。
-LAST_DATE = DAILY["上证指数"][-1]["日期"] if DAILY.get("上证指数") else ""
+# **行情水位**（数据到哪天）—— 上证指数 30 分钟线的末根。算价只认它。**与日历是两件事**。
+LAST_DATE = INTRADAY["上证指数"][-1][0] if INTRADAY.get("上证指数") else ""
 
 
 def _load_cal() -> None:
@@ -98,16 +102,25 @@ def reload() -> None:
 
     **补行情之后必须调一次**，否则同一进程里算出来的还是补之前的那份。
     """
-    global DAILY, INTRADAY, LAST_DATE
-    DAILY = _load_daily()
+    global INTRADAY, LAST_DATE
     INTRADAY = _load_intraday()
-    LAST_DATE = DAILY["上证指数"][-1]["日期"] if DAILY.get("上证指数") else ""
+    LAST_DATE = INTRADAY["上证指数"][-1][0] if INTRADAY.get("上证指数") else ""
     _load_cal()
 
 
 def is_trading_day(d: str) -> bool:
     _require_cal()
     return d in CAL_SET
+
+
+def after_calendar(d: str) -> bool:
+    """`d` 晚于日历末日 —— 那天是不是交易日，**日历说了不算，现在判不了**。
+
+    `is_trading_day` 对它只会说 False，与「日历里明确是休市」混成一个答案。要分开：
+    前者是「还判不了」，后者是「那天没开市」（03§3.6 ②）。
+    """
+    _require_cal()
+    return bool(CAL) and d > CAL[-1]
 
 
 def prev_td(d: str) -> str | None:
@@ -146,14 +159,13 @@ def _minutes(pub: str) -> int | None:
 
 
 def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
-    """单指数（不含双创）的现值，附快照性质 —— **发帖前最后收完的那根的收盘价**（02§2.1）。
+    """单指数（不含双创）的现值，附快照性质 —— **发帖时刻可获取的最新价格**（02§2.1）。
 
-    快照性质两种：`bar` 取到了当天某一根的收盘（附那根的结束时刻）／`prev` 上一交易日收盘
-    （盘前，或刚开盘那半小时 —— 当天一根都还没收出来）。
+    快照性质两种：`open:<那根>` 盘中（`9:30~11:30`、`13:00~15:00`）取**所处那根的开盘价**
+    —— 那一刻已经知道，与上一根的收盘是同一个数；`prev` 其余时间取**上一根的收盘价**
+    （`11:30`、`15:00` 本身，以及午休、盘后、盘前、休市）。
 
-    **只取已经收出来的那根**，不去要还没收出来的下一根：同一根 K 线的收盘与下一根的开盘
-    是同一个时点、数值只差最后一笔的零头，但前者当场就取得到。推送一档一推、随时要拿
-    发帖时刻的现值做注记，等不起那半小时（06§5.3）。
+    报告与回测是事后的，那根一定在；推送是实时的，它直接取现价，不走这里（06§5.3）。
     """
     days = INTRADAY.get(normalize_idx(idx))
     if not days:
@@ -163,17 +175,19 @@ def _intraday_price(idx: str, pub: str) -> tuple[float | None, str | None]:
     if hm is None or len(hhmm) < 5:
         return None, None
 
-    if is_trading_day(pub_day) and hm >= SESSION_AM[0]:
-        for day, rows in days:
-            if day != pub_day:
-                continue
-            done = [(t, b) for t, b in rows if t <= hhmm]
-            if done:
-                t, b = done[-1]
-                return b["close"], f"bar:{t}"
-            break                                 # 当天一根都还没收出来 → 退回上一交易日
+    today = next((rows for day, rows in days if day == pub_day), []) if is_trading_day(pub_day) else []
 
-    prev = prev_td(pub_day)
+    if SESSION_AM[0] <= hm < SESSION_AM[1] or SESSION_PM[0] <= hm < SESSION_PM[1]:
+        ahead = [(t, b) for t, b in today if t > hhmm]
+        if ahead:
+            t, b = ahead[0]
+            return b["open"], f"open:{t}"
+
+    done = [(t, b) for t, b in today if t <= hhmm]
+    if done:                                      # 午休、盘后：当日上一根的收盘
+        return done[-1][1]["close"], "prev"
+
+    prev = prev_td(pub_day)                       # 盘前、休市：上一交易日末根
     if prev is None:
         return None, None
     for day, rows in days:
@@ -196,15 +210,14 @@ def ref_price(idx: str, pub: str) -> float | None:
 def snapshot_label(pub: str) -> str | None:
     """发帖时刻的快照性质，写进行情注记的头部（02§2.1）。
 
-    取到当天某根 → `10:00 收盘(发帖前最后收完的一根)`；当天一根都还没收出来 → `上一交易日收盘`。
+    盘中 → `盘中(30分钟线当根开盘)`；其余 → `上一根(30分钟线收盘)`。
     """
     if len(pub[11:16]) < 5 or _minutes(pub) is None:
         return None
     _, snap = _intraday_price("上证指数", pub)
     if snap is None:
         return None
-    return (f"{snap[4:]} 收盘(发帖前最后收完的一根)" if snap.startswith("bar:")
-            else "上一交易日收盘")
+    return "盘中(30分钟线当根开盘)" if snap.startswith("open:") else "上一根(30分钟线收盘)"
 
 
 def pub_note(pub: str) -> str | None:
@@ -226,22 +239,18 @@ def pub_note(pub: str) -> str | None:
 def _last_td_of_week(d: str) -> str | None:
     """`d` 所在那一周的最后交易日。
 
-    **整周一个交易日都没有**（春节那一周）时，「最后交易日」不存在 —— 退到该周之后最近的
-    一个交易日。不退的话这条永远算不出终点，只能挂在「待验证」里。
+    **整周一个交易日都没有**（春节那一周）时取该周最后一天（周日）—— 它不是交易日，
+    这条表述因此不成立（03§3.6 ②）。这不是特例，是同一条规则。
     """
     _require_cal()
     y, w, _ = date.fromisoformat(d).isocalendar()
     days = [x for x in CAL if date.fromisoformat(x).isocalendar()[:2] == (y, w)]
-    if days:
-        return days[-1]
-    return next_td(date.fromisocalendar(y, w, 7).isoformat())
+    return days[-1] if days else date.fromisocalendar(y, w, 7).isoformat()
 
 
-def _settle(x: str | None) -> str | None:
-    """验证终点落在非交易日 → 顺延到之后最近的一个交易日。"""
-    if x is None:
-        return None
-    return x if is_trading_day(x) else next_td(x)
+def _last_day_of_month(ym: str) -> str:
+    """该月的最后一天（自然日）—— 整月没交易日时拿它当终点，与周那一路同一条规矩。"""
+    return (date.fromisoformat(_next_month(ym) + "-01") - timedelta(days=1)).isoformat()
 
 
 def _weekday_of_week(d: str, weekday: int, plus_weeks: int = 0) -> str | None:
@@ -258,7 +267,7 @@ def _last_td_of_month(d: str) -> str | None:
     _require_cal()
     ym = d[:7]
     days = [x for x in CAL if x[:7] == ym]
-    return days[-1] if days else None
+    return days[-1] if days else _last_day_of_month(ym)
 
 
 def _next_month(ym: str) -> str:
@@ -269,8 +278,9 @@ def _next_month(ym: str) -> str:
 def endpoint(pub: str, spec: str) -> str | None:
     """**验证终点** —— 这条观点信号该看哪一天。
 
-    日历**含未来**（01§10.3），所以「明天」「下周」这类终点都算得出；找不到的只有两种：
-    `long` 没有终点，以及终点落到日历覆盖之外。
+    **就是博主说的那一天，不顺延**（02§4.1）：落在非交易日的话，这条表述没有可验证的
+    终点，03 判成「报错」（03§3.6 ②）。日历**含未来**（01§10.3），所以「明天」「下周」
+    这类终点都算得出；算不出的只有两种：`long` 没有终点，以及终点超过日历末日。
     """
     _require_cal()
     day = pub[:10]
@@ -281,8 +291,8 @@ def endpoint(pub: str, spec: str) -> str | None:
     if spec == "long":
         return None
     if spec == "today":
-        # 非交易日发布的「今天」类由 03 判成「报错」；这里顺延只是防御，别让它崩
-        return day if is_trading_day(day) else next_td(day)
+        # 终点就是发帖当天 —— 非交易日发布的话它不是交易日，03 判「报错」（03§3.6 ②）
+        return day
 
     if spec.startswith("t") and spec[1:].isdigit():
         n = int(spec[1:])
@@ -301,15 +311,13 @@ def endpoint(pub: str, spec: str) -> str | None:
 
     if spec.startswith("d:"):
         target = spec[2:]
-        if not _ok_date(target):
-            return None
-        return _settle(target)
+        return target if _ok_date(target) else None
 
     # 周几：monday~friday 指本周的那一天，nmonday~nfriday 指下周的那一天
     if spec in WEEKDAY_SPECS:
-        return _settle(_weekday_of_week(day, WEEKDAY_SPECS[spec]))
+        return _weekday_of_week(day, WEEKDAY_SPECS[spec])
     if spec.startswith("n") and spec[1:] in WEEKDAY_SPECS:
-        return _settle(_weekday_of_week(day, WEEKDAY_SPECS[spec[1:]], plus_weeks=1))
+        return _weekday_of_week(day, WEEKDAY_SPECS[spec[1:]], plus_weeks=1)
 
     return None
 
@@ -323,19 +331,18 @@ def _ok_date(s: str) -> bool:
 
 
 def ep_close(idx: str, ep: str) -> float | None:
-    """**终点价** —— 验证终点那天的收盘价。取不到返回 None。"""
+    """**终点价** —— 验证终点那天的收盘价（30 分钟线当日末根）。取不到返回 None。
+
+    **不兜底**：行情水位到了、这个指数这天却没数据的话，就是「报错」（03§3.6 ⑤），
+    不拿别的源凑一个数出来 —— 凑出来的数看不出是凑的。
+    """
     if idx in COMBO:
         vals = [ep_close(one, ep) for one in COMBO[idx]]
         return sum(vals) / len(vals) if all(v is not None for v in vals) else None
 
-    want = normalize_idx(idx)
-    # 主指数先用 30 分钟线的当日末根；没有就走日线收盘
-    for day, rows in INTRADAY.get(want, []):
+    for day, rows in INTRADAY.get(normalize_idx(idx), []):
         if day == ep:
             return rows[-1][1]["close"]
-    for r in DAILY.get(want, []):
-        if r["日期"] == ep:
-            return r["收盘"]
     return None
 
 

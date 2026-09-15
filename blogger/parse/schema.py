@@ -17,6 +17,7 @@ from blogger.common import market, params, text
 # ── ±10% 兜底：核心预测句未点名指数时，点位须落在上证现值 ±10% 内（02§5.4／§10.1） ──
 
 BAND = params.get("parse.band", 0.10)          # 「合理范围」的半宽
+QUOTE_LIMIT = params.get("parse.quote_limit", 60)   # 引文限长（字）
 POINT_MIN, POINT_MAX = 1000.0, 20000.0    # 点位量级：低于 1000 的是「还有 X 点空间」，不是点位
 
 # 02§5.2 映射表的关键词 —— 引文里出现任一个，这一处就算**点名了对象**，本规则不适用
@@ -76,6 +77,8 @@ def to_signal(raw: dict, post: dict) -> tuple[dict | None, str | None]:
     quote = str(raw.get("quote") or "").strip()
     if not quote:
         return None, "引文为空"
+    if len(quote) > QUOTE_LIMIT:      # 02§10.1：超长截到限内，**不丢行**；截断后仍须逐字可搜
+        quote = quote[:QUOTE_LIMIT]
     if not text.verbatim_in(quote, post.get("title") or "", post.get("content") or ""):
         return None, f"引文在帖里搜不到（{quote[:30]}…）"
 
@@ -98,17 +101,51 @@ def key_of(signal: dict) -> tuple:
     return (signal["post_id"], signal["idx"], signal["spec"], signal["d"])
 
 
-def dedup_with_dropped(signals: list[dict]) -> tuple[list[dict], list[dict]]:
+def _posts_by_id(posts) -> dict:
+    """调用方给的是帖子列表（`[{post_id, title, content, …}]`）或现成的 `{post_id: post}`。"""
+    if not posts:
+        return {}
+    return posts if isinstance(posts, dict) else {p["post_id"]: p for p in posts}
+
+
+def _merge(group: list[dict], post: dict | None) -> dict:
+    """同一条的几处合成一处 —— **引文并成一份**（§9）。
+
+    并出来过不了强校验的（搜不到、或点位出带），退回**最长**的那份：那几份各自都是过了
+    强校验进来的，退回去一定还有一条。`post` 取不到（没给帖子）时也退回最长的那份。
+    """
+    longest = max(group, key=lambda s: len(s["quote"]))
+    quotes = list(dict.fromkeys(s["quote"] for s in group))
+    if len(quotes) < 2 or post is None:
+        return longest
+    base = group[0]
+    merged = text.union_quote(quotes, post.get("title") or "", post.get("content") or "",
+                              limit=QUOTE_LIMIT)
+    sig, _ = to_signal({"d": base["d"], "spec": base["spec"],
+                        "idx": base["idx"], "quote": merged}, post) if merged else (None, None)
+    if sig is None:
+        return longest
+    return {**sig, **{k: v for k, v in base.items() if k not in sig}}   # 把 post_n 之类带回去
+
+
+def dedup_with_dropped(signals: list[dict],
+                       posts=None) -> tuple[list[dict], list[dict]]:
     """同 `dedup`，另外把**被合掉的那些**还给你 —— 03§3.8 要把它们逐条报出来。"""
-    best: dict[tuple, dict] = {}
+    groups: dict[tuple, list[dict]] = {}
     for s in signals:
-        k = key_of(s)
-        cur = best.get(k)
-        if cur is None or len(s["quote"]) > len(cur["quote"]):
-            best[k] = s
-    return list(best.values()), [s for s in signals if best[key_of(s)] is not s]
+        groups.setdefault(key_of(s), []).append(s)
+
+    by_id = _posts_by_id(posts)
+    out, dups = [], []
+    for k, group in groups.items():
+        if len(group) == 1:
+            out.append(group[0])
+        else:
+            out.append(_merge(group, by_id.get(k[0])))
+            dups += group[1:]
+    return out, dups
 
 
-def dedup(signals: list[dict]) -> list[dict]:
-    """同帖内同对象同周期同方向的重复表述只留一条（引文取更长的那个，佐证更足）。"""
-    return dedup_with_dropped(signals)[0]
+def dedup(signals: list[dict], posts=None) -> list[dict]:
+    """同帖内同对象同周期同方向的重复表述**只留一条，引文并成一份**（§9）。"""
+    return dedup_with_dropped(signals, posts)[0]

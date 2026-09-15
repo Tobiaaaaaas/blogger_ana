@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """02 llm解析 —— **解析一条帖**这一个动作。
 
-输入一批帖，输出零到多条结构化数据。**批的大小、排序、跑几次、存哪，都不在这里** ——
+输入一批帖，输出零到多条结构化数据。**批的大小、排序、存哪，都不在这里** ——
 那是调用方（03 报告 / 06 推送）的事，本文只管「给我这些帖，我还你结构化数据」。
 
 外部事实只有一样：**行情注记**（发帖时刻七个主指数的现值）。**取不到注记的帖不解析** ——
@@ -21,6 +21,7 @@ BATCH_SIZE = params.get("parse.batch_size", 15)     # 一批最多几条帖
 BATCH_CHAR_BUDGET = params.get("parse.batch_char_budget", 30000)
 PER_POST_LIMIT = params.get("parse.per_post_limit", 4000)   # 单帖正文截断长度（保头 60% 尾 40%）
 BATCH_PAUSE = params.get("parse.batch_pause", 0.5)  # 批与批之间的间隔（秒）
+RUNS = params.get("parse.runs", 1)                  # 同一条帖跑几遍（§10.2）
 
 WEEKDAY_CN = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 
@@ -110,7 +111,7 @@ def parse_batch(posts: list[dict], label: str = "") -> tuple[list[dict], dict]:
     if result is None:
         return [], {"失败": len(kept)}
 
-    signals, dropped, bad_n = [], [], 0
+    signals, dropped, dropped_n, bad_n = [], [], [], 0
     for raw in (result.get("signals") or []):
         n = raw.get("post_n")
         if not isinstance(n, int) or not (0 <= n < len(kept)):
@@ -120,17 +121,18 @@ def parse_batch(posts: list[dict], label: str = "") -> tuple[list[dict], dict]:
         if sig is None:
             # 带上出处 —— 这条被丢了，报告里再也看不到它，只有这里能说明白是哪儿丢的
             dropped.append(f"{kept[n]['pub']} {kept[n]['post_id']}｜{why}")
+            dropped_n.append(n)             # 与 dropped 逐条对齐，定夺那一步要用
         else:
             # 临时带上批内序号：定夺那一步要把产出回喂模型，而模型只能靠这个序号认帖 ——
             # 少了它，模型会把 A 帖的引文安到 B 帖头上。**出口处一律去掉**，出参恒为 6 键。
             signals.append({**sig, "post_n": n})
 
-    signals, dups = schema.dedup_with_dropped(signals)
+    signals, dups = schema.dedup_with_dropped(signals, kept)
 
     return signals, {
         "帖": len(kept), "产": len(signals), "去重": len(dups),
         "丢弃": len(dropped), "编号错": bad_n,
-        "丢弃清单": dropped,
+        "丢弃清单": dropped, "丢弃帖号": dropped_n,
         "去重清单": [f"{s['pub']} {s['post_id']}｜同帖同对象同周期的重复表述"
                      f"（{s['idx']} {s['spec']} {s['d']:+d}｜{s['quote'][:20]}…）" for s in dups],
     }
@@ -143,12 +145,35 @@ def untag(signals: list[dict]) -> list[dict]:
     return [{k: v for k, v in s.items() if k != "post_n"} for s in signals]
 
 
+def triple_of(signal: dict) -> tuple:
+    """一条信号的三元组 —— 比对各遍产出时只看这三样，**不看 `quote`**（§10.2）。"""
+    return (signal["d"], signal["spec"], signal["idx"])
+
+
+def split_agreed(kept: list[dict], outs: list[list[dict]]) -> tuple[list[dict], list[int]]:
+    """按帖比各遍产出的三元组。返回 `(各遍一致的那些行, 对不上的帖号)`。
+
+    一致的帖**不必再花一次调用**：三元组既然一样，并起来去过重留下的就是**引文更长**的
+    那一份（§10.1）。对不上的帖**整条**交给模型，所以这里只把帖号挑出来 —— 送哪几处、
+    送什么，是调用方的事。
+    """
+    agreed, disputed = [], []
+    for n in range(len(kept)):
+        faces = {tuple(sorted(triple_of(s) for s in o if s["post_n"] == n)) for o in outs}
+        if len(faces) == 1:
+            agreed += [s for o in outs for s in o if s["post_n"] == n]
+        else:
+            disputed.append(n)
+    return schema.dedup(agreed, kept), disputed
+
+
 def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
               ) -> tuple[list[dict], dict]:
-    """把 N 份产出连同原文交给模型，由它定夺最终取哪些。返回 `(结构化数据, 统计)`。
+    """把 N 份产出连同原文交给模型，由它**逐遍审、剔掉错的、把对的并起来**。返回 `(结构化数据, 统计)`。
 
-    **N = 1 时没有分歧可定夺，这一步退化成单纯的自查** —— 照样跑，让模型独立看一遍
-    「引文里的方向词在原帖里搜不搜得到」。
+    **`posts` 只是需要定夺的那些帖**（§10.2：各遍三元组对不上的），`runs` 与它一一对应、
+    每一处的 `post_n` 已按 `posts` 的下标重编过。N = 1 或 `self_check` 时传整批进来，意义
+    不变 —— 那一路是单纯的自查：让模型独立看一遍「引文里的方向词在原帖里搜不搜得到」。
 
     `runs` 里的每一处产出**必须带着 `post_n`**（批内序号）—— 模型就是照它说「这一处出自
     哪条帖」的。喂进去没有、却要它写出来，它只能一律写 0，把 A 帖的引文安到 B 帖头上，
@@ -168,7 +193,7 @@ def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
                           f"{user_text}\n\n## 各遍产出\n{body}", label or "定夺")
     if result is None:
         # 定夺没跑成，退回各遍的并集 —— 这一退没有「被丢掉」可言
-        return untag(schema.dedup([s for run in runs for s in run])), {}
+        return untag(schema.dedup([s for run in runs for s in run], posts)), {}
 
     signals, lost, bad_n = [], [], 0
     for raw in (result.get("signals") or []):
@@ -182,7 +207,7 @@ def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
         else:
             signals.append(sig)
 
-    signals, dups = schema.dedup_with_dropped(signals)
+    signals, dups = schema.dedup_with_dropped(signals, kept)
     n_lost = len(lost)                       # 先数，再往同一个清单里续去重与编号错的交代
     if bad_n:
         lost.append(f"（另有 {bad_n} 处编号指错：指向了不存在的帖号，整条丢掉）")
@@ -194,26 +219,28 @@ def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
 
 # ── 入口 ────────────────────────────────────────────────────────────────
 
-def extract(posts: list[dict], runs: int = 1, self_check: bool = True,
+def extract(posts: list[dict], self_check: bool = True,
             batch_size: int = BATCH_SIZE, progress=None, on_judged=None
             ) -> tuple[list[dict], dict]:
     """解析这一批帖，返回 `(结构化数据, 统计)`。
 
-    - `runs`：同一条帖跑几遍。跑几遍、怎么定夺归本文；**N 由调用方给**（见 03）
-    - `self_check`：`runs=1` 时要不要仍然让模型自查一遍
+    - 同一条帖跑几遍取 `parse.runs`（§10.2）—— **值只有这一个来源，调用方不给**
+    - 各遍都过硬校验后**按帖比三元组**（§10.2）：一致的直接算过、一次调用都不花；
+      对不上的那些帖才连同它们各遍的产出交给模型逐遍审
+    - `self_check`：`runs=1` 时无从可比，要不要仍然让模型自查一遍
     - `on_judged(批里的帖, 这批产出的行, 成没成)`：一批判完就报一次。**调用方靠它记
       「这条帖判过了」** —— 失败的那批不能记，否则这几条帖永远判不到了
     """
-    if runs < 1:
-        raise ValueError("runs 至少是 1")
+    if RUNS < 1:
+        raise ValueError("parse.runs 至少是 1")
 
     batches = build_batches(posts, batch_size)
     all_signals: list[dict] = []
     tally = {"批": len(batches), "帖": 0, "产": 0, "丢弃": 0, "失败批": 0,
-             "编号错": 0, "丢弃清单": []}
+             "编号错": 0, "丢弃清单": [], "失败帖": []}
 
     for bi, batch in enumerate(batches, 1):
-        # 注记取不到的帖在这儿就被筛掉，不进 runs
+        # 注记取不到的帖在这儿就被筛掉，不进解析
         _, kept = render_batch(batch)
         tally["帖"] += len(kept)
         if not kept:
@@ -221,34 +248,63 @@ def extract(posts: list[dict], runs: int = 1, self_check: bool = True,
 
         outs: list[list[dict]] = []
         failed = False
-        n_first = 0                          # 第一遍丢掉的条数，只有「不定夺」那条路用得上
-        for r in range(runs):
+        drop_n: list[int] = []               # 各遍强校验丢掉的，逐条记着它出自批内哪条帖
+        drop_txt: list[str] = []
+        for r in range(RUNS):
             sigs, st = parse_batch(kept, label=f"解析 批{bi}/{len(batches)} 第{r + 1}遍")
             outs.append(sigs)
-            tally["产"] += len(sigs)
-            n_first += st.get("丢弃", 0)
+            drop_n += st.get("丢弃帖号") or []
+            drop_txt += st.get("丢弃清单") or []
             tally["编号错"] += st.get("编号错", 0)
             if st.get("失败"):
                 tally["失败批"] += 1
                 failed = True
-            if runs > 1:
+            if RUNS > 1:
                 time.sleep(BATCH_PAUSE)
 
-        # **丢弃只数最终那一份产出的** —— 中间那几遍只是它的输入，把它们丢的也算进来，
-        # 报出来的会是「本来就不作数的东西」。计数与清单同理，两者必须同源。
-        if failed and not any(outs):
+        # **整批没调通的帖要记名** —— 它们既没产出行、也没进缓存（下一轮还会重判），
+        # 报不出来就成了「信号比上次少了，却不知道少在哪一步」（03§3.8）。
+        if failed:
+            tally["失败帖"].extend(f"{p['pub']} {p['post_id']}" for p in kept)
+
+        # 各遍都过硬校验了，接着**按帖比三元组**：一致的直接算过，对不上的才送模型（§10.2）
+        agreed, disputed = split_agreed(kept, outs)
+        by_model = set(disputed)             # 最终产出由模型给的帖号 —— 下面的丢弃要用
+
+        if disputed:
+            # 只送对不上的那些帖。`post_n` 得按新下标重编 —— 模型眼里的 0 号是 subs 的第 0 条
+            pos = {n: i for i, n in enumerate(disputed)}
+            subs = [kept[n] for n in disputed]
+            runs_in = [[{**s, "post_n": pos[s["post_n"]]} for s in o if s["post_n"] in pos]
+                       for o in outs]
+            merged = untag(agreed)
+        elif failed and not any(outs):
             # 各遍**全都失败**：没有产出可定夺。**不许把空产出交给模型定夺** ——
             # 那等于让它对着空气编，编出来的引文只要在帖里搜得到就能通过强校验。
-            merged, lost, n_drop = [], [], 0
-        elif self_check or runs > 1:
-            merged, st = reconcile(kept, outs, label=f"定夺 批{bi}/{len(batches)}")
-            lost, n_drop = st.get("丢弃清单") or [], st.get("丢弃", 0)
+            subs, runs_in, merged = [], [], []
+            by_model = set(range(len(kept)))
+        elif RUNS == 1 and self_check:
+            # 无从可比 —— 这一步退化成单纯的自查，一份产出也照样交模型复核一遍
+            subs, runs_in, merged = kept, outs, []
+            by_model = set(range(len(kept)))
         else:
-            # 不定夺 → 第一遍的产出就是最终的，它丢的也就是最终的
-            merged, dups = schema.dedup_with_dropped([s for o in outs for s in o])
-            lost = [f"{s['pub']} {s['post_id']}｜同帖同对象同周期的重复表述"
-                    f"（{s['idx']} {s['spec']} {s['d']:+d}｜{s['quote'][:20]}…）" for s in dups]
-            n_drop = n_first
+            subs, runs_in, merged = [], [], untag(agreed)
+
+        lost, n_drop = [], 0
+        if subs:
+            ruled, st = reconcile(subs, runs_in, label=f"定夺 批{bi}/{len(batches)}")
+            merged += ruled
+            lost, n_drop = st.get("丢弃清单") or [], st.get("丢弃", 0)
+
+        # **丢弃只数最终那一份产出的** —— 中间那几遍只是它的输入，把它们丢的也算进来，
+        # 报出来的会是「本来就不作数的东西」。计数与清单同理，两者必须同源：归模型定夺的
+        # 帖由模型另给了一份，各遍在这些帖上丢的就不作数；其余帖的最终产出就是各遍的并集。
+        for txt, n in zip(drop_txt, drop_n):
+            if n in by_model:
+                continue
+            n_drop += 1
+            lost.append(txt)
+
         merged = untag(merged)
         all_signals.extend(merged)
         tally["丢弃"] += n_drop
@@ -260,17 +316,18 @@ def extract(posts: list[dict], runs: int = 1, self_check: bool = True,
             progress(bi, len(batches), len(merged))
         time.sleep(BATCH_PAUSE)
 
-    all_signals = schema.dedup(all_signals)
+    all_signals = schema.dedup(all_signals, posts)
     all_signals.sort(key=lambda s: (s["pub"], s["idx"], s["spec"]))
     tally["产"] = len(all_signals)
     return all_signals, tally
 
 
-def parse_one(post: dict, runs: int = 1) -> list[dict]:
+def parse_one(post: dict) -> list[dict]:
     """解析单独一条帖 —— 调试用。"""
-    sigs, _ = extract([post], runs=runs)
+    sigs, _ = extract([post])
     return sigs
 
 
-__all__ = ["extract", "parse_batch", "parse_one", "reconcile", "untag", "render_batch",
-           "render_post", "build_batches", "ready_posts", "weekday_of", "truncate"]
+__all__ = ["extract", "parse_batch", "parse_one", "reconcile", "split_agreed", "triple_of",
+           "untag", "render_batch", "render_post", "build_batches", "ready_posts",
+           "weekday_of", "truncate"]

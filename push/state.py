@@ -41,10 +41,13 @@ def load(board: str) -> dict:
 
 
 def save(board: str, book: dict) -> None:
-    """整份写回。每位的条目按 `pub` 排 —— 固定下来，便于人工比对与版本差异。"""
-    rows = {name: sorted((store.pick(r) for r in rs), key=lambda r: (r["pub"] or "",
-                                                                    r["spec"] or "",
-                                                                    r["d"] or 0))
+    """整份写回。每位的条目按 `pub` / `idx` / `spec` 排 —— **与信号文件同一个顺序**。
+
+    「最新」并列时看的就是列表里的先后（06§5.6 第 3 条）。排序键与 `report.store.save`
+    一样，存取一轮之后并列的胜者才与回测那条重算的路一致（05§2）。
+    """
+    rows = {name: sorted((store.pick(r) for r in rs),
+                         key=lambda r: (r["pub"] or "", r["idx"] or "", r["spec"] or ""))
             for name, rs in book.items()}
     p = path(board)
     p.parent.mkdir(parents=True, exist_ok=True)

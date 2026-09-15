@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """统计 —— 从现算出来的那些数字算出报告要写的东西（见 03§4）。
 
-**只用「计分」的信号。** 不计分／无效-过时／待验证／报错**单列**，不进任何指标 ——
-它们照常留在信号文件里（03§3.7 不删行），只是到不了这里。
+**只用「计分」的信号。** 不计分**是信号**（进「信号总数」），只是打不了分；
+**无效-过时／待验证／报错不是信号**（03§3.6），不进「信号总数」。这四档都**单列**，
+不进任何指标 —— 它们照常留在信号文件里（03§3.7 不删行），只是到不了这里。
 
 口径与旧报告一致（样本标准差），这样新旧报告能逐格对账。
 """
@@ -17,6 +18,15 @@ from blogger.report import verify
 # 分档标签
 BUCKETS = ("超短期", "波段")
 BUCKET_SPAN = params.get("report.bucket_span", 2)   # 交易日跨度 ≥ 2 归「波段」，否则「超短期」
+
+
+def signals(rows: list[dict]) -> list[dict]:
+    """**信号** —— 计分与不计分两档（03§3.6）。
+
+    「是信号」与「计不计分」是两件事：`long` 是信号但不计分；报错／无效-过时／待验证
+    **不是信号**。集中度警告（§4.4）吃这一份，各项指标吃其中的计分那部分。
+    """
+    return [r for r in rows if r["note"] in (verify.SCORED, verify.UNSCORED)]
 
 
 def accuracy(rows: list[dict]) -> tuple[int, int, float]:
@@ -98,6 +108,8 @@ def _group(rows: list[dict], key, only=None) -> dict[str, list[dict]]:
 def concentration(rows: list[dict]) -> list[tuple[str, str]]:
     """**必须提出来，不许闷着** —— 样本不足或高度集中的报告，指标再好看也没意义。
 
+    `rows` 是**信号**（`signals()`）—— 计分与不计分都算，不是信号的三档不在内（03§4.4）。
+
     返回 `[(级别, 说明)]`，级别是「高度集中」／「轻度集中」／「严重缺口」／「提示」。
     """
     out: list[tuple[str, str]] = []
@@ -109,9 +121,10 @@ def concentration(rows: list[dict]) -> list[tuple[str, str]]:
     gap_severe = params.get("warn.gap_severe", 3)
     gap_mild = params.get("warn.gap_mild", 1)
 
+    # **逐月判，过线的都列** —— 只取最高的那一个月会漏掉同样过线的次高月（03§4.4）
     months = Counter(r["pub"][:7] for r in rows)
     total = len(rows)
-    for m, c in months.most_common(1):
+    for m, c in months.most_common():
         share = c / total
         if share >= high:
             out.append(("高度集中", f"{m} 一个月占了 {share:.0%}（{c}/{total} 条）"))
@@ -141,11 +154,15 @@ def _month_gaps(months: list[str]) -> list[int]:
 # ── 汇总 ────────────────────────────────────────────────────────────────
 
 def tally(rows: list[dict]) -> dict:
-    """按状态分堆。`rows` 是**全部信号**（含没算分的那些）。"""
+    """按状态分堆。`rows` 是**全部行**（含不是信号的那三档）。
+
+    `signals` 只数计分与不计分两档（03§4.1）；`total` 是全部行 —— 逐条汇总表列的是它。
+    """
     counts = Counter(r["note"] for r in rows)
-    return {"total": len(rows),
-            "scored": counts.get(verify.SCORED, 0),
-            "unscored": counts.get(verify.UNSCORED, 0),
+    scored = counts.get(verify.SCORED, 0)
+    unscored = counts.get(verify.UNSCORED, 0)
+    return {"total": len(rows), "signals": scored + unscored,
+            "scored": scored, "unscored": unscored,
             "stale": counts.get(verify.STALE, 0),
             "error": counts.get(verify.ERROR, 0),
             "pending": counts.get(verify.PENDING, 0)}
@@ -153,4 +170,4 @@ def tally(rows: list[dict]) -> dict:
 
 __all__ = ["accuracy", "mean_score", "volatility", "info_ratio", "summarize",
            "by_index", "by_bucket", "by_direction", "by_month", "concentration",
-           "tally", "BUCKETS"]
+           "tally", "signals", "BUCKETS"]

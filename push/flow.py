@@ -10,7 +10,7 @@
 | ③ | 备料行情 | 核对到本档时刻，达不到 → **硬失败、本档不推** |
 | ④ | 抓增量帖 | 某位抓失败只影响他自己 |
 | ⑤ | 解析增量 | 判过的走缓存，不重判 |
-| ⑥ | 淘汰 | 滑出窗口的、终点已过的，逐条丢掉 |
+| ⑥ | 淘汰 | 滑出窗口的、终点没开市的、终点已过的，逐条丢掉 |
 | ⑦ | 并入 | 这一轮新产出的、符合本板块的 |
 | ⑧ | 计数 | 每位取窗口内 `pub` 最大的那条，再数人头 |
 | ⑨ | 渲染 → 推送 → 落档 → 推进状态 | 发不出去就不落档、不推进 |
@@ -29,11 +29,10 @@ from datetime import datetime, timedelta, timezone
 from blogger.common import config, consensus, market, paths
 from blogger.market import fetch
 from blogger.report import cache, flow as report_flow
-from blogger.scrape import toutiao
+from blogger.scrape import toutiao, verify
 
 from push import card, conf, feishu, state, summary
 
-RUNS = 1                          # 03§2.2：一条帖跑 1 遍 —— 推送与报告读帖的方式必须一致
 BEIJING = timezone(timedelta(hours=8))    # 档按北京时间判（06§5.1）
 CLOSE = "15:00"
 # 30 分钟线每天的结束时刻 —— **按结束时间标注，没有 09:30 那根**（06§5.3）
@@ -55,6 +54,15 @@ def run(board: str, init: bool = False, dry_run: bool = False, force: bool = Fal
     log(f"[{cfg['name']}板] {stamp}" + ("　（初始化）" if init else "")
         + ("　（补一档）" if force and not init else "")
         + ("　（只看不发）" if dry_run else ""))
+
+    if not init and not force:
+        # **先看一眼时刻表，再碰任何东西** —— 两张表都不含此刻时，「不在档上」
+        # 已经定了，用不着日历也判得出（06§5.1「不在档上时它什么都不碰」）。
+        # 补日历那一下要联网写盘，排在这里后面才不违背那句话。
+        if hhmm not in cfg["trading"] and hhmm not in cfg["restday"]:
+            log(f"  {day} {hhmm} 不在〈交易日 20 档〉也不在〈非交易日 5 档〉上"
+                f" —— 这一下不该推。")
+            return 0
 
     if not _calendar(log):
         return 2
@@ -200,6 +208,10 @@ def _unlock(fd) -> None:
 
 
 # ── ③ 备料行情 ──────────────────────────────────────────────────────────
+#
+# **这一步与 06§5.3 相反，还没改** —— 06 定案推送取**现价**、不走 01 的备料链
+# （30 分钟线），实时现价源与推送自己那套交易日判断都还没设计。
+# 定案之前这里保持现状。
 
 def _market(day: str, hhmm: str, trading: bool, log) -> tuple[bool, str]:
     """补到此刻并核对（06§5.3）。**已经补到就跳过，不重复抓。**"""
@@ -283,9 +295,14 @@ def _scrape(cfg: dict, wstart: str, init: bool, log) -> None:
             log(f"  {name}：帖子文件里没有 source_url，跳过")
             miss.append(name)
             continue
+        start = wstart if init else config.resume_start(doc)
         try:
-            if not toutiao.run(url, wstart if init else config.resume_start(doc)):
+            got = toutiao.run(url, start)
+            if not got:
                 log(f"  {name}：没抓成 —— 只影响他自己")
+            # 抓完就地校验（01§9）—— 硬失败算他这一档抓失败，只影响他自己
+            elif verify.verify(got, start, log=log) != 0:
+                log(f"  {name}：校验有硬失败 —— 只影响他自己")
         except Exception as e:
             log(f"  {name}：抓帖出岔子（{e!r}）—— 只影响他自己")
     if miss:
@@ -316,8 +333,7 @@ def _judge(cfg: dict, log) -> tuple[dict, dict]:
             continue
         before = set(cache.load(name)["judged"])
         try:
-            got, _, _ = report_flow.judge_posts(name, report_flow.load_posts(name),
-                                                RUNS, log)
+            got, _, _ = report_flow.judge_posts(name, report_flow.load_posts(name), log)
         except Exception as e:
             log(f"  {name}：解析出岔子（{e!r}）—— 他那条旧条目照留")
             continue
@@ -333,9 +349,14 @@ def _judge(cfg: dict, log) -> tuple[dict, dict]:
 # ── ⑥⑦ 淘汰与并入 ───────────────────────────────────────────────────────
 
 def _drop(book: dict, now: str, wstart: str, log) -> dict:
-    """淘汰两道（06§5.7）：滑出窗口的、终点已过的，逐条丢掉。
+    """淘汰三道（06§5.7）：滑出窗口的、终点没开市的、终点已过的，逐条丢掉。
 
     **先筛后取最新**（06§5.6）—— 删的是过期的那几条，不是整位博主。
+
+    三道与 06§5.7 一字不差 —— 增量这条路与回测那条重算的路必须得出同一份分布（05§2）。
+
+    前视不在这里判：`pub` 晚于本档时刻的进不来状态（`_merge` 与 `_pick` 都走
+    `consensus.candidate`，那一道自带）。
     """
     out, gone = {}, 0
     for name, rows in book.items():
@@ -345,14 +366,17 @@ def _drop(book: dict, now: str, wstart: str, log) -> dict:
             if not consensus.in_window(rec["pub"], wstart):
                 gone += 1
                 continue
-            # **终点算不出的不按第二条淘汰** —— 只等第一条把它带出去
+            # **终点算不出的不按后两道淘汰** —— 只等第一道把它带出去
+            if consensus.nontrading(rec["ep"]):
+                gone += 1
+                continue
             if consensus.expired(rec["ep"], now):
                 gone += 1
                 continue
             kept.append(rec)
         out[name] = kept
     if gone:
-        log(f"  丢掉 {gone} 条（滑出窗口或终点已过）")
+        log(f"  丢掉 {gone} 条（滑出窗口、终点没开市或终点已过）")
     return out
 
 
@@ -385,7 +409,7 @@ def _merge(cfg: dict, book: dict, rows: dict, now: str, wstart: str, log) -> Non
 # ── ⑧ 计数 ──────────────────────────────────────────────────────────────
 
 def _pick(cfg: dict, book: dict, now: str, wstart: str, log) -> list[dict]:
-    """每位取**窗口内 `pub` 最大**的那条 —— 就是他这一档的立场（06§5.6 第 3 步）。
+    """每位取**最新**的那条（06§5.6 第 3 步的三级判据）—— 就是他这一档的立场。
 
     按**池子里的顺序**返回 —— 名单顺序就是卡面上的显示顺序，不重排。
     取不到的那位这一档不显示、不计数；他下次发了新帖再回来（06§5.7）。

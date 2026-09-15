@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """单独跑一遍解析（调试/试跑用；正式产物由 03 单博主报告写）。
 
-    python -m blogger.parse <博主名> [--runs 1] [--limit 20] [--no-check]
+    python -m blogger.parse <博主名> [--limit 20] [--no-check]
     python -m blogger.parse <博主名> --begin_date 2026-07-12   （试跑：只看这之后的帖）
 
 **本模块不走缓存、也不落盘** —— 它只是把 02 拿一批帖跑一遍给你看。
@@ -25,17 +25,18 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     begin_date, argv = config.split_begin_date(argv)
 
-    blogger, runs, limit, check = "", 1, 0, True
+    blogger, limit, check = "", 0, True
     i = 0
     while i < len(argv):
         a = argv[i]
-        if a == "--runs":
-            i += 1; runs = int(argv[i])
-        elif a == "--limit":
+        if a == "--limit":
             i += 1; limit = int(argv[i])
         elif a == "--no-check":
             check = False
-        elif not a.startswith("-") and not blogger:
+        elif a.startswith("-"):
+            print(f"认不得的参数：{a}")
+            return 2
+        elif not blogger:
             blogger = a
         i += 1
 
@@ -55,10 +56,10 @@ def main(argv: list[str] | None = None) -> int:
     if limit:
         posts = posts[:limit]
     print(f"{blogger}：{len(posts)} 条帖待解析"
-          f"（{begin_date or '全区间'}）｜runs={runs}｜自查={check}")
+          f"（{begin_date or '全区间'}）｜runs={extract.RUNS}｜自查={check}")
 
     t0 = time.time()
-    signals, tally = extract.extract(posts, runs=runs, self_check=check,
+    signals, tally = extract.extract(posts, self_check=check,
                                      progress=lambda i, n, k: print(f"  批 {i}/{n} → {k} 条"))
     print(f"\n用时 {time.time() - t0:.0f}s｜{tally}")
     for s in signals:

@@ -38,7 +38,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from blogger.common import market, paths                       # noqa: E402
-from blogger.report import cache, flow, store, verify          # noqa: E402
+from blogger.report import cache, flow, stats, store, verify   # noqa: E402
 
 BLOGGER = sys.argv[1] if len(sys.argv) > 1 else "aniu24W"
 
@@ -47,7 +47,7 @@ print("行情到 =", market.LAST_DATE)
 
 posts = flow.load_posts(BLOGGER)
 print("[② 解析]")
-judged, tally, no_note = flow.judge_posts(BLOGGER, posts, 1, print)
+judged, tally, no_note = flow.judge_posts(BLOGGER, posts, print)
 
 print("[③ 保存]")
 ids = {p["post_id"] for p in posts}
@@ -56,21 +56,23 @@ store.save(BLOGGER, rows)
 print("  %d 条 → %s" % (len(rows), paths.signals_file(BLOGGER)))
 
 print("[④ 事后验证]")
-scored = [verify.evaluate(r) for r in rows]
+evaluated = [verify.evaluate(r) for r in rows]
 
 print("[⑤ 单列]")
-unscored = [r for r in scored if r["note"] != verify.SCORED]
-print("  计分 %d 条｜没算分 %d 条（行照留，不删）" % (len(scored) - len(unscored), len(unscored)))
+unscored = [r for r in evaluated if r["note"] != verify.SCORED]
+t = stats.tally(evaluated)
+print("  信号 %d 条（计分 %d / 不计分 %d）｜不是信号 %d 条（行照留，不删）"
+      % (t["signals"], t["scored"], t["unscored"], t["total"] - t["signals"]))
 
 print("[⑥ 统计]")
-flow._write_report(BLOGGER, scored, posts, print)
+flow._write_report(BLOGGER, evaluated, posts, print)
 
 print("[⑦ 清单]")
 flow._report_dropped(tally, no_note, unscored, print)
 
 print("\n" + "=" * 70)
-print("产出的 %d 条观点信号：" % len(scored))
-for r in sorted(scored, key=lambda x: x["pub"]):
+print("产出的 %d 行：" % len(evaluated))
+for r in sorted(evaluated, key=lambda x: x["pub"]):
     ep = market.endpoint(r["pub"], r["spec"]) or "—"
     print("  %s %-8s %+d  %-22s 终点 %s  %s"
           % (r["pub"], r["spec"], r["d"], r["idx"], ep, r["quote"][:44].replace("\n", " ")))

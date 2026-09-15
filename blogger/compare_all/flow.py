@@ -3,7 +3,7 @@
 
 **用模型的只有 ① 和 ⑦。** ②～⑥ 全是纯计算。
 
-报告**不留档**，每次覆盖同一份 `reports/博主对比.md`（04§改动记录）——
+报告**不留档**，每次覆盖同一份 `reports/博主对比.md` ——
 所以上一版要在覆盖**之前**读出来，交给第 ⑦ 段比变化。
 """
 
@@ -15,17 +15,14 @@ from blogger.common import config, market, paths
 from blogger.compare_all import boards, pool, render, summary
 from blogger.report import flow as report_flow
 
-RUNS = 1
-
-
-def run(begin_date: str = "", runs: int = RUNS, refresh: bool = True, log=print) -> int:
+def run(begin_date: str = "", refresh: bool = True, log=print) -> int:
     """全博主对比。返回 0 成功、2 出错。"""
     if not report_flow.roster():
         log("库里一位博主都没有 —— 没有可比的。先给一条帖子链接把博主引进来（03§0）。")
         return 2
 
     log("[① 全库更新]")
-    names, failed = pool.update(begin_date, runs, refresh, log)
+    names, failed = pool.update(begin_date, refresh, log)
 
     log("[②③ 收集与现算]")
     people = pool.collect(names, failed, log)

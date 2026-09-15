@@ -9,8 +9,8 @@
 
 **逐指数落盘** —— 一个指数抓完就写一次。7 个跑完才写的话，第 5 个崩了前 4 个白抓。
 
-**抓不到不算失败**：行情缺一段，对应的信号状态记「待验证」（03§3.6），是算不出、不是算错。
-够不够齐由 `flow.confirm()` 判 —— 它拿**官方日历**当尺子核（01§10.4），不归这里管。
+**抓不到不算失败**：行情整体没补到时，对应的信号状态记「待验证」（03§3.6 ④），是算不出、
+不是算错。够不够齐由 `flow.confirm()` 判 —— 它拿**官方日历**当尺子核（01§10.4），不归这里管。
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
 
 from blogger.common import market, params, paths
@@ -122,17 +122,15 @@ def needs_refresh(until: str = "") -> bool:
 
 
 def refresh(until: str = "", progress=None) -> dict:
-    """把官方日历、日线、30 分钟线补到 `until`（默认今天）。返回补了什么。
+    """把官方日历、30 分钟线补到 `until`（默认今天）。返回补了什么。
 
     **日历第一个抓** —— 后面的「该到哪天」要拿它算；抓不到就抛（01§10.3）。
     """
     if calendar_stale():
         _fetch_calendar(progress)
-    target = until or date.today().isoformat()
-    daily = _fetch_daily(target, progress)
     intraday = _fetch_intraday(progress)
     market.reload()
-    return {"日线": daily, "30分钟": intraday, "行情到": market.LAST_DATE,
+    return {"30分钟": intraday, "行情到": market.LAST_DATE,
             "日历到": official_days()[-1] if official_days() else "**没有**"}
 
 
@@ -164,76 +162,6 @@ def _write_json(path: Path, doc) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, path)
-
-
-# ── 日线 ────────────────────────────────────────────────────────────────
-
-def _fetch_daily(until: str, progress=None) -> int:
-    store = json.loads(paths.MARKET_DAILY.read_text(encoding="utf-8")) \
-        if paths.MARKET_DAILY.exists() else {}
-    start = (market.LAST_DATE or "2024-01-01")
-    # 从已有末日的前一天起抓：末日那根可能是不完整的（盘中抓的），要让它被覆盖一次
-    start = (date.fromisoformat(start) - timedelta(days=1)).strftime("%Y%m%d")
-
-    added = 0
-    for sym, name in INDICES:
-        rows = _daily_rows(sym, start, until)
-        if rows is None:
-            continue
-        by_day = {r["日期"]: r for r in store.get(name) or []}
-        new = sum(1 for r in rows if r["日期"] not in by_day)
-        for r in rows:
-            by_day[r["日期"]] = r
-        store[name] = [by_day[k] for k in sorted(by_day)]
-        _write_json(paths.MARKET_DAILY, store)      # 抓一个写一个 —— 崩了不连累已抓到的
-        added += new
-        if progress:
-            progress(f"  日线 {name}：+{new} → {len(store[name])} 条，"
-                     f"止于 {store[name][-1]['日期']}")
-        time.sleep(PAUSE)
-    return added
-
-
-def _daily_rows(symbol: str, start: str, end: str) -> list[dict] | None:
-    """指数日线。**两个源依次降级**：东财（能按区间取）→ 新浪（全量历史，列名一致）。
-
-    抓不到返回 None —— 不中断，其余指数继续。
-
-    **不能只挂一个源。** 2026-09-13 东财整片连不上，日历随即停在上一个交易日；
-    而日历一停，下游每条信号都退化成「待验证」，报告看上去却一切正常 ——
-    这种「静悄悄地退化」比抓不到还难发现。
-    """
-    import akshare as ak
-    df = None
-    for label, fn in (
-        ("东财", lambda: ak.stock_zh_index_daily_em(
-            symbol=symbol, start_date=start, end_date=end.replace("-", ""))),
-        ("新浪", lambda: ak.stock_zh_index_daily(symbol=symbol)),
-    ):
-        try:
-            got = _try(f"日线 {symbol} 走{label}", fn)
-        except Exception as e:
-            print(f"  日线 {symbol} 走{label}没抓到：{e}")
-            continue
-        if got is not None and len(got):
-            df = got
-            break
-    if df is None:
-        print(f"  日线 {symbol} 两个源都没抓到")
-        return None
-
-    since = f"{start[:4]}-{start[4:6]}-{start[6:8]}" if len(start) == 8 else start[:10]
-    out = []
-    for _, r in df.iterrows():
-        day = str(r["date"])[:10]
-        if day < since:            # 全量源会把整段历史带回来，只留区间内的
-            continue
-        row = {"日期": day, "开盘": float(r["open"]), "收盘": float(r["close"]),
-               "最高": float(r["high"]), "最低": float(r["low"])}
-        if "volume" in df.columns:
-            row["成交量"] = float(r["volume"])
-        out.append(row)
-    return out
 
 
 # ── 30 分钟线 ───────────────────────────────────────────────────────────

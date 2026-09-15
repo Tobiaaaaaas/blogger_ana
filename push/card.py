@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import textwrap
-
 WEEK = "一二三四五六日"
 
 BULL, BEAR = "🔴", "🟢"        # 红涨绿跌，A 股习惯
@@ -68,13 +66,12 @@ def _one(cfg: dict, rec: dict) -> list[str]:
 
 
 def _直到(cfg: dict, rec: dict) -> str:
-    """验证终点：`终点 MM-DD 收盘`。
+    """验证终点：`终点 MM-DD 收盘`（06§6.1）。
 
-    日历**含未来一年**（01§10.3），所以「明天」「下周」这类终点都算得出 ——
-    **只有终点超过日历末日时才退回写档位**（`spec` 的字段值，如 `week`）。
+    日历**含未来**（01§10.3），所以「明天」「下周」这类终点都算得出；**算不出终点的
+    压根进不了状态**（06§2、§5.7），所以这里只有这一种写法。
     """
-    ep = rec.get("ep")
-    return f"{ep[5:10]} 收盘" if ep else f"{rec.get('spec') or '—'}（终点算不出）"
+    return f"{rec['ep'][5:10]} 收盘"
 
 
 def _pub(pub: str | None) -> str:
@@ -86,9 +83,13 @@ def _pub(pub: str | None) -> str:
 
 
 def _clip(s: str, limit: int) -> str:
-    """引文截断长度照 `report.quote_limit`（06§6.2）—— 与 03§8 是同一个键。"""
-    return textwrap.shorten(s.replace("\n", " "), width=limit, placeholder="…") \
-        if len(s) > limit else s.replace("\n", " ")
+    """引文截断长度照 `parse.quote_limit`（06§6.2）—— 与 02§12 是同一个键。
+
+    **按字数截**，与报告链的 `render._quote` 一副面孔 —— 中文整句没有空格，
+    交给 `textwrap.shorten` 会被当成一个「词」，一超限就只剩一个省略号。
+    """
+    s = (s or "").replace("\n", " ")
+    return s if len(s) <= limit else s[:limit] + "…"
 
 
 __all__ = ["render", "minimal"]

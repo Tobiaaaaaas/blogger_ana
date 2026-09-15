@@ -41,6 +41,45 @@ def split_quote(quote: str) -> list[str]:
 
 
 SEP = "\x01"        # 字段之间的隔断，normalize 不会抹掉它
+JOIN = "……"         # 引文并起来时的段间隔，split_quote 认得它
+
+
+def union_quote(quotes: list[str], *texts: str, limit: int = 0) -> str:
+    """把几份引文**并成一份** —— 各段按在帖里的先后接起来，段间用省略号（02§9）。
+
+    重复的段、与别的段重叠的段（同一处只留**最长**的那段）、接上就超 `limit` 的段，都不要。
+    一段都留不下就返回空串 —— 调用方自己决定退回哪一份。
+    """
+    body = SEP.join(b for b in (normalize(t) for t in texts) if b)
+    if not body:
+        return ""
+    frags, seen = [], set()
+    for q in quotes:
+        for frag in split_quote(q):
+            n = normalize(frag)
+            if not n or n in seen:
+                continue
+            seen.add(n)
+            i = body.find(n)
+            if i >= 0:                   # 搜不到的段不该有（进来的都过了强校验），防一手
+                frags.append((i, i + len(n), frag.strip()))
+
+    frags.sort(key=lambda g: (g[0] - g[1], g[0]))   # 长的先来 —— 抢下那处，短的让位
+    kept: list[tuple[int, int, str]] = []
+    for s, e, frag in frags:
+        if any(s < ke and ks < e for ks, ke, _ in kept):
+            continue                     # 与已留下的那段重叠 → 不要
+        kept.append((s, e, frag))
+    kept.sort()                          # 输出照在帖里的先后 —— 顺序颠倒就搜不到了
+
+    out, used = [], 0
+    for _, _, frag in kept:
+        add = len(frag) + (len(JOIN) if out else 0)
+        if limit and used + add > limit:
+            continue                     # 接上就超限 → 这一段不要（宁可短，不改字）
+        out.append(frag)
+        used += add
+    return JOIN.join(out)
 
 
 def verbatim_in(quote: str, *texts: str) -> bool:

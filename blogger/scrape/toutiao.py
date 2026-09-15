@@ -311,6 +311,11 @@ def fetch_detail(ctx, page, post: dict) -> dict:
     if text and WALL_TEXT not in text:
         return {"kind": "text", "title": post.get("title"), "content": text}
 
+    # **风控页算没抓到** —— 列表给的只是一句摘要，判不了观点信号，返回 `blocked`
+    # 让调用方重试（01§8）。列表文字只兜「三级都没取到东西」，不兜「取到了墙」。
+    if (body and WALL_TEXT in body) or (text and WALL_TEXT in text):
+        return {"kind": "blocked", "title": post.get("title"), "content": ""}
+
     fallback = (post.get("_list_text") or "").strip()
     if fallback:
         return {"kind": "text", "title": post.get("title"), "content": fallback}
@@ -537,7 +542,8 @@ def run(post_url: str, begin_date: str = "") -> str:
         # 那是正常的，不是错。所以取身份信息要能退回上一轮存下来的那份。
         existing = load_existing(blogger)
         old_posts = existing.get("posts") or []
-        owner = kept[0] if kept else items[0]
+        # `kept` 空、`items` 也空时给个空字典 —— 下面那两个 `or` 会退回 `stored`
+        owner = kept[0] if kept else (items[0] if items else {})
         stored = existing.get("user_info") or {}
         user_info = {"name": blogger,
                      "user_id": owner.get("_user_id") or stored.get("user_id", ""),

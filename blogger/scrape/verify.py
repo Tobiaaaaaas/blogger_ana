@@ -25,41 +25,42 @@ from blogger.common import config, params, paths
 GAP_DAYS = params.get("scrape.gap_days", 7)   # 按日缺口阈值：博主停更属正常，只提示
 
 
-def verify(blogger: str, begin_date: str = "") -> int:
+def verify(blogger: str, begin_date: str = "", log=print) -> int:
+    """校验一位。`log` 是输出口 —— 补齐链用 `print`，报告与推送链把它接进自己的日志。"""
     path = paths.posts_file(blogger)
     if not path.exists():
-        print(f"错误：帖子文件不存在 {path}")
+        log(f"错误：帖子文件不存在 {path}")
         return 2
 
     data = json.loads(path.read_text(encoding="utf-8"))
     posts = data.get("posts") or []
     stop = data.get("stop_reason") or ""
 
-    print(f"== 校验 {blogger} == {path}")
-    print(f"   抓取截止 {data.get('scrape_time') or '（无）'}｜停止原因 {stop or '（无）'}")
+    log(f"== 校验 {blogger} == {path}")
+    log(f"   抓取截止 {data.get('scrape_time') or '（无）'}｜停止原因 {stop or '（无）'}")
 
     n, hard, warn = 0, 0, 0
 
     def ok(msg):
         nonlocal n
         n += 1
-        print(f"  [{n}] OK   {msg}")
+        log(f"  [{n}] OK   {msg}")
 
     def bad(msg):
         nonlocal n, hard
         n += 1
         hard += 1
-        print(f"  [{n}] 硬失败 {msg}")
+        log(f"  [{n}] 硬失败 {msg}")
 
     def hint(msg):
         nonlocal n, warn
         n += 1
         warn += 1
-        print(f"  [{n}] 提示   {msg}")
+        log(f"  [{n}] 提示   {msg}")
 
     if not posts:
         bad("posts 为空：一条帖都没有")
-        print(f"\n结果：{warn} 项提示 / {hard} 项硬失败")
+        log(f"\n结果：{warn} 项提示 / {hard} 项硬失败")
         return 1
 
     # 重复 post_id —— 去重与合并的唯一钥匙，重复即数据损坏
@@ -136,8 +137,8 @@ def verify(blogger: str, begin_date: str = "") -> int:
         else:
             ok(f"无 ≥{GAP_DAYS} 天的空档")
 
-    print("-" * 60)
-    print(f"结果：{warn} 项提示 / {hard} 项硬失败｜{len(posts)} 条帖")
+    log("-" * 60)
+    log(f"结果：{warn} 项提示 / {hard} 项硬失败｜{len(posts)} 条帖")
     return 1 if hard else 0
 
 

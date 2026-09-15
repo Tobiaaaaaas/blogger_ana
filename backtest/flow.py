@@ -18,15 +18,19 @@ import bisect
 import sys
 from datetime import date, datetime
 
-from blogger.common import config, consensus, market, params, paths
+from blogger.common import config, consensus, market, paths
 from blogger.compare_all import pool as cmp_pool
 from blogger.report import flow as report_flow, store
 
 from backtest import book as book_mod, conf, render
 
-RUNS = 1                    # 05§8：抽取共识次数写死
-# 05§8：**回测不给自己开开关** —— 新博主的抓取起点走 `scrape.begin_date`、runs = 1、先刷行情。
+# 05§8：**回测不给自己开开关** —— 新博主的抓取起点走 `scrape.begin_date`、
+# 一条帖跑几遍走 `parse.runs`、先刷行情。要改这些就改配置。
 BEGIN_DATE = config.BEGIN_DATE
+
+# 05§0：**回测只考察上证指数** —— 写死的，不开配置键（04 的榜已改吃全部计分信号，
+# 那条线上只剩本文与推送）。
+IDX = "上证指数"
 
 
 def run(log=print) -> int:
@@ -41,7 +45,7 @@ def run(log=print) -> int:
 
     log("[① 全库更新]")
     if cfg["update"]:
-        names, failed = cmp_pool.update(BEGIN_DATE, RUNS, True, log)
+        names, failed = cmp_pool.update(BEGIN_DATE, True, log)
         if failed:
             log(f"  这 {len(failed)} 位这轮没更新成：{'、'.join(failed)}")
     else:
@@ -90,13 +94,12 @@ def _load(cfg: dict, log) -> tuple[dict, dict, list[str]]:
 
     跨度为 `None` 的（`long`、或终点超出日历）一并落在这里 —— 算不出跨度就分不了档。
     """
-    idx = params.get("compare.index", "上证指数")
     bucket = cfg["bucket_span"]
     out, named, missing = {}, {}, []
     for name in cfg["pool"]:
         picked = []
         for sig in store.load(name):
-            if sig.get("idx") != idx:
+            if sig.get("idx") != IDX:
                 continue
             rec = consensus.derive(sig)
             if rec["span"] is not None and rec["span"] >= bucket:

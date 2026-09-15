@@ -14,17 +14,16 @@ import json
 from blogger.common import config, market, paths
 from blogger.market import fetch
 from blogger.parse import extract
-from blogger.report import cache, render, store, verify
+from blogger.report import cache, render, stats, store, verify
 from blogger.scrape import toutiao
-
-RUNS = 1                 # 03§2.2：一条帖跑 1 遍
+from blogger.scrape import verify as scrape_verify
 
 
 def looks_like_url(s: str) -> bool:
     return s.startswith("http://") or s.startswith("https://")
 
 
-def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
+def report_one(locator: str, begin_date: str = "",
                refresh: bool = True, log=print) -> int:
     """一位博主 —— 入库或更新。返回 0 成功、2 出错。
 
@@ -47,7 +46,7 @@ def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
 
     log("[② 解析]")
     posts = load_posts(blogger)
-    judged, tally, no_note = judge_posts(blogger, posts, runs, log)
+    judged, tally, no_note = judge_posts(blogger, posts, log)
 
     log("[③ 保存]")
     ids = {p["post_id"] for p in posts}
@@ -60,8 +59,9 @@ def report_one(locator: str, begin_date: str = "", runs: int = RUNS,
 
     log("[⑤ 单列]")
     unscored = [r for r in scored_rows if r["note"] != verify.SCORED]
-    log(f"  计分 {len(scored_rows) - len(unscored)} 条｜没算分 {len(unscored)} 条"
-        "（行照留，不删）")
+    t = stats.tally(scored_rows)
+    log(f"  信号 {t['signals']} 条（计分 {t['scored']} / 不计分 {t['unscored']}）"
+        f"｜不是信号 {t['total'] - t['signals']} 条（行照留，不删）")
 
     log("[⑥ 统计]")
     _write_report(blogger, scored_rows, posts, log)
@@ -79,7 +79,7 @@ def roster() -> list[str]:
     return paths.roster()
 
 
-def report_all(begin_date: str = "", runs: int = RUNS, refresh: bool = True,
+def report_all(begin_date: str = "", refresh: bool = True,
                log=print, on_done=None) -> int:
     """全库 —— 每位各更新一遍。`on_done(博主名, 成没成)` 每一位跑完调一次。"""
     names = roster()
@@ -91,19 +91,22 @@ def report_all(begin_date: str = "", runs: int = RUNS, refresh: bool = True,
     if refresh:
         market_refresh(log)
 
-    bad = 0
+    failed: list[str] = []
     for i, name in enumerate(names, 1):
         log(f"\n{'=' * 60}\n[{i}/{len(names)}] {name}")
         try:
-            ok = report_one(name, begin_date, runs, refresh=False, log=log) == 0
+            ok = report_one(name, begin_date, refresh=False, log=log) == 0
         except Exception as e:           # **一位跑不成不牵连其余的** —— 单列出来就行（04§2）
             log(f"  这一位没跑成：{e!r}")
             ok = False
-        bad += 0 if ok else 1
+        if not ok:
+            failed.append(name)
         if on_done:
             on_done(name, ok)
-    log(f"\n全库跑完：{len(names) - bad} 位成功，{bad} 位出错")
-    return 1 if bad else 0
+    log(f"\n全库跑完：{len(names) - len(failed)} 位成功，{len(failed)} 位出错")
+    if failed:
+        log(f"  没跑成的名单：{'、'.join(failed)}")      # 末尾把名单报出来（03§6）
+    return 1 if failed else 0
 
 
 # ── 定位 ────────────────────────────────────────────────────────────────
@@ -174,11 +177,17 @@ def _scrape(blogger: str, url: str, start: str, log) -> str:
         return ""
     if blogger and got != blogger:
         log(f"  **注意**：这条链接认出来的是「{got}」，不是「{blogger}」—— 按 {got} 继续。")
+    # 抓完就地校验（01§9）—— 硬失败算这位这一轮没跑成，只影响他自己（03§6）。
+    # 传**与抓取同一个**起点，否则覆盖检查判不了。
+    # 注意别跟 `blogger.report.verify`（03 的事后验证）混了 —— 这是抓取那一侧的校验。
+    if scrape_verify.verify(got, start, log=log) != 0:
+        log("  校验有硬失败 —— 这位这次到此为止。")
+        return ""
     return got
 
 
 def market_refresh(log) -> None:
-    """**备料行情** —— 日线（算交易日历）＋ 30 分钟线（算参考价与终点价）。见 01§10。
+    """**备料行情** —— 30 分钟线（算参考价、终点价与行情水位）。见 01§10。
 
     已经补到**该到的那天**就不重复抓。**这里不核对** —— 核对是 `blogger.market` 的事。
 
@@ -189,12 +198,12 @@ def market_refresh(log) -> None:
         return
     log(f"  补行情（现在到 {market.LAST_DATE}）…")
     got = fetch.refresh(progress=log)
-    log(f"  行情到 {got['日历到']}")
+    log(f"  行情到 {got['行情到']}")
 
 
 # ── ② 解析 ──────────────────────────────────────────────────────────────
 
-def judge_posts(blogger: str, posts: list[dict], runs: int, log
+def judge_posts(blogger: str, posts: list[dict], log
                 ) -> tuple[dict, dict, list[dict]]:
     """只判**还没判过的帖**；判过的直接从缓存取行（03§2.2）。
 
@@ -225,7 +234,7 @@ def judge_posts(blogger: str, posts: list[dict], runs: int, log
                 judged[p["post_id"]] = {"pub": p["pub"],
                                         "signals": by_post.get(p["post_id"], [])}
 
-        _, tally = extract.extract(ready, runs=runs,
+        _, tally = extract.extract(ready,
                                    on_judged=remember,
                                    progress=lambda i, n, k: log(f"    批 {i}/{n} → {k} 条"))
         cache.save(blogger, judged)
@@ -235,20 +244,26 @@ def judge_posts(blogger: str, posts: list[dict], runs: int, log
 # ── ⑦ 清单 ──────────────────────────────────────────────────────────────
 
 def _report_dropped(tally: dict, no_note: list[dict], unscored: list[dict], log) -> None:
-    """把**没能进到统计里**的观点信号逐条报出来（03§3.8）。
+    """把**没能进到统计里**的行逐条报出来（03§3.8）。
 
     **只打印在命令行，不写进报告** —— 报告是给人看结论的，不是流水账。
     但这一份必须报：不报，读者只会看到「信号比上次少了」，却不知道少在哪一步。
     """
     lost = tally.get("丢弃清单") or []
+    failed = tally.get("失败帖") or []
 
-    if not (lost or unscored or no_note):
+    if not (lost or failed or unscored or no_note):
         log("  没有没能进统计的")
         return
 
     if lost:
         log(f"  解析阶段：{len(lost)} 条没能成为观点信号")
         for s in lost:
+            log(f"    {s}")
+    if failed:
+        log(f"  解析阶段：{len(failed)} 条帖整批没调通"
+            "（这一轮没判出来，下一轮会重判）")
+        for s in failed:
             log(f"    {s}")
     for r in unscored:
         log(f"  没算分：{r['pub']} {r['post_id']}｜{r['note']}"

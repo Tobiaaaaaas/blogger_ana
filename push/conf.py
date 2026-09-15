@@ -3,7 +3,7 @@
 
 两个板块的差别只有五样：**池子、回看窗口、卡面名字、卡内标签、飞书群**。
 时刻表两张两板块共用（06§5.1）。**分档按交易日跨度**，与 03§3.4／04§3.4 同一口径 ——
-不是卡片上的周期词。**只考察哪个指数**照 04§3.1 那个键（`compare.index`），不另配一份。
+不是卡片上的周期词。**只看上证指数**是写死的（06§0），不开配置键。
 """
 
 from __future__ import annotations
@@ -11,6 +11,9 @@ from __future__ import annotations
 from blogger.common import params
 
 BOARDS = ("short", "swing")
+
+# 06§0：**只考察上证指数** —— 写死的，不开配置键（04 的榜已改吃全部计分信号）。
+IDX = "上证指数"
 
 BOARD = {
     "short": {"name": "超短", "tag": "超短(0-1日)", "mark": "⏱️",
@@ -25,7 +28,7 @@ def load(board: str) -> dict:
     return {
         "board": board,
         **BOARD[board],
-        "index": str(params.get("compare.index", "上证指数")),
+        "index": IDX,
         "pool": list(params.get(f"push.pools.{board}", []) or []),
         "window": int(params.get(f"push.window.{board}", 1)),
         "trading": list(params.get("push.grid.trading", []) or []),
@@ -35,7 +38,7 @@ def load(board: str) -> dict:
         "timeout": int(params.get("push.webhook_timeout", 20)),
         "summary_limit": int(params.get("push.summary_limit", 240)),
         "bucket_span": int(params.get("report.bucket_span", 2)),
-        "quote_limit": int(params.get("report.quote_limit", 60)),
+        "quote_limit": int(params.get("parse.quote_limit", 60)),
     }
 
 
@@ -55,4 +58,4 @@ def span_ok(board: str, span: int | None, bucket: int) -> bool:
     return span <= bucket - 1 if board == "short" else span >= bucket
 
 
-__all__ = ["BOARDS", "BOARD", "load", "span_ok"]
+__all__ = ["BOARDS", "BOARD", "IDX", "load", "span_ok"]

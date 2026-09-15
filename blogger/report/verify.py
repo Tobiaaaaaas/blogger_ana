@@ -11,16 +11,11 @@
 | 得分 | `score` | 方向 × 收益率 × 100 |
 | 状态 | `note` | 计分／不计分／待验证／报错／无效-过时 |
 
-**为什么不存**：七样全是「结构化数据 + 行情」的纯函数 —— 行情一补、公式一改，
-存下来的立刻作废。重算比维护一份会过期的副本便宜得多。
-
 `ref` 与 02 的**行情注记**调的是同一个取价函数、同一份行情、同一个 `pub`，
 所以必然同值。**两处一分叉，模型判对的会被算成算错。**
 """
 
 from __future__ import annotations
-
-from datetime import date
 
 from blogger.common import market
 
@@ -76,17 +71,22 @@ def _state(pub: str, spec: str, ep: str | None, epc: float | None) -> str:
     # ① 年度预测／中长期 —— 没有验证终点，不参与打分
     if spec == "long":
         return UNSCORED
-    # ② 非交易日说「今天」—— 这句话本身就不成立
-    if spec == "today" and not market.is_trading_day(pub[:10]):
+    # ② 说的那天没开市 —— 验证终点落不到交易日（02§4.1）。终点就是博主说的那一天、
+    # **不顺延**，所以它与发帖日谁先谁后都有可能：`spec=today` 而发帖日不是交易日，
+    # 就是「终点 = 发帖当天」那一例。终点超过日历末日的不算 —— 那是「还判不了」。
+    if ep and not market.after_calendar(ep) and not market.is_trading_day(ep):
         return ERROR
     # ③ 发帖时该周期已经收盘了 —— 说在事后，不算数。
     # **边界取等**：发帖正好是收盘那一刻（15:00:00）→ 算「晚于」，照样是 STALE（02§4.2）
     if ep and f"{ep} {CLOSE_AT}" <= pub[:16]:
         return STALE
-    # ④ 算不出来：终点还没到、或行情还没覆盖到那天（**是算不出，不是算错**）
-    if ep is None or epc is None or ep > date.today().isoformat():
+    # ④ 算不出来：终点超出日历末日、或行情水位还没到那一天（**是算不出，不是算错**）
+    if ep is None or ep > market.LAST_DATE:
         return PENDING
-    # ⑤ 其余
+    # ⑤ 水位到了，这个指数在终点那天却没有行情 —— **不兜底**，报出来（03§3.6 ⑤）
+    if epc is None:
+        return ERROR
+    # ⑥ 其余
     return SCORED
 
 

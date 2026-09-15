@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""**共识分布** —— 回看窗口、两条淘汰、取最新、计数。**05 与 06 共用这一份**。
+"""**共识分布** —— 回看窗口、三条淘汰、取最新、计数。**05 与 06 共用这一份**。
 
 05§2 定死了一条：**规则同一套，机制两条路，结果必须一致。**
 
@@ -41,13 +41,24 @@ def window_start(day: str, days: int) -> str:
     return f"{anchor} 00:00" if anchor else ""
 
 
-# ── 两条淘汰 ────────────────────────────────────────────────────────────
+# ── 三条淘汰 ────────────────────────────────────────────────────────────
+# 判据与次序都照 03§3.6 的状态机 —— 那一条线上的信号在报告里是什么下场，
+# 在卡上、在回测里就是什么下场（06§0、06§5.7、05§3）。
+
+def nontrading(ep: str | None) -> bool:
+    """**终点没开市**（06§5.7）—— 验证终点落不到交易日，这条表述不成立（03§3.6 ②）。
+
+    **终点超过日历末日的不算** —— 那是「还判不了」，不是「不成立」（`after_calendar`）。
+    这类跟「终点算不出的」一样，只等「滑出窗口」把它带出去。
+    """
+    return bool(ep) and not market.after_calendar(ep) and not market.is_trading_day(ep)
+
 
 def expired(ep: str | None, now: str) -> bool:
     """**终点已过**（06§5.7）—— 验证终点**已经收盘**，含正好收盘那一刻。
 
     **终点算不出的不按这条淘汰**（`ep is None` → False）—— 只等「滑出窗口」把它带出去。
-    日历含未来一年，所以这只在「终点超过日历末日」时发生。
+    日历含未来（覆盖到哪天以文件为准），所以这只在「终点超过日历末日」时发生。
     """
     return bool(ep) and f"{ep} {CLOSE_AT}" <= now
 
@@ -69,11 +80,16 @@ def derive(sig: dict) -> dict:
 
 
 def candidate(rec: dict, now: str, wstart: str) -> dict | None:
-    """这一档里，这条信号还算不算数。算就原样返回，不算返回 None。`rec` 是 `derive` 过的。"""
+    """这一档里，这条信号还算不算数。算就原样返回，不算返回 None。`rec` 是 `derive` 过的。
+
+    三条淘汰按 §5.7 的次序走：滑出窗口 → 终点没开市 → 终点已过。
+    """
     pub = rec.get("pub") or ""
     if not pub or pub > now:              # **前视**：这一档只看 pub ≤ 本档时刻的帖（05§3）
         return None
     if not in_window(pub, wstart):
+        return None
+    if nontrading(rec.get("ep")):
         return None
     if expired(rec.get("ep"), now):
         return None
@@ -86,7 +102,8 @@ def latest(rows: list[dict]) -> dict | None:
     """**最新**的那条（06§5.6 三级判据）：`pub` 大 → 验证终点更晚 → 信号文件里先出现。
 
     第 2 条管「同一帖出了两条同板块信号」（如「今天涨，明天也涨」）；
-    第 3 条要确定、可复现，所以拿**列表里的先后**当依据 —— 列表按信号文件的顺序给。
+    第 3 条要确定、可复现，所以拿**列表里的先后**当依据 —— 信号文件与状态文件都按
+    `pub`／`idx`／`spec` 排（`report.store.save`、`push.state.save`），两条链同序。
     """
     if not rows:
         return None
@@ -108,5 +125,5 @@ def spread(picked: list[dict]) -> tuple[int, int]:
     return len(picked), sum(1 for r in picked if r["d"] > 0)
 
 
-__all__ = ["window_start", "expired", "in_window", "derive", "candidate", "latest",
-           "spread", "CLOSE_AT"]
+__all__ = ["window_start", "nontrading", "expired", "in_window", "derive", "candidate",
+           "latest", "spread", "CLOSE_AT"]

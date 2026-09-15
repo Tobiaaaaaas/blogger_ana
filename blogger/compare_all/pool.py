@@ -8,19 +8,13 @@
 
 from __future__ import annotations
 
-from blogger.common import params
 from blogger.report import flow, render, stats, store, verify
 
 
-def index() -> str:
-    """榜单只考察哪个预测对象（04§3.1）。"""
-    return params.get("compare.index", "上证指数")
-
-
-def update(begin_date: str, runs: int, refresh: bool, log) -> tuple[list[str], list[str]]:
+def update(begin_date: str, refresh: bool, log) -> tuple[list[str], list[str]]:
     """① 全库更新。返回 `(名单, 本轮更新失败的)`。"""
     failed: list[str] = []
-    flow.report_all(begin_date, runs, refresh, log=log,
+    flow.report_all(begin_date, refresh, log=log,
                     on_done=lambda name, ok: None if ok else failed.append(name))
     return flow.roster(), failed
 
@@ -28,10 +22,9 @@ def update(begin_date: str, runs: int, refresh: bool, log) -> tuple[list[str], l
 def collect(names: list[str], failed: list[str], log) -> list[dict]:
     """② 收集 ③ 现算 —— 每位博主一份样本。
 
-    每份样本里的 `rows` 是全部信号（含单列的），`scored` 是计分的，
-    `board` 是**只留上证**的计分行 —— 榜上的一切数字都从它来（04§3.1）。
+    每份样本里的 `rows` 是全部行（含不是信号的那三档），`scored` 是计分的 ——
+    **榜上的一切数字都从 `scored` 来**：榜不分指数，八个指数混在一张榜里排（04§3.1）。
     """
-    idx = index()
     out: list[dict] = []
     for name in names:
         if name in failed:
@@ -46,9 +39,7 @@ def collect(names: list[str], failed: list[str], log) -> list[dict]:
             "name": name,
             "rows": rows,
             "scored": scored,
-            "board": [r for r in scored if r["idx"] == idx],
             "months": months,
-            "signals": t["scored"],
             "short": short,
             "in": not short,          # 够不够参与对比（04§4.1）
         })
@@ -58,4 +49,4 @@ def collect(names: list[str], failed: list[str], log) -> list[dict]:
     return out
 
 
-__all__ = ["index", "update", "collect"]
+__all__ = ["update", "collect"]

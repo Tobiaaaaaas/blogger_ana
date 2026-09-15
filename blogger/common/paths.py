@@ -22,8 +22,7 @@ COMPARE_FILE = REPORTS_DIR / "博主对比.md"       # 04 的产物
 BACKTEST_RUNS = ROOT / "backtest" / "runs"    # 05 的产物：<日期>_<时刻>/ 一个夹子
 BRIEFINGS_DIR = DATA / "briefings"    # 06 的留档：<日期>_<时刻>_<板块>.json
 
-MARKET_DAILY = MARKET_DIR / "market_data.json"      # 日线
-MARKET_INTRADAY_DIR = MARKET_DIR / "intraday"       # 30 分钟线
+MARKET_INTRADAY_DIR = MARKET_DIR / "intraday"       # 30 分钟线 —— 参考价、终点价、行情水位
 MARKET_CAL = MARKET_DIR / "trade_cal.json"          # 官方交易日历 —— 就是系统日历（01§10.3）
 
 DONE_IDS = STATE_DIR / "done_posts.json"            # 已完成记录：视频帖与置顶帖（01§1）

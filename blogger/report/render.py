@@ -10,13 +10,13 @@ from __future__ import annotations
 from blogger.common import market, params
 from blogger.report import stats, verify
 
-QUOTE_LIMIT = params.get("report.quote_limit", 60)          # 逐条汇总表里引文的截断长度
+QUOTE_LIMIT = params.get("parse.quote_limit", 60)           # 逐条汇总表里引文的截断长度（键归 02§12）
 SAMPLE_MONTHS = params.get("sample.span_months", 6)         # §5 的样本线：帖子跨度 ≥ 6 个月
 SAMPLE_SIGNALS = params.get("sample.signals", 10)           # §5 的样本线：计分信号 > 10 条
 
 
 def report(blogger: str, rows: list[dict], posts: list[dict]) -> str:
-    """整份报告。`rows` 是**全部信号**（含没算分、单列的那些）。"""
+    """整份报告。`rows` 是**全部行**（含不是信号的那些）。"""
     L: list[str] = [f"# {blogger}", ""]
     L += _head(blogger, rows, posts)
     L += _summary(rows)
@@ -31,12 +31,12 @@ def report(blogger: str, rows: list[dict], posts: list[dict]) -> str:
 # ── 头部 ────────────────────────────────────────────────────────────────
 
 def _head(blogger: str, rows: list[dict], posts: list[dict]) -> list[str]:
-    """评估时间（= 最新交易日）／帖子总数（帖子文件缺失时标「未知」）／信号总数（03§4）。"""
+    """数据截止（= 最新交易日）／帖子总数（帖子文件缺失时标「未知」）／信号总数（03§4）。"""
     days = sorted(p["pub"][:10] for p in posts if p.get("pub"))
     t = stats.tally(rows)
-    L = [f"评估时间 {market.LAST_DATE or '未知'}"
+    L = [f"数据截止 {market.LAST_DATE or '未知'}"
          f"｜帖子 {len(posts) if posts else '未知'} 条"
-         f"｜信号 {t['total']} 条（计分 {t['scored']}）"
+         f"｜信号 {t['signals']} 条（计分 {t['scored']}）"
          + (f"｜区间 {days[0]} ~ {days[-1]}" if days else ""), ""]
     L += _sample_warning(days, t)
     return L
@@ -61,7 +61,7 @@ def months_between(days: list[str]) -> int:
 def sample_short(months: int, scored: int) -> list[str]:
     """样本线（§5）：差在哪几项，逐条列出来。**一条都不差就是空的。**
 
-    **数的是计分信号**（§5）—— 没算分的那些不进统计，也就不撑样本。
+    **数的是计分信号**（§5）—— 不计分的、以及不是信号的那三档都不进统计，也就不撑样本。
 
     04§4.1 用的是同一条线 —— 两处读同一份配置、同一段判断。
     """
@@ -80,11 +80,8 @@ def _summary(rows: list[dict]) -> list[str]:
     t = stats.tally(rows)
     s = stats.summarize(scored)
     L = ["## 汇总", ""]
-    L.append(f"信号总数：{t['total']}")
-    L.append(f"　另有：没算分 {t['total'] - t['scored']} 条"
-             f"（不计分 {t['unscored']} / 无效-过时 {t['stale']} / "
-             f"待验证 {t['pending']} / 报错 {t['error']}）")
-    L.append(f"计分信号：{t['scored']} 条")
+    L.append(f"信号总数：{t['signals']}（计分 {t['scored']} / 不计分 {t['unscored']}）")
+    L.append(f"不是信号：无效-过时 {t['stale']} / 待验证 {t['pending']} / 报错 {t['error']}")
     if not scored:
         L += ["", "没有可计分的信号 —— 下面的指标都算不出来。", ""]
         return L
@@ -127,7 +124,12 @@ def _tables(rows: list[dict]) -> list[str]:
 
 
 def _table(groups: dict, keep_order: bool) -> list[str]:
-    L = ["| 分类 | 信号数 | 平均分 | 正确率 | 波动率 | 信息比率 |",
+    """分类表与月度表共用的一张表。**吃的一定是计分信号**（§4.2、§4.3）。
+
+    表头写「计分信号」而不是「信号数」—— 04 的榜表就这么写，且 §4.4 的时间分布表
+    另有「信号数」一列（那列算的是「信号」＝计分与不计分），两张表不能撞名。
+    """
+    L = ["| 分类 | 计分信号 | 平均分 | 正确率 | 波动率 | 信息比率 |",
          "|:---|---:|---:|---:|---:|---:|"]
     keys = list(stats.BUCKETS) if keep_order else sorted(groups)
     keys = [k for k in keys if k in groups]
@@ -153,7 +155,15 @@ def _monthly(rows: list[dict]) -> list[str]:
 # ── 时间分布与集中度 ────────────────────────────────────────────────────
 
 def _distribution(rows: list[dict]) -> list[str]:
+    """时间分布与集中度警告（03§4.4）—— **算的是信号**（计分与不计分都算）。
+
+    不是信号的三档（无效-过时／待验证／报错）不在内，与上面几张表的样本也不同。
+
+    **这是 §4 里唯一不看分数的一节** —— §4 引子写着「不进各项指标」，这里是它的例外。
+    所以时间分布那列照旧叫「信号数」，而分类表与月度表那列改叫「计分信号」。
+    """
     L = ["## 时间分布", ""]
+    rows = stats.signals(rows)
     months = stats.by_month(rows)
     if months:
         L.append("| 月份 | 信号数 |")
@@ -253,9 +263,10 @@ def _notes(rows: list[dict]) -> list[str]:
         singles.append(f"报错 {t['error']} 条")
     if t["pending"]:
         singles.append(f"待验证 {t['pending']} 条")
-    L.append("- 单列的信号：" + ("、".join(singles) if singles else "没有")
-             + ("（不计分是年度／中长期预测，无效-过时是发帖时那段行情已经走完，"
-                "报错是非交易日说「今天」，待验证是行情还没覆盖到终点）"
+    L.append("- 单列的：" + ("、".join(singles) if singles else "没有")
+             + ("（不计分是年度／中长期预测 —— 它算信号，只是打不了分；"
+                "无效-过时是发帖时那段行情已经走完；报错是终点落不到交易日或该指数那天"
+                "没有行情；待验证是行情水位还没到终点）"
                 if singles else ""))
     L.append("")
     return L

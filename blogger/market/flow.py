@@ -23,7 +23,7 @@ def run(until: str = "", log=print) -> int:
     log("[① 抓]")
     got = fetch.refresh(until, progress=log)
     log(f"  该到 {fetch.due_day(until)}｜官方日历 {_cal_note()}")
-    log(f"  日线 +{got['日线']} 根、30 分钟线 +{got['30分钟']} 根，行情到 {got['行情到']}")
+    log(f"  30 分钟线 +{got['30分钟']} 根，行情到 {got['行情到']}")
     log("")
     return 0 if not confirm(until, log) else 1
 
@@ -34,7 +34,7 @@ def confirm(until: str = "", log=print) -> int:
     log(f"[② 核对] 该到 {want}")
     short = _shortfalls(want)
     if not short:
-        log("  两样都对上了。")
+        log("  都对上了。")
         return 0
     for what, why in short:
         log(f"  **没到位** {what}：{why}")
@@ -53,10 +53,10 @@ def survey(log=print) -> int:
         return 1
     log(f"该到　　　　　{want}")
     log("")
-    log("| 指数 | 日线到 | 30 分钟线到 |")
-    log("|:---|:---|:---|")
+    log("| 指数 | 30 分钟线到 |")
+    log("|:---|:---|")
     for _, name in fetch.INDICES:
-        log(f"| {name} | {_daily_last(name) or '—'} | {_intraday_last(name) or '—'} |")
+        log(f"| {name} | {_intraday_last(name) or '—'} |")
     log("")
     confirm("", log)
     return len(_shortfalls(want))
@@ -71,15 +71,11 @@ def _cal_note() -> str:
 # ── 核对 ────────────────────────────────────────────────────────────────
 
 def _shortfalls(want: str) -> list[tuple[str, str]]:
-    """**比两样**：每个指数的日线末根、每个指数的 30 分钟线末根（01§10.4）。
+    """**每个指数的 30 分钟线末根都要对到「该到哪天」**（01§10.4）。
 
     「该到哪天」是拿**官方日历**算的 —— 尺子与被量的东西不同源，量得出缺口。
     """
     out = []
-    for _, name in fetch.INDICES:
-        last = _daily_last(name)
-        if last < want:
-            out.append((f"日线 {name}", _why(last, want)))
     for _, name in fetch.INDICES:
         last = _intraday_last(name)
         if last < want:
@@ -95,11 +91,6 @@ def _why(last: str, want: str) -> str:
     if len(miss) <= MAX_LIST:
         return f"止于 {last}，缺 {'、'.join(miss)}"
     return f"止于 {last}，缺 {len(miss)} 个交易日（{miss[0]} … {miss[-1]}）"
-
-
-def _daily_last(name: str) -> str:
-    rows = market.DAILY.get(name) or []
-    return rows[-1]["日期"] if rows else ""
 
 
 def _intraday_last(name: str) -> str:

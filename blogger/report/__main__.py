@@ -22,14 +22,11 @@ def main(argv: list[str] | None = None, all_bloggers: bool = False) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     begin_date, rest = config.split_begin_date(argv)
 
-    runs, no_market, names = 1, False, []
+    no_market, names = False, []
     i = 0
     while i < len(rest):
         a = rest[i]
-        if a == "--runs":
-            i += 1
-            runs = int(rest[i])
-        elif a == "--no-market":
+        if a == "--no-market":
             no_market = True
         elif not a.startswith("-"):
             names.append(a)
@@ -39,11 +36,11 @@ def main(argv: list[str] | None = None, all_bloggers: bool = False) -> int:
         i += 1
 
     if all_bloggers:
-        return flow.report_all(begin_date, runs, not no_market)
+        return flow.report_all(begin_date, not no_market)
     if len(names) != 1:
         print(__doc__.strip())
         return 2
-    return flow.report_one(names[0], begin_date, runs, not no_market)
+    return flow.report_one(names[0], begin_date, not no_market)
 
 
 if __name__ == "__main__":
