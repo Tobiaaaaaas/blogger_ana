@@ -67,12 +67,10 @@ def _one(name: str, log) -> bool:
         start = config.BEGIN_DATE
         log(f"  文件里没有 scrape_time（从没抓全过），改从默认起始时间全量重抓：{start}")
 
-    got = toutiao.run(url, start)
+    got = toutiao.run(url, start, expect=name)
     if not got:
         log("  抓取没成 —— 这一位跳过，下次再来")
         return False
-    if got != name:
-        log(f"  **注意**：这条链接认出来的是「{got}」，不是「{name}」—— 按 {got} 继续校验")
 
     # 校验传**与抓取同一个**起点，否则覆盖检查判不了（§9）
     return verify.verify(got, start) == 0

@@ -196,18 +196,23 @@ def _user_of(item: dict) -> dict:
     return {}
 
 
-def crawl_feed(page, token: str, since_ts: int) -> tuple[list[dict], str]:
-    """翻列表，返回 (条目, 停止原因)。停止原因只有四种：
+def crawl_feed(page, token: str, since_ts: int, expect: str = "") -> tuple[list[dict], str]:
+    """翻列表，返回 (条目, 停止原因)。停止原因只有五种：
 
     | 取值 | 什么时候盖 | 覆盖 |
     |:---|:---|:---|
     | `since` | 碰到起始时间了 | 齐了 |
     | `no_more` | feed 真的翻到底了（没有下一页／连空页） | 再也拿不到更早的帖，也齐了 |
+    | `wrong_person` | 第 1 页里出现最多的是别人 | 一条都没要 |
     | `capped` | **我们自己截断的** —— 翻到页数上限／条数收够 | 还拿得到，只是没拿 |
     | `error` | 接口重试三次仍失败 | 没拿全 |
 
-    前两种是**正常收工**，后两种**不算收全**：都别推进「抓取截止」，
-    否则下次从今天续，没抓到的中段就被永久跳过。
+    `since`／`no_more` 是**正常收工**，可以推进「抓取截止」；其余三种都别推进，
+    否则下次从今天续、没抓到的中段就被永久跳过 —— `wrong_person` 连帖都不该留。
+
+    `expect` 是**预期是谁**。给了它就在第 1 页上认一次人：链接解出来的 token 未必属于
+    这位（死链会落到页面上第一个带 token 的锚点，那是别人），认错了当场收手，
+    不去把别人整个 feed 吞完。认不出人的第 1 页**不算认错** —— 照旧往下翻。
     """
     items: list[dict] = []
     seen: set[str] = set()
@@ -240,6 +245,15 @@ def crawl_feed(page, token: str, since_ts: int) -> tuple[list[dict], str]:
         newest = max((p["_ts"] for p in fresh), default=0)
         log(f"  第{page_num}页：+{len(fresh)} 条 | 累计 {len(items)} 条 | "
             f"最近 {datetime.fromtimestamp(newest).strftime('%m-%d') if newest else '?'}")
+
+        # 认人关 —— 排在最前，先于「到起点了」。解错人的那个 feed 也可能早就停更，
+        # 让 `since` 先撞上、就这么放它过去，等于白认一次。
+        if page_num == 1 and expect:
+            top = Counter(it["user"] for it in items if it["user"]).most_common(1)
+            who = top[0][0] if top else ""
+            if who and who != expect:
+                log(f"  第1页里最多的是「{who}」，不是 {expect} —— 解错了人，退出")
+                return [], "wrong_person"
 
         # 到起点了：本页**最新的一条**都已早于起始时间，后面只会更早。
         # 用最新的那条判、不用最旧的那条 —— feed 会在末页混入历史兜底帖，
@@ -472,8 +486,11 @@ def to_timestamp(begin_date: str) -> int:
     raise SystemExit(f"起始时间格式不对：{begin_date}（要 YYYY-MM-DD 或 YYYY-MM-DD HH:MM）")
 
 
-def run(post_url: str, begin_date: str = "") -> str:
+def run(post_url: str, begin_date: str = "", expect: str = "") -> str:
     """抓一次。成功返回**博主名**，失败返回空串 —— 调用环节靠这个名字知道抓的是谁。
+
+    `expect` 是**预期是谁**（点名抓的那位）。给了它就在翻列表的第 1 页上先认一次人，
+    对不上立刻收手 —— 链接解出来的 token 未必属于这位（01§3.1）。
 
     **微头条的列表文字就是全文** —— 它不走详情页，只花一次便宜的 info 接口请求做视频判定。
     """
@@ -507,10 +524,15 @@ def run(post_url: str, begin_date: str = "") -> str:
         time.sleep(3)
 
         log("[2] 翻列表")
-        items, stop = crawl_feed(page, token, begin_ts)
+        items, stop = crawl_feed(page, token, begin_ts, expect)
         log(f"  翻页结束：{stop}，共 {len(items)} 条")
+        if stop == "wrong_person":
+            log("  这个链接指向的不是这位博主 —— 不抓、不写文件。")
+            browser.close()
+            return ""
 
-        # 身份关：博主本人 = feed 里出现最多的那个用户。
+        # 身份关：博主本人 = feed 里出现最多的那个用户。与上面那道认人关是同一条判据，
+        # 只是这里翻完了整摞、说话作数 —— 它还顺手把混进 feed 的别人的帖挑出去。
         # 认不出是谁的一律不收 —— 不用任何旁证去补。
         counter = Counter(it["user"] for it in items if it["user"])
         blogger = counter.most_common(1)[0][0] if counter else ""

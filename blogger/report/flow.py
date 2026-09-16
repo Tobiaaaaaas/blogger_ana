@@ -169,14 +169,15 @@ def _scrape(blogger: str, url: str, start: str, log) -> str:
     `start` 就是起始时间：新博主是固定日期，旧博主是续抓起点（01§5）——
     两者的区别由上面的 `_locate` 判，抓取自己不知道有这回事。
 
+    `blogger` 有名字就是**点名抓**：抓取第 1 页上认人，对不上当场作废（01§3.1）。
+    空串是新博主 —— 那本来就是在问「这是谁」，没有名字可点。
+
     抓不成就不往下走：宁可报错，也不拿旧数据出一份看着正常的报告。
     """
-    got = toutiao.run(url, start)
+    got = toutiao.run(url, start, expect=blogger)
     if not got:
         log("  抓取没成 —— 这次到此为止。")
         return ""
-    if blogger and got != blogger:
-        log(f"  **注意**：这条链接认出来的是「{got}」，不是「{blogger}」—— 按 {got} 继续。")
     # 抓完就地校验（01§9）—— 硬失败算这位这一轮没跑成，只影响他自己（03§6）。
     # 传**与抓取同一个**起点，否则覆盖检查判不了。
     # 注意别跟 `blogger.report.verify`（03 的事后验证）混了 —— 这是抓取那一侧的校验。
