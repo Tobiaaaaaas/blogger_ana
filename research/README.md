@@ -5,7 +5,10 @@
 
 | 目录 | 在试什么 | 结论 |
 |:---|:---|:---|
-| [semparse/](semparse/) | 02 解析流程换一套架构 —— 模型逐句表态、代码只切标核 | 见 [semparse/README.md](semparse/README.md) |
+| [semparse/](semparse/) | 02 的读法稳不稳 —— 同一条帖判两遍，量对不上的占多少 | 见 [semparse/README.md](semparse/README.md) |
 
-**规矩**：只读引用 `blogger/`，一个字不改；产物落各自的 `reports/`；不碰 `data/`、
+**四段流程那一轮已结案归档**，产物见 [../archive/20260916-四段流程/](../archive/20260916-四段流程/)。
+
+**规矩**：只读引用 `blogger/`，一个字不改；产物落各自的 `reports/`（`semparse` 那一轮的
+`reports/` 已随归档，现在只往 stdout 与 `docs/判例/` 走）；不碰 `data/`、
 不写判断缓存、不动调度。方案验证得过才谈部署。

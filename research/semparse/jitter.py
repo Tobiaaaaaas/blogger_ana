@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """同一份输入把全库判两遍，比出「多次判断不一致」的帖。
 
-    python -m blogger.tests.jitter run --out _pass1
-    python -m blogger.tests.jitter run --out _pass2
-    python -m blogger.tests.jitter cmp _pass1.json _pass2.json
-    python -m blogger.tests.jitter draft _pass1.json _pass2.json --out <草稿路径>
+    python -m research.semparse.jitter run --out _pass1
+    python -m research.semparse.jitter run --out _pass2
+    python -m research.semparse.jitter cmp _pass1.json _pass2.json
+    python -m research.semparse.jitter draft _pass1.json _pass2.json --out <草稿路径>
 
-**不抓帖、不动库、也不写判断缓存** —— 帖文与行情就是当前 `data/` 的那一份，两遍之间
-唯一的变量是模型自己。取帖与分批**照抄** `blogger.report.flow.judge_posts`：先按 `pub`
-从新到旧排，再筛掉取不到行情注记的，再切批。不照抄的话，「分批不同」会混进差异里，
-量出来的就不是模型的抖动。
+**量的就是 02§10.3 那条规矩**：同一条帖跑 `parse.runs` 遍、比三元组，对不上的才定夺。
+两遍之间唯一的变量是模型自己，所以量出来的不一致率就是这套读法的**抖动下限** ——
+它进不了模型的错，只量模型自己跟自己不一致。
+
+**不抓帖、不动库、也不写判断缓存** —— 帖文与行情就是当前 `data/` 的那一份。取帖与分批
+**照抄** `blogger.report.flow.judge_posts`：先按 `pub` 从新到旧排，再筛掉取不到行情注记的，
+再切批。不照抄的话，「分批不同」会混进差异里，量出来的就不是模型的抖动。
 
 **没判到的帖不算差异** —— 失败批里的帖、取不到注记的帖，两遍里都不出现。`cmp` 只比
 两遍都在的帖，并把剔掉的条数报出来。
@@ -66,8 +69,8 @@ def judge_once(name: str, log=print) -> dict:
 
     _, tally = extract.extract(ready, on_judged=remember,
                                progress=lambda i, n, k: log(f"    批 {i}/{n} → {k} 条"))
-    judged["__tally__"] = {k: v for k, v in tally.items()
-                           if k not in ("丢弃清单", "失败帖")}
+    # **丢的账留着** —— 守门的验收标准是「有没有错筛」，那条清单就是给人逐条读的。
+    judged["__tally__"] = {k: v for k, v in tally.items() if k != "失败帖"}
     judged["__tally__"]["失败帖数"] = len(tally.get("失败帖") or [])
     judged["__tally__"]["帖"] = len(posts)
     judged["__tally__"]["可判"] = len(ready)

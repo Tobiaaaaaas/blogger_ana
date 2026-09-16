@@ -40,7 +40,25 @@ python -m blogger.tests.invariant <博主名>
 
 ## 判两遍，比抖动
 
-这一件**已随 02 换代退役、归档**：`archive/20260916-旧解析流程/jitter.py`，怎么跑、为什么退，见那里的 README。
+把全库判两遍，量出「同一条帖、同一份规则，两次判断对不上」的帖占多少 —— 量的就是
+02§10.3 那条规矩。它是**实验层**，不在 `blogger/` 里：`research/semparse/jitter.py`。
+
+```bash
+python -m research.semparse.jitter run --out _pass1
+python -m research.semparse.jitter run --out _pass2
+python -m research.semparse.jitter cmp _pass1.json _pass2.json
+```
+
+怎么读、基线是多少，见 [research/semparse/README.md](../../research/semparse/README.md)。
+**它中途退役过一次**（2026-09-16 02 换四段流程那一轮，四段不需要这条尺子），同日回退后复役。
+
+## 守门只丢该丢的
+
+02§10.2 唯一一条按字面判死的守门（条件句），验收标准是**有没有错筛，不看覆盖率**。
+
+```bash
+python -m blogger.tests.gate
+```
 
 ## 现在还缺什么
 

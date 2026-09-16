@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """比 —— 两遍之间、与旧流程之间、与判例之间。
 
-一致性的那一半**分组判定原样抄自 `archive/20260916-旧解析流程/jitter.py`** —— 甲／乙／
+一致性的那一半**分组判定原样抄自 `research/semparse/jitter.py`** —— 甲／乙／
 丙1／丙2／丙3／丁 六个组的判定，是判例与旧基线用的同一把尺子。**一个字没改**：判例与
 旧基线既然是那把尺子量的，换一份实现就等于换了一把尺子，量出来的差说不清是流程的差
 还是尺子的差。底下 `GROUPS` 与 `classify` 那一节连注释一起照搬。
@@ -23,7 +23,7 @@ from blogger.report import cache
 
 from research.semparse import gold
 
-# ── 从 archive/20260916-旧解析流程/jitter.py 原样抄来 ────────────────────
+# ── 从 research/semparse/jitter.py 原样抄来 ──────────────────────────────
 
 # 争议分组 —— 按「规则问的是哪个问题」分，不按博主
 GROUPS = [

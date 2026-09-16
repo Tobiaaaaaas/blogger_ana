@@ -26,13 +26,16 @@ from blogger.parse import prompts
 def rule_fingerprint() -> str:
     """当前这版读帖规则的指纹。**规则文本、模型名、跑几遍、一批几条，任一改指纹就变。**
 
-    **模型名、跑几遍、批大小也都认**（02§11、§10.2、§12）—— 换模型、换跑几遍，都是换了
+    **模型名、跑几遍、批大小也都认**（02§11、§10.3、§12）—— 换模型、换跑几遍，都是换了
     个读法；批大小变了，一条帖跟哪些帖摆在一起也就变了，模型看到的东西不一样。只认规则
     文本的话，改了这几样会静悄悄地拿着上一版读法的结论往下跑。
+
+    **两份规则文本都算** —— 读帖那份（`ANNOTATION_SYSTEM_PROMPT`）与定夺那份
+    （`RECONCILE_SYSTEM_PROMPT`）都是规则文本；只认前者的话，改了定夺的判据指纹不动。
     """
-    blob = (prompts.ANNOTATION_SYSTEM_PROMPT + "\x00" + prompts.REREAD_PROMPT
+    blob = (prompts.ANNOTATION_SYSTEM_PROMPT + "\x00" + prompts.RECONCILE_SYSTEM_PROMPT
             + "\x00" + str(params.get("parse.model", ""))
-            + "\x00" + str(params.get("parse.runs", 1))
+            + "\x00" + str(params.get("parse.runs", 2))
             + "\x00" + str(params.get("parse.batch_size", 15)))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 

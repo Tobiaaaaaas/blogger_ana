@@ -51,8 +51,13 @@ def _with_deadline(fn, deadline: int, label: str):
 
 
 def call_json(system_prompt: str, user_message: str, label: str = "call",
-              thinking: bool = False) -> dict:
+              thinking: bool = False, need: str | None = None) -> dict:
     """调模型，返回解析好的 dict。**拿不到合法 JSON 就重试，全失败抛 `ModelError`**（02§11）。
+
+    `need`：回来的对象里必须有这个键，没有也算这次没成、走重试。**这是防「空壳」的** ——
+    括号配对扫描能从一段被截断的返回里救出**内层**那个对象，那是个没有 `signals` 键的半截
+    东西；放过去，这一批会被记成「判过了、一条都不产」，恰好伪装成「这帖不该产」。
+    **`{"signals": []}` 不算空壳** —— 整批真没可判读的表述，就是这个样子。
 
     每次尝试都建全新的 client —— 不复用可能已被拖死的连接。
     """
@@ -77,9 +82,10 @@ def call_json(system_prompt: str, user_message: str, label: str = "call",
                 f"{label} 第 {attempt} 次",
             )
             parsed = parse_json(response.choices[0].message.content)
-            if parsed is not None:
+            if parsed is not None and (need is None or need in parsed):
                 return parsed
-            last_error = "返回的不是合法 JSON"
+            last_error = ("返回的不是合法 JSON" if parsed is None
+                          else f"回来的对象里没有 {need} 键")
             print(f"  {label} 第 {attempt} 次：{last_error}")
         except Exception as e:
             last_error = e

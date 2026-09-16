@@ -10,8 +10,8 @@
 
 **流程一律从 `blogger.parse` 取，这里不另存一份实现** —— 尺子量的是上线的那份代码。
 本目录只剩「怎么跑」与「怎么读」：`runner` 分批排序、`compare` 比与统计、`gold` 金标、
-`probe` 探针。旧流程那两件（`jitter`／`reconcile`）已随读法换代归档，见
-`archive/20260916-旧解析流程/`。
+`probe` 探针。链条式那两件：尺子 `jitter` 已复役回 `research/semparse/jitter.py`，
+`reconcile` 在本目录的上一层。
 
 产物一律落 `research/semparse/reports/`。`run` 的 `--out`／后面几个子命令的参数都写
 **名字**（不带 `.json`、不带路径）；要指别处的文件就直接给路径。
