@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """单独跑一遍解析（调试/试跑用；正式产物由 03 单博主报告写）。
 
-    python -m blogger.parse <博主名> [--limit 20] [--no-check]
+    python -m blogger.parse <博主名> [--limit 20]
     python -m blogger.parse <博主名> --begin_date 2026-07-12   （试跑：只看这之后的帖）
 
 **本模块不走缓存、也不落盘** —— 它只是把 02 拿一批帖跑一遍给你看。
 正式链路的「判过的帖不重判」在 03 里。
 
-`--begin_date` 在这里**只是一道显示过滤** —— 主文件里的帖本来就都在区间内
-（越界的在 01 就滤掉了），这个参数是给你临时缩范围试跑用的。
+`--begin_date` 在这里**只是一道显示过滤** —— 主文件里的帖本来就都在区间内（越界的在 01
+就滤掉了），这个参数是给你临时缩范围试跑用的。
 """
 
 from __future__ import annotations
@@ -25,14 +25,12 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     begin_date, argv = config.split_begin_date(argv)
 
-    blogger, limit, check = "", 0, True
+    blogger, limit = "", 0
     i = 0
     while i < len(argv):
         a = argv[i]
         if a == "--limit":
             i += 1; limit = int(argv[i])
-        elif a == "--no-check":
-            check = False
         elif a.startswith("-"):
             print(f"认不得的参数：{a}")
             return 2
@@ -56,11 +54,11 @@ def main(argv: list[str] | None = None) -> int:
     if limit:
         posts = posts[:limit]
     print(f"{blogger}：{len(posts)} 条帖待解析"
-          f"（{begin_date or '全区间'}）｜runs={extract.RUNS}｜自查={check}")
+          f"（{begin_date or '全区间'}）｜逐句表态 {extract.RUNS} 遍")
 
     t0 = time.time()
-    signals, tally = extract.extract(posts, self_check=check,
-                                     progress=lambda i, n, k: print(f"  批 {i}/{n} → {k} 条"))
+    signals, tally = extract.extract(
+        posts, progress=lambda i, n, k: print(f"  批 {i}/{n} → {k} 条"))
     print(f"\n用时 {time.time() - t0:.0f}s｜{tally}")
     for s in signals:
         print(f"  {s['pub']}  d={s['d']:+d}  {s['spec']:8} {s['idx']:6}  {s['quote'][:44]}")

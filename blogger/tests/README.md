@@ -38,28 +38,9 @@ python -m blogger.tests.invariant            # 全库
 python -m blogger.tests.invariant <博主名>
 ```
 
-## 判两遍，比抖动：jitter.py
+## 判两遍，比抖动
 
-同一份帖文、同一份行情，把全库判两遍，看哪些帖两遍判得不一样。**不抓帖、不动库、也不写判断缓存** —— 两遍之间唯一的变量是模型自己。
-
-**一遍 ＝ 02§10.2 那一整套**（跑 `parse.runs` 遍，三元组一致的直接算过、对不上的才交模型定夺）—— 量到的是**最终产出**的抖动。`parse.runs` 改成 1 也去不掉这一层：那时定夺退化成整批自查（`self_check` 默认开着）。
-
-```bash
-python -m blogger.tests.jitter run --out _pass1      # 全库判一遍，逐帖产出落 _pass1.json
-python -m blogger.tests.jitter run --out _pass2
-python -m blogger.tests.jitter cmp _pass1.json _pass2.json
-python -m blogger.tests.jitter draft _pass1.json _pass2.json --out <草稿路径>
-```
-
-**取帖与分批照抄 `report/flow.py` 的 `judge_posts`** —— 先按 `pub` 从新到旧排、再筛掉取不到行情注记的、再切批。不照抄的话，「分批不同」会混进差异里，量出来的就不是模型的抖动。
-
-`cmp` 只比**两遍都判到**的帖。失败批里的帖、取不到注记的帖，两遍里都不出现，不算差异，`cmp` 把剔掉几条报出来。
-
-`draft` 出的是一份给人填裁定的草稿（成品见 `docs/判例.md` 与 `docs/判例-第二轮.md`）。**目标文件已存在就拒绝写** —— 那份文档一旦填了裁定，重跑一次冲掉就等于白填。
-
-草稿里那一行「库（参考）」只在 `data/signals/` 有货时才出 —— 那份只是参考、不算第三票，删掉之后草稿就只剩「第一遍／第二遍」两行。
-
-`_pass*.json` 落在仓库根，已被 `.gitignore` 的 `_*.json` 覆盖。
+这一件**已随 02 换代退役、归档**：`archive/20260916-旧解析流程/jitter.py`，怎么跑、为什么退，见那里的 README。
 
 ## 现在还缺什么
 

@@ -233,11 +233,14 @@ def judge_posts(blogger: str, posts: list[dict], log
             for p in batch:
                 judged[p["post_id"]] = {"pub": p["pub"],
                                         "signals": by_post.get(p["post_id"], [])}
+            # **一批一落。** 全库一轮要几十分钟，落在最后的话，中途一次调用失败或一次
+            # Ctrl-C 就把这一位已经判成的批全带走。落盘的是「判过哪些帖」，失败的那批
+            # 没进 `judged`，下一轮照样重判。
+            cache.save(blogger, judged)
 
         _, tally = extract.extract(ready,
                                    on_judged=remember,
                                    progress=lambda i, n, k: log(f"    批 {i}/{n} → {k} 条"))
-        cache.save(blogger, judged)
     return judged, tally, no_note
 
 
