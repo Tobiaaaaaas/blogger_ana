@@ -120,7 +120,7 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
         log("[④ 抓增量帖]")
         _scrape(cfg, log)
         log("[⑤ 解析增量]")
-        rows = _judge(cfg, log)
+        rows = _judge(cfg, wstart, log)
         log("[⑥ 淘汰]")
         book["book"] = _drop(book["book"], stamp, wstart, log)
         log("[⑦ 并入]")
@@ -284,6 +284,10 @@ def _scrape(cfg: dict, log, wstart: str = "") -> None:
     与「窗口起点」里晚的那个（窗口外的那一段推送用不着；窗口内的那一段，要么这次抓回来、
     要么本来就在库里）。抓完**把「抓取截止」退回原值** —— 这一轮被窗口掐了头，不算
     01§5 意义上的抓全了；不推进，下一档才会从原处接着补，中间那段不会被永久跳过。
+    帖档里还没有「续抓起点」的（只有 `source_url` 的空壳）就退回空串，按窗口起点抓。
+
+    **点名抓** —— 传给 `run` 的是池子里那位的名字，链接解出来的 token 若属于别人
+    （01§3.1），第 1 页上就认出来、当场收手，不去吞别人整个 feed。
     """
     miss = []
     for name in cfg["pool"]:
@@ -299,7 +303,7 @@ def _scrape(cfg: dict, log, wstart: str = "") -> None:
         before = config.resume_start(doc)
         start = max(before, wstart) if wstart else before
         try:
-            got = toutiao.run(url, start)
+            got = toutiao.run(url, start, expect=name)
             if start != before:
                 _restore_scrape_time(name, before)
             if not got:
@@ -314,7 +318,11 @@ def _scrape(cfg: dict, log, wstart: str = "") -> None:
 
 
 def _restore_scrape_time(name: str, before: str) -> None:
-    """把「抓取截止」退回抓之前的值（06§4）—— 初始化那一轮被窗口掐了头，不算抓全了。"""
+    """把「抓取截止」退回抓之前的值（06§4）—— 初始化那一轮被窗口掐了头，不算抓全了（01§4）。
+
+    `before` 是空串 = 这位**从没抓全过**（01§5）—— 退回空串正是这个意思，
+    下一次调用环节就从固定起始时间起全量重抓，窗口起点之前那一段不会被永久跳过。
+    """
     p = paths.posts_file(name)
     try:
         doc = json.loads(p.read_text(encoding="utf-8")) or {}
@@ -340,8 +348,11 @@ def _posts_doc(name: str) -> dict:
 
 # ── ⑤ 解析 ──────────────────────────────────────────────────────────────
 
-def _judge(cfg: dict, log) -> dict:
-    """只判**这一轮新抓回来的帖**。判过的走判断缓存（06§5.5）。
+def _judge(cfg: dict, wstart: str, log) -> dict:
+    """初始化之外的那些档 —— 只判**窗口内还没判过的帖**（06§5.5）。
+
+    **窗口之外的一条不判** —— 与这一档的分布无关，判了白花模型钱；真要判它们，
+    报告链自己会判（判断缓存两边共用，03§2.2）。与 `_seed` 同一条口径。
 
     返回 `博主 → 这一轮新判出来的行`。判不成的博主不进结果 ——
     他那一条旧条目在状态里照留（06§7）。
@@ -352,7 +363,9 @@ def _judge(cfg: dict, log) -> dict:
             continue
         before = set(cache.load(name)["judged"])
         try:
-            got, _, _ = report_flow.judge_posts(name, report_flow.load_posts(name), log)
+            posts = [p for p in report_flow.load_posts(name)
+                     if consensus.in_window(p.get("pub") or "", wstart)]
+            got, _, _ = report_flow.judge_posts(name, posts, log)
         except Exception as e:
             log(f"  {name}：解析出岔子（{e!r}）—— 他那条旧条目照留")
             continue
