@@ -22,7 +22,14 @@ set "LOGDIR=%ROOT%\deploy\logs"
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 
 REM KEY=value lines, '#' starts a comment, no quoting in the file.
-for /f "usebackq eol=# tokens=1,* delims==" %%a in ("%ROOT%\.deepseek_keys.env") do set "%%a=%%b"
+REM findstr first, so that only ASSIGNMENT lines reach for /f. cmd reads this
+REM file in the OEM codepage; a UTF-8 Chinese comment can swallow its own line
+REM break, and the KEY=value line after it then merges into the comment and is
+REM LOST. That is exactly how FEISHU_WEBHOOK_URL_SWING went missing on the
+REM first real push (2026-09-16): the push ran to the end and the card was
+REM never sent, leaving only one "not configured" line in the log. ASCII-only
+REM lines cannot hit that. Do NOT go back to reading the file directly.
+for /f "usebackq tokens=1,* delims==" %%a in (`findstr /r /b "[A-Z_][A-Z0-9_]*=" "%ROOT%\.deepseek_keys.env"`) do set "%%a=%%b"
 
 set "PYTHONIOENCODING=utf-8"
 cd /d "%ROOT%"
