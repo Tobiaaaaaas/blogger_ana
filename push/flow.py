@@ -15,6 +15,9 @@
 | ⑧ | 计数 | 每位取窗口内 `pub` 最大的那条，再数人头 |
 | ⑨ | 渲染 → 推送 → 落档 → 推进状态 | 发不出去就不落档、不推进 |
 
+**初始化只做窗口内那一段** —— `--init` 池里每位抓一次帖（只抓窗口内那一段）、判窗口内
+那些帖，再取窗口内的全部行攒成初始分布（06§4）。窗口之外的一概不碰，报告产物归 03。
+
 **推送是实时增量，回测是事后重算** —— 两条路，**同一套规则，结果必须一致**（06§1、05§2）。
 规则全在 `blogger.common.consensus` 那一份里，这儿不写第二套。
 """
@@ -107,21 +110,20 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
         log(f"  回看窗口算不出来（日历覆盖不到前 {cfg['window']} 个交易日）—— 本档不推")
         return 1
 
-    log("[④ 抓增量帖]")
-    _scrape(cfg, wstart, init, log)
-
-    log("[⑤ 解析增量]")
-    judged, fresh = _judge(cfg, log)
-
     if init:
+        log("[④ 抓窗口内的帖]")
+        _scrape(cfg, log, wstart)
+        log("[⑤ 解析窗口内的帖]")
+        rows = _seed(cfg, wstart, log)
         log("[⑥⑦ 攒初始分布]")
-        # 缓存是「帖 → 这一帖判出来的行」，**摊平**才是信号清单
-        rows = {name: cache.rows_of(got) for name, got in judged.items()}
     else:
+        log("[④ 抓增量帖]")
+        _scrape(cfg, log)
+        log("[⑤ 解析增量]")
+        rows = _judge(cfg, log)
         log("[⑥ 淘汰]")
         book["book"] = _drop(book["book"], stamp, wstart, log)
         log("[⑦ 并入]")
-        rows = fresh
     _merge(cfg, book["book"], rows, stamp, wstart, log)
 
     log("[⑧ 计数]")
@@ -208,10 +210,6 @@ def _unlock(fd) -> None:
 
 
 # ── ③ 备料行情 ──────────────────────────────────────────────────────────
-#
-# **这一步与 06§5.3 相反，还没改** —— 06 定案推送取**现价**、不走 01 的备料链
-# （30 分钟线），实时现价源与推送自己那套交易日判断都还没设计。
-# 定案之前这里保持现状。
 
 def _market(day: str, hhmm: str, trading: bool, log) -> tuple[bool, str]:
     """补到此刻并核对（06§5.3）。**已经补到就跳过，不重复抓。**"""
@@ -274,15 +272,18 @@ def _minutes(hhmm: str) -> int | None:
         return None
 
 
-# ── ④ 抓增量帖 ──────────────────────────────────────────────────────────
+# ── ④ 抓帖 ──────────────────────────────────────────────────────────────
 
-def _scrape(cfg: dict, wstart: str, init: bool, log) -> None:
+def _scrape(cfg: dict, log, wstart: str = "") -> None:
     """池里每一位从**各自的续抓起点**往后抓到此刻（06§5.4）。
-
-    `--init` 时改从**回看窗口起点**抓（06§4）—— 窗口内的帖只读一遍、判一遍。
 
     **某一位抓失败只影响他自己**：不中断本档，状态里那条旧条目照留；
     他的 `scrape_time` 没推进，下一档还会从原处接着抓。
+
+    `wstart` 给了就是初始化那一遍（06§4）—— **只抓窗口内那一段**：起点取「续抓起点」
+    与「窗口起点」里晚的那个（窗口外的那一段推送用不着；窗口内的那一段，要么这次抓回来、
+    要么本来就在库里）。抓完**把「抓取截止」退回原值** —— 这一轮被窗口掐了头，不算
+    01§5 意义上的抓全了；不推进，下一档才会从原处接着补，中间那段不会被永久跳过。
     """
     miss = []
     for name in cfg["pool"]:
@@ -295,9 +296,12 @@ def _scrape(cfg: dict, wstart: str, init: bool, log) -> None:
             log(f"  {name}：帖子文件里没有 source_url，跳过")
             miss.append(name)
             continue
-        start = wstart if init else config.resume_start(doc)
+        before = config.resume_start(doc)
+        start = max(before, wstart) if wstart else before
         try:
             got = toutiao.run(url, start)
+            if start != before:
+                _restore_scrape_time(name, before)
             if not got:
                 log(f"  {name}：没抓成 —— 只影响他自己")
             # 抓完就地校验（01§9）—— 硬失败算他这一档抓失败，只影响他自己
@@ -307,6 +311,21 @@ def _scrape(cfg: dict, wstart: str, init: bool, log) -> None:
             log(f"  {name}：抓帖出岔子（{e!r}）—— 只影响他自己")
     if miss:
         log(f"  池里这 {len(miss)} 位库里没有，跳过：{'、'.join(miss)}")
+
+
+def _restore_scrape_time(name: str, before: str) -> None:
+    """把「抓取截止」退回抓之前的值（06§4）—— 初始化那一轮被窗口掐了头，不算抓全了。"""
+    p = paths.posts_file(name)
+    try:
+        doc = json.loads(p.read_text(encoding="utf-8")) or {}
+    except (ValueError, OSError):
+        return
+    if doc.get("scrape_time") == before:
+        return
+    doc["scrape_time"] = before
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, p)
 
 
 def _posts_doc(name: str) -> dict:
@@ -319,15 +338,15 @@ def _posts_doc(name: str) -> dict:
         return {}
 
 
-# ── ⑤ 解析增量 ──────────────────────────────────────────────────────────
+# ── ⑤ 解析 ──────────────────────────────────────────────────────────────
 
-def _judge(cfg: dict, log) -> tuple[dict, dict]:
+def _judge(cfg: dict, log) -> dict:
     """只判**这一轮新抓回来的帖**。判过的走判断缓存（06§5.5）。
 
-    返回 `(博主 → 缓存, 博主 → 这一轮新判出来的行)`。判不成的博主不进结果 ——
+    返回 `博主 → 这一轮新判出来的行`。判不成的博主不进结果 ——
     他那一条旧条目在状态里照留（06§7）。
     """
-    judged, fresh = {}, {}
+    fresh = {}
     for name in cfg["pool"]:
         if not paths.posts_file(name).exists():
             continue
@@ -337,13 +356,34 @@ def _judge(cfg: dict, log) -> tuple[dict, dict]:
         except Exception as e:
             log(f"  {name}：解析出岔子（{e!r}）—— 他那条旧条目照留")
             continue
-        judged[name] = got
-        rows = []
-        for pid, entry in got.items():
-            if pid not in before:
-                rows += entry.get("signals") or []
-        fresh[name] = rows
-    return judged, fresh
+        fresh[name] = [r for pid, entry in got.items() if pid not in before
+                       for r in (entry.get("signals") or [])]
+    return fresh
+
+
+def _seed(cfg: dict, wstart: str, log) -> dict:
+    """初始化 —— 只判**窗口内**那些帖，返回这一位窗口内**全部**的行（06§4）。
+
+    **窗口之外的帖一条不判** —— 与这一档的分布无关，判了白花模型钱；真要判它们，
+    报告链自己会判（判断缓存两边共用，03§2.2）。
+
+    返回的不是「这一轮新判出来的」，而是「窗口内全部」—— 初始化那一次，窗口内的帖
+    多半早就判过了，只取新的会一条都取不到。哪位判岔了就跳过他自己（06§7）。
+    """
+    rows = {}
+    for name in cfg["pool"]:
+        if not paths.posts_file(name).exists():
+            continue
+        try:
+            posts = [p for p in report_flow.load_posts(name)
+                     if consensus.in_window(p.get("pub") or "", wstart)]
+            report_flow.judge_posts(name, posts, log)
+        except Exception as e:
+            log(f"  {name}：解析出岔子（{e!r}）—— 跳过他自己")
+            continue
+        rows[name] = [r for r in cache.rows_of(cache.load(name)["judged"])
+                      if consensus.in_window(r.get("pub") or "", wstart)]
+    return rows
 
 
 # ── ⑥⑦ 淘汰与并入 ───────────────────────────────────────────────────────
