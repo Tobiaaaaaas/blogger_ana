@@ -105,7 +105,7 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
         log(f"  行情没到位：{why} —— **本档不推**（06§5.3）")
         return 1
 
-    wstart = consensus.window_start(day, cfg["window"])
+    wstart = conf.window_start(cfg, day, stamp)
     if not wstart:
         log(f"  回看窗口算不出来（日历覆盖不到前 {cfg['window']} 个交易日）—— 本档不推")
         return 1

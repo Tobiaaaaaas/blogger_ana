@@ -21,9 +21,10 @@ v16（2026-09-08）：行抽取由"两板各自抽一层"改为**单趟分层分
 - 单趟抽取后逐板块 锚定→计数→收敛总结，各推各群（render.webhook_for 读
   config.WEBHOOK_ENV；该板块 webhook 缺失按失败处理，**不回落** FEISHU_WEBHOOK_URL——
   防波段卡误发超短群）。
-- 窗口（v14 交易日口径；v15 波段 3→5）：超短 = 前一交易日 00:00 至 now、波段 = 前 5 个
-  交易日 00:00 至 now（config.WINDOW_TRADING_DAYS；起点用 calendar.n_trading_days_ago，
-  非自然日相减）。由此周一早晨窗口含上周五帖（消除 v13 自然日取舍）。
+- 窗口（v14 交易日口径；v22 两板块统一 3 日 + 起点下限）：两板块都是前 3 个交易日 00:00 至
+  now（config.WINDOW_TRADING_DAYS；起点用 calendar.n_trading_days_ago，非自然日相减），
+  再与 config.WINDOW_FLOOR 取晚的那个（下限之前的帖一律不进；下限赢过交易日起点时覆盖行
+  写起点时刻）。由此周一早晨窗口含上周五帖（消除 v13 自然日取舍）。
 - 每档必发：板块有方向观点→全卡 + 本板块收敛总结；空→单板块最小卡（区分窗口
   无人发帖 / 有人发帖但无该板块方向观点）；内容没变也发；不加 🆕 标记。
 
@@ -149,19 +150,45 @@ def _beijing_midnight_epoch(d) -> int:
     return int(datetime(d.year, d.month, d.day, tzinfo=BEIJING_TZ).timestamp())
 
 
-def _window_start_ts(key, now):
-    """某板块展示窗口下界（v14 交易日口径）= 前一/前N个交易日 00:00（北京时 epoch 秒）。
+def _floor_ts() -> int:
+    """窗口起点下限 config.WINDOW_FLOOR（北京时 'YYYY-MM-DD HH:MM'）的 epoch 秒；空串＝不限（0）。"""
+    if not config.WINDOW_FLOOR:
+        return 0
+    d = datetime.strptime(config.WINDOW_FLOOR, "%Y-%m-%d %H:%M").replace(tzinfo=BEIJING_TZ)
+    return int(d.timestamp())
 
-    N = config.WINDOW_TRADING_DAYS[key]；起点日由 calendar.n_trading_days_ago 按交易日
-    回看得到，上界仍 ≤ now。周末/盘前模拟（now 非交易日）按最近交易日取参考日。
+
+def _window_floor(now) -> int:
+    """本档真正生效的下限 —— config.WINDOW_FLOOR，但**晚于 now 就不算数**（返回 0）。
+
+    它管的是"落地之后"：还没落地时窗口照交易日口径算，否则 `--time` 摆到落地之前、
+    或补跑历史档，起点会被推到本档时刻之后，窗口整段落空。
+    """
+    floor = _floor_ts()
+    return floor if floor and floor <= int(now.timestamp()) else 0
+
+
+def _window_start_ts(key, now):
+    """某板块展示窗口下界（v14 交易日口径；v22 加下限）—— 北京时 epoch 秒。
+
+    = max(前 N 个交易日的 00:00, 生效下限)。N = config.WINDOW_TRADING_DAYS[key]；起点日由
+    calendar.n_trading_days_ago 按交易日回看得到，上界仍 ≤ now。周末/盘前模拟（now 非交易日）
+    按最近交易日取参考日。
     """
     start = calendar.n_trading_days_ago(now.date(), config.WINDOW_TRADING_DAYS[key])
-    return _beijing_midnight_epoch(start)
+    return max(_beijing_midnight_epoch(start), _window_floor(now))
 
 
 def _window_txt(key, now):
-    """某板块覆盖窗口说明（进卡/总结）。如 '超短板块 前1个交易日到现在（09-03 起）'。"""
+    """某板块覆盖窗口说明（进卡/总结）。如 '波段板块 前3个交易日到现在（09-14 起）'。
+
+    **下限压过交易日起点时换一种写法** —— 不写"前N个交易日"，直接写起点时刻。
+    """
     start = calendar.n_trading_days_ago(now.date(), config.WINDOW_TRADING_DAYS[key])
+    floor = _window_floor(now)
+    if floor > _beijing_midnight_epoch(start):
+        s = datetime.fromtimestamp(floor, BEIJING_TZ)
+        return f"{config.BOARD_WORD[key]}板块 {s:%m-%d %H:%M} 起到现在"
     return (f"{config.BOARD_WORD[key]}板块 前{config.WINDOW_TRADING_DAYS[key]}个交易日"
             f"到现在（{start:%m-%d} 起）")
 

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from blogger.common import params
+from blogger.common import consensus, params
 
 BOARDS = ("short", "swing")
 
@@ -31,6 +31,7 @@ def load(board: str) -> dict:
         "index": IDX,
         "pool": list(params.get(f"push.pools.{board}", []) or []),
         "window": int(params.get(f"push.window.{board}", 1)),
+        "window_floor": str(params.get("push.window.floor", "") or ""),
         "trading": list(params.get("push.grid.trading", []) or []),
         "restday": list(params.get("push.grid.restday", []) or []),
         "retries": int(params.get("push.retries", 3)),
@@ -40,6 +41,22 @@ def load(board: str) -> dict:
         "bucket_span": int(params.get("report.bucket_span", 2)),
         "quote_limit": int(params.get("parse.quote_limit", 60)),
     }
+
+
+def window_start(cfg: dict, day: str, now: str) -> str:
+    """本档的窗口起点 —— **交易日回看（06§3）与下限取晚的那个**。
+
+    **下限只有推送吃** —— 回测（05§2）的窗口是纯交易日口径，所以这一层不进
+    `blogger/common/consensus.py`（那份 05／06 共用）。
+
+    **下限晚于本档时刻就不算数** —— 它管的是「落地之后」，还没落地时窗口照交易日口径算，
+    否则补跑落地之前的历史档会把起点推到本档时刻之后，窗口整段落空。
+    """
+    ws = consensus.window_start(day, cfg["window"])
+    floor = cfg["window_floor"]
+    if not ws or not floor or floor <= ws or floor > now:
+        return ws
+    return floor
 
 
 def span_ok(board: str, span: int | None, bucket: int) -> bool:

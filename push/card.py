@@ -28,8 +28,10 @@ def render(cfg: dict, now: str, wstart: str, picked: list[dict],
 def minimal(cfg: dict, now: str, wstart: str) -> str:
     """**零表态时的最小卡**（06§6.3）—— 不渲染名单、不渲染总结，没有人可讲就不占地方。"""
     L = _head(cfg, now, wstart)
+    span = (f"前{cfg['window']}个交易日内" if _by_trading_days(wstart)
+            else f"{wstart[5:16]} 起")
     L += [f"{cfg['mark']} **{cfg['tag']}** · 0多/0空",
-          f"（前{cfg['window']}个交易日内无人给出本档的上证方向观点）"]
+          f"（{span}无人给出本档的上证方向观点）"]
     return "\n".join(L)
 
 
@@ -38,13 +40,24 @@ def minimal(cfg: dict, now: str, wstart: str) -> str:
 def _head(cfg: dict, now: str, wstart: str) -> list[str]:
     """① 标题 —— 写的是**这一次实际执行的时刻**，不是应该执行的时刻。
 
-    ② 覆盖范围 —— `前N个交易日` 与起点日期都从回看窗口现算（06§3）。
+    ② 覆盖范围 —— `前N个交易日` 与起点日期都从回看窗口现算（06§3）。**下限压过交易日
+       起点时换一种写法**（`_by_trading_days`）—— 那时「前N个交易日」并不成立。
     """
     title = f"📊 {cfg['name']} {now[11:16]} · {now[5:10]} 周{WEEK[_weekday(now[:10])]}"
     if not wstart:
         return [title, f"🕐 覆盖：{cfg['name']}板块 前{cfg['window']}个交易日到现在"]
-    return [title,
-            f"🕐 覆盖：{cfg['name']}板块 前{cfg['window']}个交易日到现在（{wstart[5:10]} 起）"]
+    return [title, f"🕐 覆盖：{cfg['name']}板块 {_cover(cfg, wstart)}"]
+
+
+def _cover(cfg: dict, wstart: str) -> str:
+    if _by_trading_days(wstart):
+        return f"前{cfg['window']}个交易日到现在（{wstart[5:10]} 起）"
+    return f"{wstart[5:16]} 起到现在"
+
+
+def _by_trading_days(wstart: str) -> bool:
+    """起点落在 00:00 ＝ 交易日口径；不是 ＝ 下限赢了（06§3）。空串也按交易日口径算。"""
+    return not wstart or wstart[11:16] == "00:00"
 
 
 def _weekday(day: str) -> int:
