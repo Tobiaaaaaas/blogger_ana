@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-"""简报编排器 v17：超短/波段两卡两群 · 节奏统一 · 单趟分层抽取 · 行缓存增量复用 · 交易日窗口。
+"""简报编排器 v22：超短/波段两卡两群 · 节奏统一 · 单趟分层抽取 · 行缓存增量复用 · 交易日窗口。
 
+v22（2026-09-17）：回看窗口两板块统一 3 个交易日，起点加下限（`config.WINDOW_FLOOR`，
+与仓库根新栈同一口径）；空表态那两句随窗口起点分叉（`_span_txt`）。两板块复役
+（`due_boards` 交易日两板块同节奏、非交易日只推波段）。
 v17（2026-09-08 共享模块委派）：分层判定由 LAYER prompt 迁进顶层 opinion/——extract_layers
 内部改走 opinion 单一共享逐帖标注（ANNOTATION_SYSTEM_PROMPT，rows 规范行）+ collapse_board
 确定性坍缩；窗口读帖委派 opinion.posts（_read_window_posts）。两板两卡行为与 v16 同形（路过
@@ -193,6 +196,20 @@ def _window_txt(key, now):
             f"到现在（{start:%m-%d} 起）")
 
 
+def _span_txt(key, now) -> str:
+    """窗口**内容面**的说法 —— `前N个交易日内` 或下限赢时的 `MM-DD HH:MM 起`（v22）。
+
+    空表态那两句（窗口内无人发帖 / 有人发帖但无该板块方向观点）都挂在这上面。
+    **不能写死交易日口径** —— 下限压过交易日起点时「前N个交易日」并不成立，
+    会与覆盖行（`_window_txt`）在同一张卡上当场打架。
+    """
+    start = calendar.n_trading_days_ago(now.date(), config.WINDOW_TRADING_DAYS[key])
+    floor = _window_floor(now)
+    if floor > _beijing_midnight_epoch(start):
+        return f"{datetime.fromtimestamp(floor, BEIJING_TZ):%m-%d %H:%M} 起"
+    return f"前{config.WINDOW_TRADING_DAYS[key]}个交易日内"
+
+
 def _read_window_posts(blogger, start_ts, now_ts):
     """现读合并主文件，返回该博主窗口内 [start_ts, now_ts] 的可读帖（新→旧）。
 
@@ -332,7 +349,7 @@ def _release_lock():
 
 
 def _preview_lines(board_key, counts, rows, mkt_text, date_str, hm,
-                   window_txt="", summary_text=""):
+                   window_txt="", summary_text="", note_text=""):
     """dry-run 预览：单板块标题 + 覆盖 + 行情 + 名单（与卡同构，_board_section_lines 单源）。"""
     from .render import _board_section_lines
     lines = [config.board_title(board_key, date_str, hm)]
@@ -340,7 +357,7 @@ def _preview_lines(board_key, counts, rows, mkt_text, date_str, hm,
         lines.append(f"🕐 覆盖：{window_txt}")
     lines.append("📈 " + mkt_text)
     lines.append("")
-    lines.extend(_board_section_lines(board_key, rows, counts))
+    lines.extend(_board_section_lines(board_key, rows, counts, note_text))
     if summary_text:
         lines.append("")
         lines.append(f"🧭 {summary_text}")
@@ -366,6 +383,7 @@ def _process_board(key, anchored, counts, posters, mkt_text, now, date_str, hm):
                  f"{ep:%m-%d} 收盘" if ep else "—", r.get("anchor") or "—")
 
     win_txt = _window_txt(key, now)
+    note = ""
     if c["shown"] > 0:
         summary_text = summarize_board(key, anchored, c, mkt_text, date_str,
                                        window_txt=win_txt, now=now)
@@ -373,13 +391,14 @@ def _process_board(key, anchored, counts, posters, mkt_text, now, date_str, hm):
                                                   window_txt=win_txt, summary_text=summary_text)
     else:
         summary_text = ""
-        note = (f"前{config.WINDOW_TRADING_DAYS[key]}个交易日起窗口内无博主发帖"
+        span = _span_txt(key, now)
+        note = (f"（{span}无博主发帖）"
                 if not posters.get(key)
-                else config.BOARD_META[key]["empty_note"])
+                else config.empty_note(key, span))
         payload = render.build_minimal_card_payload(key, c, mkt_text, date_str, hm,
                                                     window_txt=win_txt, note_text=note)
     preview = _preview_lines(key, c, anchored, mkt_text, date_str, hm,
-                             window_txt=win_txt, summary_text=summary_text)
+                             window_txt=win_txt, summary_text=summary_text, note_text=note)
     return payload, preview
 
 
@@ -396,7 +415,7 @@ def _run(args):
     boards, now = _resolve_boards(args, wall)  # 决策时刻：窗口/锚定/标题/措辞
     date_str = _date_str(now)
     hm = now.strftime("%H:%M")
-    log.info("== 简报 v17(双卡·共享标注) %s %s 板块=%s ==", date_str, hm, ",".join(boards))
+    log.info("== 简报 v22(双卡·共享标注) %s %s 板块=%s ==", date_str, hm, ",".join(boards))
 
     if not _acquire_lock():
         return 0  # 已有进程在跑（防重叠）

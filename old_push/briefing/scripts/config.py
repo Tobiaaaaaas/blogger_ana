@@ -44,7 +44,7 @@ PANEL_SHORT = [
     "星哥投研", "大白白", "故乡的云ZYH", "入竹风拂面画船听雨眠", "道术合一",
     "股往金来oo", "云帆观市", "龙五", "钱眼", "红红火火的老牛哥",
     "股指看盘", "三粒光", "麟老哥", "波段研究师", "期指作手",
-    "纽约音乐厨房", "A股老黎实战操盘手", "要有心态", "博股思金", "股傲",
+    "纽约音乐厨房", "A股老黎实战", "要有心态", "博股思金", "股傲",
     "子房论市",
 ]
 
@@ -62,13 +62,19 @@ PANEL_KEYS = ("short", "swing")
 PANELS = {"short": PANEL_SHORT, "swing": PANEL_SWING}
 BOARD_WORD = {"short": "超短", "swing": "波段"}  # 卡标题用词（区别于 label 里的括号周期说明）
 
-# 板块展示元信息（标题/emoji/空板块提示；v14 空板文案随交易日窗口口径）
+# 板块展示元信息（标题/emoji/空板块提示）。`empty_note` 是**模板** —— `{span}` 由
+# run_briefing._span_txt 现算填：下限压过交易日起点时它不是「前N个交易日」（v22）。
 BOARD_META = {
     "short": {"label": "超短(0-1日)", "emoji": "⏱️",
-              "empty_note": "（前3个交易日起的表态无指向今/下一交易日的超短方向）"},
+              "empty_note": "（{span}的表态无指向今/下一交易日的超短方向）"},
     "swing": {"label": "波段(2日+)", "emoji": "🌊",
-              "empty_note": "（前3个交易日起无人给出波段方向观点）"},
+              "empty_note": "（{span}无人给出波段方向观点）"},
 }
+
+
+def empty_note(board_key: str, span: str) -> str:
+    """空板块提示（v22）—— `span` 由 run_briefing._span_txt 现算填。"""
+    return BOARD_META[board_key]["empty_note"].format(span=span)
 
 # 抓取/读帖全集：两板块去重（超短板块原序 + 波段板块新增第 9 位起）
 ALL_BLOGGERS = PANEL_SHORT + [b for b in PANEL_SWING if b not in PANEL_SHORT]
@@ -117,14 +123,12 @@ def in_restday_grid(dt: datetime) -> bool:
 
 
 def due_boards(trading: bool) -> list:
-    """应推板块：**本机生产只跑波段板块**，一律返回 `["swing"]`（2026-09-16）。
+    """应推板块：**交易日两板块同节奏，非交易日只推波段**（v15 口径，2026-09-17 复役）。
 
-    v15 起两板块共用同一张时刻表，`trading` 只用来选表（交易日 20 档 / 非交易日 5 档），
-    不再用来选板块。参数留着是因为门禁 `in_trading_grid`/`in_restday_grid` 仍按它分叉，
-    调用方 `_resolve_boards` 不必改。超短板块不再运行 —— 它的 webhook 也故意不配，
-    真被唤起来也只会记失败、绝不误发。
+    两板块共用同一张时刻表，`trading` 只用来选表（交易日 20 档 / 非交易日 5 档）
+    与这一条分叉。一档里两板块**共享那一次标注**、出两张卡、各推各群（v13）。
     """
-    return ["swing"]
+    return ["short", "swing"] if trading else ["swing"]
 
 
 def board_title(board_key: str, date_str: str, hm: str) -> str:

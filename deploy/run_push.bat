@@ -2,16 +2,20 @@
 REM ---------------------------------------------------------------------------
 REM New-stack (06 push) launcher for the Windows production host.
 REM
+REM Usage:  run_push.bat <short|swing> [--force] [--dry-run] [--init]
+REM
 REM Why this exists: the new stack reads plain os.environ -- it has no .env
 REM loader of its own, and it writes nothing to a log file (all output is
 REM print()). Both are deployment-layer concerns, so this wrapper does them:
 REM   1) load <root>\.deepseek_keys.env into this process's environment
-REM   2) set PYTHONIOENCODING=utf-8 and append stdout+stderr to a log file
+REM   2) set PYTHONIOENCODING=utf-8 and append stdout+stderr to a per-board log
 REM      (the Windows console is GBK and the card text carries emoji)
-REM   3) run  python -m push swing   (board is pinned here; never short)
+REM   3) run  python -m push <board>
 REM
-REM Extra arguments are forwarded, so a manual check on the host is:
-REM   deploy\run_push.bat --dry-run
+REM The BOARD IS REQUIRED and is the first argument -- both boards run on this
+REM host now (PushSwing*/PushShort* tasks in register_tasks.ps1), so there is no
+REM safe default to guess. Everything after it is forwarded, so a manual check
+REM on the host is:  deploy\run_push.bat swing --dry-run
 REM
 REM Keep this file ASCII-only + CRLF. See deploy\DEPLOY.md.
 REM ---------------------------------------------------------------------------
@@ -19,6 +23,23 @@ setlocal
 for %%i in ("%~dp0..") do set "ROOT=%%~fi"
 set "PY=C:\Users\24966\AppData\Local\Programs\Python\Python311\python.exe"
 set "LOGDIR=%ROOT%\deploy\logs"
+
+set "BOARD=%~1"
+if "%BOARD%"=="" (
+  echo usage: run_push.bat ^<short^|swing^> [--force] [--dry-run] [--init]
+  exit /b 2
+)
+shift
+
+REM cmd's %* is NOT updated by shift, so rebuild the tail explicitly.
+set "TAIL="
+:args
+if "%~1"=="" goto :args_done
+set "TAIL=%TAIL% %~1"
+shift
+goto :args
+:args_done
+
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 
 REM KEY=value lines, '#' starts a comment, no quoting in the file.
@@ -33,7 +54,7 @@ for /f "usebackq tokens=1,* delims==" %%a in (`findstr /r /b "[A-Z_][A-Z0-9_]*="
 
 set "PYTHONIOENCODING=utf-8"
 cd /d "%ROOT%"
-echo. >> "%LOGDIR%\push_swing.log"
-echo ===== %DATE% %TIME% ===== >> "%LOGDIR%\push_swing.log"
-"%PY%" -m push swing %* >> "%LOGDIR%\push_swing.log" 2>&1
+echo. >> "%LOGDIR%\push_%BOARD%.log"
+echo ===== %DATE% %TIME% ===== >> "%LOGDIR%\push_%BOARD%.log"
+"%PY%" -m push %BOARD% %TAIL% >> "%LOGDIR%\push_%BOARD%.log" 2>&1
 exit /b %ERRORLEVEL%

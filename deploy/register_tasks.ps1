@@ -1,33 +1,41 @@
-# Production scheduled-task registration for the Windows host (2026-09-16).
+# Production scheduled-task registration for the Windows host (2026-09-17).
 #
-# Registers FOUR tasks covering the two push stacks. Both stacks share the same
-# two wake windows -- the cadence tables (config.json push.grid.trading /
-# push.grid.restday) are shared, and each stack gates on the wall clock itself
-# in code, so the scheduler only has to wake the process at every possible fire
-# moment on EVERY day (incl. weekends); the code no-ops the rest.
+# Registers SIX tasks covering the two push stacks x two boards.
 #
-#   - BriefingDay:     Daily 09:00 + Repetition 30 min x 6h -> 09:00..15:00
-#   - BriefingEvening: Daily 16:00 + Repetition 1h   x 6h -> 16:00..22:00
-#       OLD stack (repo root = old_push\). Non-trading-day slots 09/12/15/18/21
-#       fall inside those windows. config.due_boards() returns swing only.
-#   - PushDay:         same triggers as BriefingDay
-#   - PushEvening:     same triggers as BriefingEvening
-#       NEW stack (repo root = the repo root). Board pinned to swing inside
-#       deploy\run_push.bat, which also loads the env and writes a log.
+#   NEW stack (repo root = the repo root), board passed to deploy\run_push.bat:
+#     PushSwingDay / PushSwingEvening   board = swing
+#     PushShortDay / PushShortEvening   board = short
+#   OLD stack (repo root = old_push\), python called directly, one run renders
+#   BOTH boards and pushes each to its own group:
+#     BriefingDay / BriefingEvening     config.due_boards() -> short+swing on
+#                                       trading days, swing only on restdays.
+#
+# Both stacks share the same two wake windows -- the cadence tables
+# (config.json push.grid.trading / push.grid.restday) are shared, and each stack
+# gates on the wall clock itself in code, so the scheduler only has to wake the
+# process at every possible fire moment on EVERY day (incl. weekends); the code
+# no-ops the rest.
+#
+#   Day:     Daily 09:00 + Repetition 30 min x 6h -> 09:00..15:00
+#   Evening: Daily 16:00 + Repetition 1h   x 6h -> 16:00..22:00
+#       Restday slots 09/12/15/18/21 fall inside those windows.
 #
 # The two stacks run CONCURRENTLY in the same slot, by design; they are fully
-# separate systems with separate data trees, separate caches and separate
-# Feishu groups (old -> the old-push group, new -> the swing group).
+# separate systems with separate data trees, separate caches and separate Feishu
+# groups (old -> the old-push groups, new -> the namesake groups). The new
+# stack's two boards also run concurrently: run_push.bat takes the board as its
+# FIRST argument, and that board pins which pool is crawled and which webhook is
+# used. The board argument is required -- do not register a new-stack task
+# without it.
 #
 # Settings: StartWhenAvailable (missed wakes are caught up), MultipleInstances
 #   IgnoreNew, principal 24966 Interactive Limited.
 #   ExecutionTimeLimit 20 min for the OLD stack (unchanged, < the 30-min grid);
-#   30 min for the NEW stack -- its per-slot crawl is serial (~29 bloggers),
+#   30 min for the NEW stack -- its per-slot crawl is serial (21 or 29 bloggers),
 #   measurably slower than the old stack's --workers 5.
 #
-# ALL FOUR TASKS ARE LEFT DISABLED. Enabling is a separate, explicit step:
-#   Enable-ScheduledTask -TaskName PushDay
-# Do not enable anything until the first manual real push has been verified.
+# ALL SIX TASKS ARE LEFT DISABLED. Enabling is a separate, explicit step:
+#   Enable-ScheduledTask -TaskName PushSwingDay
 #
 # Keep this file ASCII-only (no Chinese) so Windows PowerShell 5.1 parses it
 # cleanly regardless of console codepage.
@@ -41,8 +49,10 @@ $root    = 'C:\Users\24966\blogger_ana'
 $oldRoot = 'C:\Users\24966\blogger_ana\old_push'
 $bat     = 'C:\Users\24966\blogger_ana\deploy\run_push.bat'
 
-# Drop the v13/v9 task names if this box still carries them.
-$stale = @('BriefingIntraday', 'BriefingMorning', 'BriefingAfternoon', 'BriefingLate')
+# Drop retired task names if this box still carries them. PushDay/PushEvening
+# were the new stack's swing-only names before the board split (2026-09-17).
+$stale = @('BriefingIntraday', 'BriefingMorning', 'BriefingAfternoon', 'BriefingLate',
+           'PushDay', 'PushEvening')
 foreach ($n in $stale) {
     Unregister-ScheduledTask -TaskName $n -Confirm:$false -ErrorAction SilentlyContinue
 }
@@ -89,16 +99,21 @@ New-PushTask -Name 'BriefingEvening' -Start '16:00' -IntervalMin 60 -DurationHou
     -Exe $py -ArgLine '-m briefing.scripts.run_briefing --push' `
     -WorkingDir $oldRoot -LimitMin 20
 
-# NEW stack: repo root = the repo root, board pinned to swing inside the wrapper.
-New-PushTask -Name 'PushDay' -Start '09:00' -IntervalMin 30 -DurationHours 6 `
-    -Exe 'cmd.exe' -ArgLine ('/c "' + $bat + '"') `
-    -WorkingDir $root -LimitMin 30
-New-PushTask -Name 'PushEvening' -Start '16:00' -IntervalMin 60 -DurationHours 6 `
-    -Exe 'cmd.exe' -ArgLine ('/c "' + $bat + '"') `
-    -WorkingDir $root -LimitMin 30
+# NEW stack: repo root = the repo root, board is the wrapper's first argument.
+foreach ($b in @('Swing', 'Short')) {
+    $board = $b.ToLower()
+    New-PushTask -Name ('Push' + $b + 'Day') -Start '09:00' -IntervalMin 30 -DurationHours 6 `
+        -Exe 'cmd.exe' -ArgLine ('/c "' + $bat + '" ' + $board) `
+        -WorkingDir $root -LimitMin 30
+    New-PushTask -Name ('Push' + $b + 'Evening') -Start '16:00' -IntervalMin 60 -DurationHours 6 `
+        -Exe 'cmd.exe' -ArgLine ('/c "' + $bat + '" ' + $board) `
+        -WorkingDir $root -LimitMin 30
+}
 
 Write-Output '--- verify ---'
-foreach ($tn in @('BriefingDay', 'BriefingEvening', 'PushDay', 'PushEvening')) {
+foreach ($tn in @('BriefingDay', 'BriefingEvening',
+                  'PushSwingDay', 'PushSwingEvening',
+                  'PushShortDay', 'PushShortEvening')) {
     $t = Get-ScheduledTask -TaskName $tn
     $rep = $t.Triggers[0].Repetition
     Write-Output ($tn + ' | ' + $t.State + ' | ' + $t.Actions[0].Execute + ' ' +
@@ -111,4 +126,4 @@ foreach ($n in $stale) {
     $left = Get-ScheduledTask -TaskName $n -ErrorAction SilentlyContinue
     if ($left) { Write-Output ('LEFTOVER ' + $n) } else { Write-Output ('gone ' + $n) }
 }
-Write-Output 'All four are DISABLED. Enable explicitly after the first real push checks out.'
+Write-Output 'All six are DISABLED. Enable explicitly after the first real push checks out.'

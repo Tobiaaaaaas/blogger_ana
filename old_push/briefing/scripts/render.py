@@ -158,12 +158,14 @@ def _fmt_board_row(name, row):
     return "\n".join(lines)
 
 
-def _board_section_lines(board_key, rows, counts):
+def _board_section_lines(board_key, rows, counts, note_text=""):
     """单个板块渲染块序列（v11）：计数头行 + 按名单序的成员行 / 空板块提示。
 
     rows: 该板块 {博主: row}（仅 has_view）；counts: board_counts[board_key]。
     同一块序列同时供卡 payload 与 dry-run 预览（run_briefing._preview_text）调用，
     单一来源防漂移。未表态成员不占行。
+
+    `note_text` 由调用方给（v22）—— 空表态那句要随窗口起点分叉，不能在这里写死。
     """
     meta = config.BOARD_META[board_key]
     c = counts or {}
@@ -178,8 +180,8 @@ def _board_section_lines(board_key, rows, counts):
             continue
         lines.append(_fmt_board_row(name, row))
         shown += 1
-    if not shown:
-        lines.append(meta["empty_note"])
+    if not shown and note_text:
+        lines.append(note_text)
     return lines
 
 

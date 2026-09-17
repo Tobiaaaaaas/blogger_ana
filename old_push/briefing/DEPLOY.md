@@ -1,15 +1,15 @@
 # 部署（v19：两群两卡 · 共享标注模块 · 解析加固）
 
-> **2026-09-16 部署变更 —— 本文下面的节奏描述已成历史。**
+> **2026-09-17 部署变更 —— 本文的窗口与节奏描述已成历史。**
 >
-> 本机生产**只跑波段板块**：`config.due_boards` 一律返回 `["swing"]`，超短板块不再运行
-> （它的 webhook `FEISHU_WEBHOOK_URL` 故意不配 —— 缺这一行只会让超短卡记失败，绝不误发）。
-> 下文的「交易日每档两卡都推」是 v15 的历史口径，**现行口径见 `blogger_ana/deploy/DEPLOY.md`**。
+> 本机生产**跑两个板块**：`config.due_boards` 交易日返回 `["short", "swing"]`、非交易日只
+> `["swing"]`（v15 口径复役）。一档里两板块共享那一次标注、出两张卡、各推各群。
+> 下文的窗口（超短前一交易日 / 波段前 5 个交易日）与「交易日每档两卡都推」都是历史口径，
+> **现行口径见 `blogger_ana/deploy/DEPLOY.md`** —— 本文件只留旧栈自己的内部结构说明。
 >
-> 同一轮变更还有两件：仓库布局改成「根 = 新栈、旧栈整体挪到 `old_push/`」——`briefing/` 的
-> 父仓库由 `blogger_ana` 变成 `blogger_ana\old_push`（`REPO_ROOT` 随 `BRIEFING_DIR` 自动解析，
-> 见 `scripts/paths.py`），任务的 `WorkingDirectory` 跟着挪；旧栈的 `data/`、`scripts/`、
-> `opinion/` 也一并挪进 `old_push/`。
+> 仓库布局：根 = 新栈、旧栈整体在 `old_push/` ——`briefing/` 的父仓库由 `blogger_ana` 变成
+> `blogger_ana\old_push`（`REPO_ROOT` 随 `BRIEFING_DIR` 自动解析，见 `scripts/paths.py`），
+> 任务的 `WorkingDirectory` 跟着挪；旧栈的 `data/`、`scripts/`、`opinion/` 也一并挪进 `old_push/`。
 
 `briefing/` 是独立部署单元。实际生产运行在用户的 **Windows 电脑**（长期开机 + Tailscale SSH，别名 `windows-server`），镜像 `aws_options` 项目已验证的部署模式；下方 Linux 段仅作通用示意。
 

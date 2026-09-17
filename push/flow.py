@@ -112,13 +112,13 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
 
     if init:
         log("[④ 抓窗口内的帖]")
-        _scrape(cfg, log, wstart)
+        _scrape(cfg, log, wstart, window_only=True)
         log("[⑤ 解析窗口内的帖]")
         rows = _seed(cfg, wstart, log)
         log("[⑥⑦ 攒初始分布]")
     else:
         log("[④ 抓增量帖]")
-        _scrape(cfg, log)
+        _scrape(cfg, log, wstart)
         log("[⑤ 解析增量]")
         rows = _judge(cfg, wstart, log)
         log("[⑥ 淘汰]")
@@ -274,17 +274,22 @@ def _minutes(hhmm: str) -> int | None:
 
 # ── ④ 抓帖 ──────────────────────────────────────────────────────────────
 
-def _scrape(cfg: dict, log, wstart: str = "") -> None:
+def _scrape(cfg: dict, log, wstart: str = "", window_only: bool = False) -> None:
     """池里每一位从**各自的续抓起点**往后抓到此刻（06§5.4）。
 
     **某一位抓失败只影响他自己**：不中断本档，状态里那条旧条目照留；
     他的 `scrape_time` 没推进，下一档还会从原处接着抓。
 
-    `wstart` 给了就是初始化那一遍（06§4）—— **只抓窗口内那一段**：起点取「续抓起点」
+    `window_only` 是初始化那一遍（06§4）—— **只抓窗口内那一段**：起点取「续抓起点」
     与「窗口起点」里晚的那个（窗口外的那一段推送用不着；窗口内的那一段，要么这次抓回来、
-    要么本来就在库里）。抓完**把「抓取截止」退回原值** —— 这一轮被窗口掐了头，不算
-    01§5 意义上的抓全了；不推进，下一档才会从原处接着补，中间那段不会被永久跳过。
-    帖档里还没有「续抓起点」的（只有 `source_url` 的空壳）就退回空串，按窗口起点抓。
+    要么本来就在库里）。增量那一遍不掐头，起点就是续抓起点本身。
+
+    帖档里还没有「续抓起点」的（只有 `source_url` 的空壳，01§5）没有起点可比，退回
+    窗口起点 —— **不是固定起始时间**，空壳不触发全量重抓；水位照旧空着
+    （`_restore_scrape_time`），将来真要补全量还补得回来。
+
+    起点被窗口掐了头的（`start != before`）抓完**把「抓取截止」退回原值** —— 这一轮
+    不算 01§5 意义上的抓全了，水位不往前推。
 
     **点名抓** —— 传给 `run` 的是池子里那位的名字，链接解出来的 token 若属于别人
     （01§3.1），第 1 页上就认出来、当场收手，不去吞别人整个 feed。
@@ -301,7 +306,7 @@ def _scrape(cfg: dict, log, wstart: str = "") -> None:
             miss.append(name)
             continue
         before = config.resume_start(doc)
-        start = max(before, wstart) if wstart else before
+        start = max(before, wstart) if window_only else (before or wstart)
         try:
             got = toutiao.run(url, start, expect=name)
             if start != before:
@@ -318,10 +323,11 @@ def _scrape(cfg: dict, log, wstart: str = "") -> None:
 
 
 def _restore_scrape_time(name: str, before: str) -> None:
-    """把「抓取截止」退回抓之前的值（06§4）—— 初始化那一轮被窗口掐了头，不算抓全了（01§4）。
+    """把「抓取截止」退回抓之前的值（06§4）—— 这一轮被窗口掐了头，不算抓全了（01§4）。
 
-    `before` 是空串 = 这位**从没抓全过**（01§5）—— 退回空串正是这个意思，
-    下一次调用环节就从固定起始时间起全量重抓，窗口起点之前那一段不会被永久跳过。
+    `before` 是空串 = 这位**从没抓全过**（01§5）—— 退回空串正是这个意思：水位一直空着，
+    下一档还是从窗口起点抓（`_scrape`）。这一轮只抓了窗口内那一段，退回空串才留得住
+    「将来补全量」这条路。
     """
     p = paths.posts_file(name)
     try:
