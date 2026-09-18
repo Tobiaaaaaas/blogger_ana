@@ -52,9 +52,10 @@ python -m research.semparse.jitter cmp _pass1.json _pass2.json
 怎么读、基线是多少，见 [research/semparse/README.md](../../research/semparse/README.md)。
 **它中途退役过一次**（2026-09-16 02 换四段流程那一轮，四段不需要这条尺子），同日回退后复役。
 
-## 守门只丢该丢的
+## 字面辅助层的口径没被改坏
 
-02§10.2 唯一一条按字面判死的守门（条件句），验收标准是**有没有错筛，不看覆盖率**。
+02§10.1 的清单与 §10.5 的复核 —— 断的是**每一条的查出条件本身**，不断言它判得准（查出来
+不等于错，改不改由模型）。三层里只有 §10.2 强校验按字面丢行，那一条不在这个 gate 里。
 
 ```bash
 python -m blogger.tests.gate

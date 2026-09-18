@@ -1,0 +1,2 @@
+# 三轮复核的原始产出 —— 代码与结论入库，原始 json 不入（照 semparse、regex_ab 的先例）
+run*.json

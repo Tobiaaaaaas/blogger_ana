@@ -6,6 +6,8 @@
 | 目录 | 在试什么 | 结论 |
 |:---|:---|:---|
 | [semparse/](semparse/) | 02 的读法稳不稳 —— 同一条帖判两遍，量对不上的占多少 | 见 [semparse/README.md](semparse/README.md) |
+| [regex_ab/](regex_ab/) | 正则辅助那一层值多少 —— 摆清单、条件句守门、每条设置各值多少 | 见 [regex_ab/README.md](regex_ab/README.md) |
+| [crosscheck/](crosscheck/) | 矛盾复核（02§10.5）值多少 —— 带不带提示、改动落在哪儿（量的是 `idx`／`spec` 那两栏） | 见 [crosscheck/README.md](crosscheck/README.md) |
 
 **四段流程那一轮已结案归档**，产物见 [../archive/20260916-四段流程/](../archive/20260916-四段流程/)。
 

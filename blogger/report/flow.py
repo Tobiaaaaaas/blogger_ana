@@ -255,14 +255,20 @@ def _report_dropped(tally: dict, no_note: list[dict], unscored: list[dict], log)
     """
     lost = tally.get("丢弃清单") or []
     failed = tally.get("失败帖") or []
+    checked = tally.get("复核清单") or []
 
-    if not (lost or failed or unscored or no_note):
+    if not (lost or failed or unscored or no_note or checked):
         log("  没有没能进统计的")
         return
 
     if lost:
         log(f"  解析阶段：{len(lost)} 条没能成为观点信号")
         for s in lost:
+            log(f"    {s}")
+    if checked:
+        log(f"  矛盾复核：{tally.get('复核', 0)} 条帖重读过，"
+            f"{tally.get('复核改', 0)} 条改了（02§10.5）")
+        for s in checked:
             log(f"    {s}")
     if failed:
         log(f"  解析阶段：{len(failed)} 条帖整批没调通"

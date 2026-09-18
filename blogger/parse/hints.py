@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""02§10.1 摆清单 —— 代码认得出的字面特征，摆在帖文旁边。
+"""02§10.1／§10.5 字面辅助层 —— 摆清单、找疑点。
+
+**只摆不判、只报不改。** 这一层一个字都不改产出：`hints_of` 把代码认得出的字面特征摆在
+帖文旁边，`suspects` 把这一帖里该复核的地方指出来（`contradiction` 是其中只用引文的那两条），
+交模型自己判。**这一层没有一处按字面删行。**
 
 **清单只摆不判，也不是全集。** 它一个字都不删不加；代码认不出不等于帖里没有 ——
 §4.1 的档位表与 §5.2 的映射表仍要模型自己会查。
@@ -10,15 +14,13 @@
 
 **方向词那一栏只列原话、不给方向。** 词表里的值是词义层面的，句义层面的翻转仍归模型；
 把值摆出来，模型多半会拿它当判决，而「不会大涨」这类正是词表出不了手的地方。
-
-`cond_reason` 是同一层的另一件：给定引文，回原文找出它所在的**那一整句**，判它是不是
-条件句。**只服务 §10.2 的守门**，不进提示词、不编号、不切句给模型看。
 """
 
 from __future__ import annotations
 
 import re
 
+from blogger.common import market
 from blogger.common.text import SEP, normalize, split_quote
 from blogger.parse import lexicons
 
@@ -36,7 +38,7 @@ def sentences(text: str) -> list[str]:
 
 
 def _fill_year(spec: str, pub: str) -> str:
-    """`d:MM-DD` 补上年份（§4.3）—— **补出来早于发帖日的，是明年那一个**。
+    """`d:MM-DD` 补上年份（§4.1）—— **补出来早于发帖日的，是明年那一个**。
 
     不补的话，摆出去的就是个缺年份的半截编码，模型照抄或自己猜年份，猜成过去年就被
     强校验按「是回顾不是预测」丢掉（§10.2）—— 那是静默的冤枉。
@@ -116,10 +118,10 @@ def hints_of(post: dict) -> str:
         f"{name}：{'、'.join(items) if items else '无'}" for name, items in cols)
 
 
-# ── 守门用：引文所在的那一整句 ──────────────────────────────────────────
+# ── 定位：引文落在的那几句（§10.5）────────────────────────────────────
 
 def _around(post: dict, frag: str) -> tuple[str, list[str]] | None:
-    """`frag` 落在这条帖的哪个字段、压住了哪几句 —— 两处都落不到返回 `None`。"""
+    """`frag` 落在这条帖的哪个字段、落在了哪几句上 —— 两处都落不到返回 `None`。"""
     for field in FIELDS:
         raw = sentences(post.get(field) or "")
         parts = [normalize(s) for s in raw]
@@ -138,12 +140,12 @@ def _around(post: dict, frag: str) -> tuple[str, list[str]] | None:
 
 
 def cond_sentence(post: dict, quote: str) -> str:
-    """`quote` 压住的那几句，拼成一份 —— **有一段落不到就返回空串**。
+    """`quote` 落在的那几句，拼成一份 —— **有一段落不到就返回空串**。
 
-    引文允许不连续的两段拼起来（§9），所以逐段定位、各取压住的那几句，合起来才是这一处
+    引文允许不连续的两段拼起来（§9），所以逐段定位、各取落到的句子，合起来才是这一处
     表述的范围。归一之后位置才对得上（全角半角、空白都不算改写）。
 
-    **只取引文压住的那些句子，不取两段之间的那一片** —— 「……」（省略号）在语料里常跨好几
+    **只取引文落在的那些句子，不取两段之间的那一片** —— 「……」（省略号）在语料里常跨好几
     句，按首段到末段整片取的话，会把中间无关句子里的条件词也认成这一处的条件，实测就是这么
     冤枉的。筛不完可以，冤枉不行。
 
@@ -173,20 +175,90 @@ def cond_sentence(post: dict, quote: str) -> str:
     return "".join(out)
 
 
-def cond_reason(post: dict, quote: str) -> str | None:
-    """这一处产出该不该按条件句丢掉（§10.2）—— 该丢返回那几句，不该丢返回 `None`。
+# ── 查矛盾：产出与引文对不上的地方（§10.5）────────────────────────────
 
-    **要引文压住的每一句都是条件句才丢。** 方向就摆在引文里，只要还有一句没挂在条件上，
-    就说不好方向是不是出自那一句 —— 拿不准的一律放行。
+def contradiction(sig: dict) -> str | None:
+    """产出与引文里的字面对不上的地方 —— 对不上返回理由，对得上返回 `None`。
 
-    **只有这一条按字面判死。** 实测一处都没冤枉过。
+    **只查 `idx` 与 `spec` 两栏。方向那一栏不查** —— 引文里的方向词是词义层面的值，
+    句义层面的翻转（「不会大涨」「急跌是低吸机会」）归模型，字面反了不算数。2026-09-18
+    在手上 2629 行活产出上量：方向那栏命中 345 条，逐条读完一条真错也没有；`idx` 与
+    `spec` 两栏共命中 13 条，3 条是真错。
+
+    **引文里查不出值的不算矛盾** —— 那是查不着，不是对不上（65% 的行引文里没有对象词，
+    39% 没有时间词）。**产出 `long` 不算矛盾** —— 它是「20 个交易日以上」的开区间，
+    引文里查得出某一天不等于与它冲突。
+
+    **查出来的值只是提示，不作结论** —— 它是字面查的，自己也会错（`idx` 那 5 条命中里
+    4 条的正则值是错的）。理由原样摆给模型，改不改由它（§10.5）。
     """
-    sent = cond_sentence(post, quote)
-    if not sent:
+    quote = sig["quote"]
+
+    objs = {idx for _, _, idx in lexicons.find_objects(quote)}
+    if objs and sig["idx"] not in objs:
+        return (f"引文里的对象词是「{'、'.join(sorted(objs))}」，"
+                f"与产出的 idx「{sig['idx']}」对不上")
+
+    if sig["spec"] == "long":          # 开区间 —— 引文里查出某一天不算冲突
         return None
-    parts = sentences(sent)
-    return sent if parts and all(lexicons.has_cond(s) for s in parts) else None
+    words = lexicons.find_time_words(quote)
+    if not words:
+        return None
+
+    pub = sig["pub"]
+    try:
+        want = market.endpoint(pub, sig["spec"])
+        cand = {market.endpoint(pub, _fill_year(v, pub)) for _, _, v in words}
+    except RuntimeError:
+        return None                    # 日历不可用，日子算不出来 —— 不判，放行
+    cand.discard(None)
+    if want is None or not cand or want in cand:
+        return None
+    return (f"引文里的时间词是「{'、'.join(w for _, w, _ in words)}」，"
+            f"与产出的 spec「{sig['spec']}」（{want}）对不上")
+
+
+def suspects(post: dict, rows: list[dict]) -> list[tuple[dict, str]]:
+    """这一帖里该复核的每一处（§10.5）—— `[(产出, 理由), …]`，没有就返回空表。
+
+    四种查法，两种只用引文（`idx`／`spec`，走 `contradiction`），一种要帖文（条件句），
+    一种比产出与产出（同帖互斥）。**一处查出几条就并成一行** —— 同一处摆两条疑问，模型会
+    当两处答。
+
+    **只报不改、只报不丢**：这里一个字都不动产出，也一条都不删。
+    """
+    found: list[list] = []                       # [[产出, [理由, …]], …]，照产出首次出现的先后
+
+    def add(sig: dict, why: str) -> None:
+        for row in found:
+            if row[0] is sig:
+                row[1].append(why)
+                return
+        found.append([sig, [why]])
+
+    for s in rows:
+        why = contradiction(s)
+        if why:
+            add(s, why)
+
+        sent = cond_sentence(post, s["quote"])
+        parts = sentences(sent)
+        if parts and all(lexicons.has_cond(x) for x in parts):
+            add(s, f"引文所在的那整句是条件句（{sent[:40]}…），这一处却产了方向（§3.2）")
+
+    groups: dict[tuple[str, str], list[dict]] = {}
+    for s in rows:
+        groups.setdefault((s["idx"], s["spec"]), []).append(s)
+    for grp in groups.values():
+        if len({s["d"] for s in grp}) < 2:
+            continue
+        for s in grp:
+            peer = next(x for x in grp if x["d"] != s["d"])
+            add(s, f"同一帖里 {s['idx']} {s['spec']} 还有方向相反的一条"
+                   f"（{peer['d']:+d}｜{peer['quote'][:20]}…）（§6）")
+
+    return [(sig, "；".join(whys)) for sig, whys in found]
 
 
 __all__ = ["SENT_END", "sentences", "find_dir_words", "hints_of",
-           "cond_sentence", "cond_reason"]
+           "contradiction", "cond_sentence", "suspects"]

@@ -30,10 +30,13 @@ def rule_fingerprint() -> str:
     个读法；批大小变了，一条帖跟哪些帖摆在一起也就变了，模型看到的东西不一样。只认规则
     文本的话，改了这几样会静悄悄地拿着上一版读法的结论往下跑。
 
-    **两份规则文本都算** —— 读帖那份（`ANNOTATION_SYSTEM_PROMPT`）与定夺那份
-    （`RECONCILE_SYSTEM_PROMPT`）都是规则文本；只认前者的话，改了定夺的判据指纹不动。
+    **三份规则文本都算** —— 读帖那份（`ANNOTATION_SYSTEM_PROMPT`）、定夺那份
+    （`RECONCILE_SYSTEM_PROMPT`）、矛盾复核那份（`CHECK_SYSTEM_PROMPT`）都是规则文本；
+    只认前者的话，改了定夺或复核的判据指纹不动。**复核那份是拼在读帖那份后面的**
+    （两者共享同一套判据），两份都写进去，读帖那份改了指纹一定跟着变。
     """
     blob = (prompts.ANNOTATION_SYSTEM_PROMPT + "\x00" + prompts.RECONCILE_SYSTEM_PROMPT
+            + "\x00" + prompts.CHECK_SYSTEM_PROMPT
             + "\x00" + str(params.get("parse.model", ""))
             + "\x00" + str(params.get("parse.runs", 2))
             + "\x00" + str(params.get("parse.batch_size", 15)))

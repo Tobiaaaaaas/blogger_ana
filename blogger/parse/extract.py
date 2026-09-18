@@ -7,9 +7,9 @@
 外部事实只有一样：**行情注记**（发帖时刻七个主指数的现值）。**取不到注记的帖不解析** ——
 点位类判断会退回「模型凭旧记忆猜」，而旧记忆里的点位和发帖时的点位常常差几百点。
 
-代码在这一环只做两件事：喂帖时**摆一份字面命中清单**（§10.1），收帖后**过一道强校验与
-条件句守门**（§10.2）。**摆与守都不下判** —— 划表述的边界、落 `spec` 与 `idx`、抄引文，
-全是模型自己下笔。
+代码在这一环做三件事：喂帖时**摆一份字面命中清单**（§10.1），收帖后**过一道强校验**（§10.2），
+各遍并完之后**把产出与引文对不上的地方交回模型复核**（§10.5）。**三件都不下判** ——
+划表述的边界、落 `spec` 与 `idx`、抄引文，全是模型自己下笔；代码只丢不合格的、只报对不上的。
 """
 
 from __future__ import annotations
@@ -103,16 +103,6 @@ def build_batches(posts: list[dict], batch_size: int = BATCH_SIZE) -> list[list[
 
 # ── 跑一遍 ──────────────────────────────────────────────────────────────
 
-def cond_drop(post: dict, sig: dict) -> str | None:
-    """条件句守门（§10.2）—— **引文所在的那一整句**是条件句、这一处却产了方向，就丢掉。
-
-    返回丢掉的理由，不该丢返回 `None`。**代码面唯一一处会删行的判断** —— 判死在整句上，
-    不在引文那半截上（「若／如果」常落在引文之外）；拿不准的一律放行。
-    """
-    sent = hints.cond_reason(post, sig["quote"])
-    return f"条件句（{sent[:40]}…）这一处却产了方向" if sent else None
-
-
 def parse_batch(posts: list[dict], label: str = "") -> tuple[list[dict], dict]:
     """一批帖跑**一遍**模型，就地做强校验。返回 `(本批的信号, 计数)`。
 
@@ -144,8 +134,6 @@ def parse_batch(posts: list[dict], label: str = "") -> tuple[list[dict], dict]:
             bad_n += 1
             continue
         sig, why = schema.to_signal(raw, kept[n])
-        if sig is not None:
-            why = cond_drop(kept[n], sig)   # 强校验过了，再过一道条件句守门（§10.2）
         if sig is None or why:
             # 带上出处 —— 这条被丢了，报告里再也看不到它，只有这里能说明白是哪儿丢的
             dropped.append(f"{kept[n]['pub']} {kept[n]['post_id']}｜{why}")
@@ -232,8 +220,6 @@ def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
             bad_n += 1
             continue
         sig, why = schema.to_signal(raw, kept[n])
-        if sig is not None:
-            why = cond_drop(kept[n], sig)   # 定夺的产出走同一道守门（§10.2）
         if sig is None or why:
             lost.append(f"{kept[n]['pub']} {kept[n]['post_id']}｜{why}")
         else:
@@ -249,6 +235,77 @@ def reconcile(posts: list[dict], runs: list[list[dict]], label: str = ""
     # 帖号只在清单里留一行交代，计数仍是 0。2026-09-16 定的先不修。
     return signals, {"产": len(signals), "丢弃": n_lost, "去重": len(dups),
                      "编号错": bad_n, "丢弃清单": lost}
+
+
+# ── 复核 ────────────────────────────────────────────────────────────────
+
+def _triples(rows: list[dict]) -> str:
+    """一帖的产出写成一行 —— 复核清单里比「原来是什么、改成了什么」用。"""
+    return "、".join(f"{s['d']:+d} {s['spec']} {s['idx']}" for s in rows) or "无"
+
+
+def check_batch(posts: list[dict], signals: list[dict], label: str = ""
+                ) -> tuple[list[dict], dict]:
+    """矛盾复核（§10.5）—— 产出对不上引文的、对得上但不该产的那几帖，连查出来的地方交模型重读。
+
+    **正则只负责指出对不上，判还是模型判** —— 查出来的值不直接替换上去（它自己也会错）。
+    **以复核为准**：回来的那一份就是这几帖的最终产出；原来是什么、改成了什么，记进清单。
+
+    一处疑点都没有的批**一次调用都不花** —— 实证 15 帖一批，约一半的批里有要复核的地方。
+    """
+    if not signals:
+        return signals, {}
+
+    by_id = {p["post_id"]: p for p in posts}
+    rows_of: dict[str, list[dict]] = {}
+    for s in signals:
+        if s["post_id"] in by_id:
+            rows_of.setdefault(s["post_id"], []).append(s)
+    # 逐帖找疑点 —— 「同帖互斥」那一条要拿这一帖的全部产出来比，不是逐行看
+    suspect = {pid: hits for pid, rows in rows_of.items()
+               if (hits := hints.suspects(by_id[pid], rows))}
+    if not suspect:
+        return signals, {}
+
+    # 只送这几帖 —— `post_n` 照**新下标**编（模型眼里的 0 号是 subs 的第 0 条）
+    subs = [by_id[pid] for pid in suspect]
+    user_text, kept = render_batch(subs)
+    if not kept:
+        return signals, {}
+    items = [{"post_n": i, "d": s["d"], "spec": s["spec"], "idx": s["idx"],
+              "quote": s["quote"], "疑问": why}
+             for i, post in enumerate(kept) for s, why in suspect[post["post_id"]]]
+    body = json.dumps({"items": items}, ensure_ascii=False, indent=1)
+    try:
+        result = ds.call_json(prompts.CHECK_SYSTEM_PROMPT,
+                              f"{user_text}\n\n## 存疑的几处\n{body}",
+                              label or "复核", need="signals")
+    except ds.ModelError:
+        # 复核没跑成 —— 退回原来的产出。这一退没有「被改掉」可言，与 §10.4 同理
+        return signals, {"复核": len(kept)}
+
+    ruled, bad_n = [], 0
+    for raw in (result.get("signals") or []):
+        n = raw.get("post_n")
+        if not isinstance(n, int) or not (0 <= n < len(kept)):
+            bad_n += 1
+            continue
+        sig, _ = schema.to_signal(raw, kept[n])
+        if sig is not None:
+            ruled.append(sig)
+    ruled = schema.dedup(ruled, kept)
+
+    replaced = {post["post_id"] for post in kept}
+    before = {post["post_id"]: [s for s in signals if s["post_id"] == post["post_id"]]
+              for post in kept}
+    after = {post["post_id"]: [s for s in ruled if s["post_id"] == post["post_id"]]
+             for post in kept}
+    notes = [f"{post['pub']} {post['post_id']}｜{_triples(before[post['post_id']])}"
+             f" → {_triples(after[post['post_id']])}"
+             for post in kept
+             if _triples(before[post["post_id"]]) != _triples(after[post["post_id"]])]
+    return ([s for s in signals if s["post_id"] not in replaced] + ruled,
+            {"复核": len(kept), "复核改": len(notes), "复核清单": notes, "编号错": bad_n})
 
 
 # ── 入口 ────────────────────────────────────────────────────────────────
@@ -271,7 +328,8 @@ def extract(posts: list[dict], self_check: bool = True,
     batches = build_batches(posts, batch_size)
     all_signals: list[dict] = []
     tally = {"批": len(batches), "帖": 0, "产": 0, "丢弃": 0, "失败批": 0,
-             "编号错": 0, "丢弃清单": [], "失败帖": []}
+             "编号错": 0, "丢弃清单": [], "失败帖": [],
+             "复核": 0, "复核改": 0, "复核清单": []}
 
     for bi, batch in enumerate(batches, 1):
         # 注记取不到的帖在这儿就被筛掉，不进解析
@@ -342,6 +400,11 @@ def extract(posts: list[dict], self_check: bool = True,
             lost.append(txt)
 
         merged = untag(merged)
+        # 各遍并完之后再复核（§10.5）—— 查的是**最终那一份**产出与引文对不对得上
+        merged, ck = check_batch(kept, merged, label=f"复核 批{bi}/{len(batches)}")
+        for k in ("复核", "复核改", "编号错"):
+            tally[k] += ck.get(k, 0)
+        tally["复核清单"].extend(ck.get("复核清单") or [])
         all_signals.extend(merged)
         tally["丢弃"] += n_drop
         tally["丢弃清单"].extend(lost)
@@ -366,4 +429,4 @@ def parse_one(post: dict) -> list[dict]:
 
 __all__ = ["extract", "parse_batch", "parse_one", "reconcile", "split_agreed", "triple_of",
            "untag", "render_batch", "render_post", "build_batches", "ready_posts",
-           "weekday_of", "truncate", "cond_drop"]
+           "weekday_of", "truncate", "check_batch"]
