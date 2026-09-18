@@ -134,6 +134,10 @@ tar --exclude='__pycache__' --exclude='*.pyc' --exclude='.DS_Store' \
    新栈必须带 `--force` —— 不带就只看时刻表，档外直接「不在档上」退出，什么也没验到。
    `--dry-run` 抓帖与行情照走（会写 `data\`），**不发卡、不落档、不推进状态**。
    三条都看到卡面打出来、末行不报错即可；旧栈那条要看到**两张卡**（超短 · 波段）。
+
+   **旧栈的 `--time` 要挑一个 30 分钟线已经收出来的档**（盘后跑用 `15:00`，盘中跑就挑当前
+   已经过的档）—— 备料门按 `--time` 那个时刻核行情，那一刻的线还没出来就 `本档不推`，
+   直接 `return 0`，什么卡也看不见。下面第 5 步同理。
 5. **手动真发一档** —— 两栈各确认自己的群收到：
    ```
    deploy\run_push.bat short --force
@@ -175,7 +179,8 @@ tar --exclude='__pycache__' --exclude='*.pyc' --exclude='.DS_Store' \
 | 代码 | `C:\Users\24966\blogger_ana\old_push\` |
 | 密钥 | `old_push\briefing\.env` —— `FEISHU_WEBHOOK_URL` 指向旧超短群，`FEISHU_WEBHOOK_URL_SWING` 指向旧推送专用群 |
 | 日志 | `old_push\briefing\data\briefing.log` |
-| 手动发一档 | `cd old_push` 后 `python -m briefing.scripts.run_briefing --push --time 15:00` |
+| 行情 | `old_push\data\market\`（日线 `market_data.json` + `intraday\<指数>_30min.json`）—— **开档自己补**，见下 |
+| 手动发一档 | `cd old_push` 后 `python -m briefing.scripts.run_briefing --push --time 15:00`（`--time` 要挑一个 30 分钟线已收出来的档） |
 | 启用 | `foreach($n in 'BriefingDay','BriefingEvening'){Enable-ScheduledTask -TaskName $n}` |
 
 `run_briefing` 没有 `--force` —— 用 `--time` 把决策时刻摆到一个档上。**别加 `--board`**：显式板块
@@ -184,18 +189,26 @@ tar --exclude='__pycache__' --exclude='*.pyc' --exclude='.DS_Store' \
 
 一档里两板块**共享那一次标注**、出两张卡、各推各群 —— 旧栈的超短卡不用单独跑一个任务。
 
+**旧栈的行情由推送链自己长**（2026-09-17 起）：开档第一件事是 `market.prepare_history()`
+把七个主指数的 30 分钟线补到本档时刻 —— 已到本档时刻就跳过不重抓、没到补一次、补完仍不到
+则**本档不推**（02§2.2 / 06§5.3），放在抓帖之前。
+30 分钟线走新浪、交易日每档都补；日线走 akshare 东财、只在盘后补（当天收盘前它没有今天那一行）。
+两个抓取器就是 `old_push\scripts\utils\` 下那两个手动脚本，起档时按文件路径当库调 —— 手动跑法不变。
+补出来的价就是标注期喂给模型、也是 03 打分时锚的那个参考价（`opinion.ref_price`，两条链同源）。
+
 ---
 
 ## 已知注意
 
 | 事 | 说明 |
 |:---|:---|
-| **同档四路并发抓头条** | 一到档位，旧栈抓 46 位（`--workers 5`）、新栈超短 21 位、新栈波段 29 位（都是串行），合起来近百次请求，其中四位博主两栈都抓。头条风控是 IP 级的，真触发「网络环境无法查看」就考虑错开或换网络 |
+| **同档三路并发抓头条** | 一到档位：旧栈一次跑抓 46 位（`--workers 5`），新栈超短 21 位、新栈波段 29 位（都是串行）—— 三个进程、96 次请求，46 位博主两栈都抓、其中 4 位新栈两板块都抓。头条风控是 IP 级的，真触发「网络环境无法查看」就考虑错开或换网络 |
 | **执行时限** | 新栈 30 分钟（两个板块任务各算各的）；旧栈 20 分钟。`IgnoreNew` 下挂住的那一档会占着锁，中间几档直接退出 |
 | **锁** | 每栈一把，OS 级（走 `msvcrt`）—— 进程被杀锁自动放，不留僵尸锁。旧栈两板块共享一把（一次跑），新栈两板块各一把（两次跑） |
 | **控制台是 GBK** | 带 emoji 的输出直接 print 会 `UnicodeEncodeError`（断言全过却非 0 退出）。新栈靠 `PYTHONIOENCODING=utf-8` + 重定向绕开 |
 | **密钥文件是 UTF-8，cmd 按 GBK 读** | `run_push.bat` 的加载循环**必须先过 `findstr` 筛出赋值行** —— 直读整个文件时，中文注释的尾字节被 GBK 当成第二字节、连行尾换行一起吞掉，紧跟其后的 `KEY=value` 并进注释里丢掉。2026-09-16 第一次真发就是这么丢的 `FEISHU_WEBHOOK_URL_SWING`：推送照跑到 `[⑨ 推送]`，卡一张没发，日志里只留一行「没配」。旧栈走 `paths.load_env()`（Python 按 UTF-8 读），不受这条影响 |
 | **密钥文件别拿 PowerShell 直读** | 上面那条 GBK 坑在**读**的一侧同样成立：`Get-Content` 默认按系统 ANSI 解码，中文注释的尾字节连行尾换行一起吞掉，紧跟的 `KEY=value` 并进注释 —— **打出来就像那一行不存在**。核对密钥用 `Get-Content -Encoding UTF8`，或 `scp` 回 Mac 看 |
-| **⚠️ 不在推送时段内同步判读契约** | **新栈**：改 `blogger/parse/prompts.py` 会改规则指纹 → `data\state\parse_cache\` 整批作废。指纹变后的**第一跑**才并得进窗口内全部，那一跑要是落在 `--dry-run` 或中途报错，`push_swing.json` 里留的就还是旧读法的行，往后每档都并不进新的 —— 所以改完读法要**紧接着跑一次 `--init` 重建分布**（06§4）<br>**旧栈**：改 `opinion/prompts.py` 会改 `annotation_fp_input()` 指纹 → `rows_cache` 全量作废、下一档整窗重抽，同一帖在新旧契约下可能给出不同判定（2026-09-09 连续三次同步，导致智由智哉的波段行一天内闪变三次） |
+| **⚠️ 不在推送时段内同步判读契约** | **新栈**：改 `blogger/parse/prompts.py` 会改规则指纹 → `data\state\parse_cache\` 整批作废，**下一档**把窗口内的帖重判一遍、再全部并回状态（06§5.6）—— 不必再跑 `--init`，但那一档会明显变长，别让它顶到 30 分钟时限<br>**旧栈**：改 `opinion/prompts.py` 会改 `annotation_fp_input()` 指纹 → `rows_cache` 全量作废、下一档整窗重抽，同一帖在新旧契约下可能给出不同判定（2026-09-09 连续三次同步，导致智由智哉的波段行一天内闪变三次）。**这份规则文本推送与报告共用** —— 报告链那条路径另有 `old_push/scripts/pipeline/extract_signals_direction.py` 的 `_REPORT_EXTRACT_SUFFIX`（周期口径重述）与 `opinion/verify.py` 的复核条文，改规则要三处一起改，只改一处会让两条链各按各的口径判 |
+| **旧栈新添两处网络依赖** | 2026-09-17 起旧栈开档先补行情：30 分钟线（新浪 7 个请求，每档）＋ 日线（akshare 东财 7 个请求，**仅盘后**——盘前盘中抓是白打，一档一次会把东财打爆）。**补不到本档时刻 → 那一档不推**，两个群都不出卡。新浪全挂时日志留一行 `30分钟线：成功 0/7`，`briefing.log` 里查；东财挂只影响日线（交易日历退到 30 分钟线兜底，注记不受影响） |
 | **`matplotlib` 没装** | 只有 `backtest/render.py` 用它，而推送不跑回测。要在 Windows 上跑回测才需 `pip install matplotlib` |
 | 交易日历 | akshare 拉取失败时回退内置规则；跨年需更新 |

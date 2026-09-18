@@ -114,7 +114,7 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
         log("[④ 抓窗口内的帖]")
         _scrape(cfg, log, wstart, window_only=True)
         log("[⑤ 解析窗口内的帖]")
-        rows = _seed(cfg, wstart, log)
+        rows = _judge(cfg, wstart, log)
         log("[⑥⑦ 攒初始分布]")
     else:
         log("[④ 抓增量帖]")
@@ -355,39 +355,17 @@ def _posts_doc(name: str) -> dict:
 # ── ⑤ 解析 ──────────────────────────────────────────────────────────────
 
 def _judge(cfg: dict, wstart: str, log) -> dict:
-    """初始化之外的那些档 —— 只判**窗口内还没判过的帖**（06§5.5）。
+    """判窗口内还没判过的帖，返回这一位**窗口内全部**的行（06§5.5、§5.6）。
 
-    **窗口之外的一条不判** —— 与这一档的分布无关，判了白花模型钱；真要判它们，
-    报告链自己会判（判断缓存两边共用，03§2.2）。与 `_seed` 同一条口径。
+    **返回「窗口内全部」，不是「这一轮新判出来的」。** 判断缓存是共用的一份
+    （03§2.2）—— 报告链会判它，本栈另一个板块也会判它，谁先判谁就把这条帖
+    「吃掉」：另一个板块那一轮 `judge_posts` 认得它已经判过，不产新行。只取新的
+    就会把它们整批漏掉，卡上少人（06§5.6）。并进状态是幂等的，取回来多并一遍
+    没有代价。
 
-    返回 `博主 → 这一轮新判出来的行`。判不成的博主不进结果 ——
-    他那一条旧条目在状态里照留（06§7）。
-    """
-    fresh = {}
-    for name in cfg["pool"]:
-        if not paths.posts_file(name).exists():
-            continue
-        before = set(cache.load(name)["judged"])
-        try:
-            posts = [p for p in report_flow.load_posts(name)
-                     if consensus.in_window(p.get("pub") or "", wstart)]
-            got, _, _ = report_flow.judge_posts(name, posts, log)
-        except Exception as e:
-            log(f"  {name}：解析出岔子（{e!r}）—— 他那条旧条目照留")
-            continue
-        fresh[name] = [r for pid, entry in got.items() if pid not in before
-                       for r in (entry.get("signals") or [])]
-    return fresh
-
-
-def _seed(cfg: dict, wstart: str, log) -> dict:
-    """初始化 —— 只判**窗口内**那些帖，返回这一位窗口内**全部**的行（06§4）。
-
-    **窗口之外的帖一条不判** —— 与这一档的分布无关，判了白花模型钱；真要判它们，
-    报告链自己会判（判断缓存两边共用，03§2.2）。
-
-    返回的不是「这一轮新判出来的」，而是「窗口内全部」—— 初始化那一次，窗口内的帖
-    多半早就判过了，只取新的会一条都取不到。哪位判岔了就跳过他自己（06§7）。
+    **窗口之外的一条不判、不取** —— 与这一档的分布无关，判了白花模型钱；真要判
+    它们，报告链自己会判（03§2.2）。判不成的博主不进结果 —— 他那一条旧条目在
+    状态里照留（06§7）。
     """
     rows = {}
     for name in cfg["pool"]:

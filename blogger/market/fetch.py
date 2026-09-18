@@ -5,7 +5,9 @@
 **源是外部事实，会变**（2026-09-13 东财整片不通），所以降级不是备选，是常态。
 
 **原子写** —— 先写 `.tmp` 再 `os.replace`。直接覆写的话，写到一半崩了会留下**截断的 JSON**：
-`market.py` 一 import 就抛异常，**全系统停摆**。
+`market.py` 一 import 就抛异常，**全系统停摆**。改名这一步跟着一起重试：两个板块的档
+同一刻起跑，各自把同一批文件读进来再写回去，Windows 上目标文件被对方读着时 `os.replace`
+直接抛 `PermissionError`（13）—— 那不是错，是撞车。
 
 **逐指数落盘** —— 一个指数抓完就写一次。7 个跑完才写的话，第 5 个崩了前 4 个白抓。
 
@@ -135,7 +137,7 @@ def refresh(until: str = "", progress=None) -> dict:
 
 
 def _try(label: str, fn):
-    """同一个源试 `market.retries` 次，间隔从 `market.retry_delay` 秒起、逐次翻倍。
+    """同一个源、或者同一处落盘，试 `market.retries` 次，间隔从 `market.retry_delay` 秒起、逐次翻倍。
 
     全失败抛最后一个异常 —— 交给调用方决定是降级还是放弃。
     """
@@ -157,11 +159,14 @@ def _write_json(path: Path, doc) -> None:
 
     直接覆写的话，写到一半崩了会留下截断的 JSON，`market.py` 一 import 就抛异常，
     **全系统停摆**。
+
+    **改名带重试** —— 撞上另一个板块的档在读同一个文件时，`os.replace` 抛
+    `PermissionError`（13）。见模块开头。
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, path)
+    _try(f"写 {path.name}", lambda: os.replace(tmp, path))
 
 
 # ── 30 分钟线 ───────────────────────────────────────────────────────────

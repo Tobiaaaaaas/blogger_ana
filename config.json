@@ -39,7 +39,7 @@
     "bucket_span": 2
   },
   "push": {
-    "_": "06 推送。两个板块各一份博主池、一个回看窗口、一个飞书群；名单顺序＝卡面上的显示顺序。推送地址走环境变量（超短 FEISHU_WEBHOOK_URL／波段 FEISHU_WEBHOOK_URL_SWING），不进仓库。",
+    "_": "06 推送。两个板块各一份博主池、一个飞书群，回看窗口与时刻表共用；名单顺序＝卡面上的显示顺序。推送地址走环境变量（超短 FEISHU_WEBHOOK_URL／波段 FEISHU_WEBHOOK_URL_SWING），不进仓库。",
     "pools": {
       "short": [
         "星哥投研",

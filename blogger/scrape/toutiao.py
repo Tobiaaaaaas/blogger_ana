@@ -546,9 +546,9 @@ def run(post_url: str, begin_date: str = "", expect: str = "") -> str:
         log(f"  博主：{blogger}｜本人帖 {len(kept)} 条"
             + (f"｜身份不符丢掉 {dropped} 条" if dropped else ""))
 
-        # 置顶帖关：公告位，插在列表最前面，日期可以是任何一天。判定即丢，
-        # 只记「已完成」—— 它不入库，但也不能每轮都为它再取一次详情页。
-        done_ids = load_done(blogger) | {it["post_id"] for it in kept if it["_stick"]}
+        # 置顶帖关：公告位，插在列表最前面，日期可以是任何一天。**只当轮丢，不记
+        # 「已完成」** —— 标记是当轮的，记下来下一轮标记没了也照样取不到（01§3.4）。
+        done_ids = load_done(blogger)
         sticky = [it for it in kept if it["_stick"]]
         kept = [it for it in kept if not it["_stick"]]
 
@@ -621,12 +621,16 @@ def run(post_url: str, begin_date: str = "", expect: str = "") -> str:
                 if new_video:
                     save_done(blogger, done_ids | new_video)
 
-        # 置顶帖也要落进已完成记录 —— 它这回没走详情页，全靠这一步记住，
-        # 否则下一轮它又会被排进 todo。
-        if new_video or sticky:
+        if new_video:
             save_done(blogger, done_ids | new_video)
 
         log(f"[4] 并入")
+        # 落盘前**重读一次主文件**：另一个板块可能在这中间往同一个文件里并过帖，
+        # 拿抓取开始时那份覆盖，会把它的新增整批抹掉。重读一次，只补不抹。
+        latest = load_existing(blogger)
+        if latest:
+            old_posts = latest.get("posts") or old_posts
+            existing = latest
         posts = merge_posts(old_posts, fresh)
         log(f"  新增 {len(fresh)} 条，视频帖丢掉 {len(new_video)} 条"
             f"，置顶帖丢掉 {len(sticky)} 条，没抓到 {blocked} 条｜文件共 {len(posts)} 条")
