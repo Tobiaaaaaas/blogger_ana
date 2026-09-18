@@ -36,9 +36,10 @@ INDICES = [
 ]
 
 
-def fetch_index(symbol, name, start_date, end_date):
+def fetch_index(symbol, name, start_date, end_date, verbose=True):
     """获取单个指数的日线数据"""
-    print(f"  获取{name} ({symbol})...")
+    if verbose:
+        print(f"  获取{name} ({symbol})...")
     try:
         df = ak.stock_zh_index_daily_em(symbol=symbol, start_date=start_date, end_date=end_date)
         df = df.rename(columns={
@@ -50,10 +51,12 @@ def fetch_index(symbol, name, start_date, end_date):
         if "成交量" in df.columns:
             keep_cols.append("成交量")
         df = df[keep_cols]
-        print(f"    {len(df)} 条记录")
+        if verbose:
+            print(f"    {len(df)} 条记录")
         return df
     except Exception as e:
-        print(f"    ❌ 失败: {e}")
+        if verbose:
+            print(f"    ❌ 失败: {e}")
         return None
 
 
@@ -62,18 +65,18 @@ def iso_date(compact):
     return f"{compact[:4]}-{compact[4:6]}-{compact[6:]}"
 
 
-def main():
-    parser = argparse.ArgumentParser(description="获取A股大盘数据")
-    parser.add_argument("--start", default=None, help="起始日期 YYYYMMDD")
-    parser.add_argument("--end", default=None, help="结束日期 YYYYMMDD")
-    args = parser.parse_args()
+def refresh(start=None, end=None, verbose=True):
+    """抓 [start, end] 区间日线，与已有文件合并写回（区间外的旧行与其他指数保留）。
 
-    # 默认获取 2026 年全年 + 前后缓冲
-    start = args.start or "20260101"
-    end = args.end or datetime.now().strftime("%Y%m%d")
+    手动 CLI（main）与推送链起档（briefing.market.refresh_history）共用这一份。
+    返回 (抓到新行的指数名, 抓取失败的指数名)；全部指数都失败 → 不写盘，返回 ([], 全部)。
+    """
+    start = start or "20260101"
+    end = end or datetime.now().strftime("%Y%m%d")
     start_iso, end_iso = iso_date(start), iso_date(end)
 
-    print(f"获取 {start} ~ {end} 大盘数据...")
+    if verbose:
+        print(f"获取 {start} ~ {end} 大盘数据...")
 
     # 读取旧文件，保留未重新抓取的指数与区间外的旧行
     old = {}
@@ -81,15 +84,20 @@ def main():
         try:
             with open(OUTPUT_FILE, encoding="utf-8") as f:
                 old = json.load(f)
-            print(f"已读取旧数据: {', '.join(old.keys())}")
+            if verbose:
+                print(f"已读取旧数据: {', '.join(old.keys())}")
         except Exception as e:
-            print(f"旧数据读取失败（将全量重建）: {e}")
+            if verbose:
+                print(f"旧数据读取失败（将全量重建）: {e}")
 
     result = dict(old)
+    ok, failed = [], []
     for symbol, name in INDICES:
-        df = fetch_index(symbol, name, start, end)
+        df = fetch_index(symbol, name, start, end, verbose=verbose)
         if df is None:
-            print(f"  ⚠️ {name} 获取失败，保留旧数据")
+            if verbose:
+                print(f"  ⚠️ {name} 获取失败，保留旧数据")
+            failed.append(name)
             continue
         new_rows = df.to_dict(orient="records")
         old_rows = [
@@ -100,17 +108,30 @@ def main():
         for r in old_rows + new_rows:
             merged[r["日期"]] = r  # 按日期去重，新行覆盖旧行
         result[name] = [merged[d] for d in sorted(merged)]
+        if new_rows:
+            ok.append(name)
 
     if not result:
-        print("❌ 所有指数获取失败")
-        return
+        if verbose:
+            print("❌ 所有指数获取失败")
+        return [], failed
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ 已保存: {OUTPUT_FILE}")
-    for name, rows in result.items():
-        print(f"  {name}: {len(rows)} 条（{rows[0]['日期']} ~ {rows[-1]['日期']}）")
+    if verbose:
+        print(f"\n✅ 已保存: {OUTPUT_FILE}")
+        for name, rows in result.items():
+            print(f"  {name}: {len(rows)} 条（{rows[0]['日期']} ~ {rows[-1]['日期']}）")
+    return ok, failed
+
+
+def main():
+    parser = argparse.ArgumentParser(description="获取A股大盘数据")
+    parser.add_argument("--start", default=None, help="起始日期 YYYYMMDD")
+    parser.add_argument("--end", default=None, help="结束日期 YYYYMMDD")
+    args = parser.parse_args()
+    refresh(args.start, args.end)
 
 
 if __name__ == "__main__":

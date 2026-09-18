@@ -78,12 +78,14 @@ from . import calendar, config, endpoint, paths
 # briefing 是独立部署单元，兜底把父仓根（paths.REPO_ROOT）补进 sys.path 以便 `import opinion`。
 try:
     from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
+    from opinion import ref_price as o_ref  # noqa: E402
     from opinion import schema as o_schema  # noqa: E402
     from opinion import verify as o_verify  # noqa: E402
 except ImportError:
     if not any(os.path.abspath(p) == os.path.abspath(paths.REPO_ROOT) for p in sys.path):
         sys.path.insert(0, paths.REPO_ROOT)
     from opinion import annotate as o_ann, cache as o_cache, ds as o_ds  # noqa: E402
+    from opinion import ref_price as o_ref  # noqa: E402
     from opinion import schema as o_schema  # noqa: E402
     from opinion import verify as o_verify  # noqa: E402
 
@@ -138,10 +140,15 @@ def _annotate_rows(name, posts):
 
     annotate_blogger 内部走 opinion.ds（3 次重试 + 硬超时）；外层 ROW_MAX_ATTEMPTS 兜底 JSON
     反复解析失败的偶发（与 v16 _call_group 同量级最坏 3×3）。失败 → None → 记 errors 下档重试。
+
+    注记：逐帖注入发帖时刻指数现值（与报告链、打分器同源同口径），规则文本里「未点名指数时按
+    上证现值判带外」要的就是它。行情未覆盖的帖 → None → 该帖不加注记。
     """
+    notes = [o_ref.pub_note((p.get("publish_date") or "").strip()) for p in posts]
     for _attempt in range(ROW_MAX_ATTEMPTS):
         try:
-            rows, _raw = o_ann.annotate_blogger(name, posts, label=f"briefing:layers:{name}")
+            rows, _raw = o_ann.annotate_blogger(name, posts, notes=notes,
+                                                label=f"briefing:layers:{name}")
         except Exception as e:
             log.warning("  %s 标注调用异常（attempt=%d）：%s", name, _attempt + 1, e)
             continue

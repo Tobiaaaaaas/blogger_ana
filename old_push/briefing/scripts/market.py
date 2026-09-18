@@ -7,12 +7,19 @@
   兜底2：仓库内 data/market/market_data.json 最近收盘（离线/接口全挂时）
 """
 import json
+import logging
 import os
 import re
+import sys
+from datetime import datetime
 
 import requests
 
 from . import paths
+
+log = logging.getLogger("briefing")
+
+UTILS_DIR = os.path.join(paths.REPO_ROOT, "scripts", "utils")
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36")
@@ -141,3 +148,131 @@ def market_line(quotes: dict) -> str:
     if total_wan:
         parts.append(f"两市 {_fmt_amount(total_wan)}")
     return " · ".join(parts) if parts else "行情数据获取失败"
+
+
+_UTILS = {}
+
+
+def _util(name):
+    """按文件路径载入 `scripts/utils/` 下的抓取器 —— 它们只有手动 CLI、不在任何包里。
+
+    载入结果缓存：其中一个 import akshare，重载一次要好几秒。"""
+    if name not in _UTILS:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            f"_oldpush_util_{name}", os.path.join(UTILS_DIR, f"{name}.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _UTILS[name] = mod
+    return _UTILS[name]
+
+
+def refresh_history(intraday=True):
+    """把仓库行情补到今天：**日线**（`opinion.ref_price` 的交易日历来源）＋ **30 分钟线**（发帖现值注记的来源）。
+
+    两个抓取器原本只有手动 CLI、没有调度 —— 推送链起档时调一次，增量、抓取失败只记一行不抛
+    （**备不到本档时刻由 `history_ready` 判「本档不推」，不在这里抛**）。
+    补完数据必须重载 `opinion.ref_price`（它导入即装载，不重载看不到新数据）。
+
+    周末整天不抓（行情停在最近交易日是对的，注记走 `_prev_ok` 的周末分支）；
+    30 分钟线在交易日**每档都抓**（盘中一直在长，早档抓过的覆盖不到晚档的帖）；
+    日线**只在盘后补**（它当天收盘前没有今天那一行，盘前盘中抓是白打东财，一档一次会把它打爆）。
+    """
+    now = datetime.now()
+    if now.weekday() >= 5:
+        log.info("行情：周末不抓，用最近交易日收盘")
+        return
+
+    today = now.strftime("%Y-%m-%d")
+    if now.hour >= 15:
+        try:
+            last = _last_daily_date()
+            if last < today:
+                _ok, failed = _util("fetch_market_data").refresh(
+                    start=(last.replace("-", "") if last else None), verbose=False)
+                log.info("日线：末日 %s%s", _last_daily_date() or "?",
+                         f"，失败 {', '.join(failed)}" if failed else "")
+        except Exception as e:
+            log.warning("日线抓取失败（交易日历仍靠 30 分钟线）：%s", e)
+
+    if intraday:
+        try:
+            ok, failed = _util("fetch_market_intraday").refresh(verbose=False)
+            log.info("30分钟线：成功 %d/%d%s", len(ok), len(ok) + len(failed),
+                     f"，失败 {', '.join(failed)}" if failed else "")
+        except Exception as e:
+            log.warning("30分钟线抓取失败：%s", e)
+
+    _o_ref().reload()
+
+
+def prepare_history(now):
+    """备料行情到本档时刻（02§2.2 / 06§5.3）。返回是否备到 —— False = 本档不推。
+
+    已经到本档时刻 → 跳过，不重复抓；没到 → 补一次；补完还不到 → False。
+    """
+    if history_ready(now):
+        return True
+    refresh_history()
+    return history_ready(now)
+
+
+# 30 分钟线的八个收线时刻（02§2.1：每指数每日 8 根，bar 时间 = 收盘时间）
+BAR_TIMES = ("10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00")
+
+
+def history_ready(now):
+    """本档要的 30 分钟线在不在（02§2.2 / 06§5.3）。False = 本档不推。
+
+    要的那根 = **结束时刻不晚于本档时刻的最后一根**；本档落在当天第一根收出来之前
+    （`09:00`／`09:30` 两档，以及盘前、非交易日）→ 退到上一交易日末根。
+
+    **逐指数核** —— 注记点到哪个指数就要哪个指数的线（`ref_price.NOTE_INDICES`，七个）。
+    缺一个就当整档没备到：宁可不出卡，也不静默出一张少了注记的卡。
+    """
+    o_ref = _o_ref()
+    day, hm = _due_bar(now, o_ref)
+    for idx in o_ref.NOTE_INDICES:
+        rows = _bars_on(o_ref.INTRADAY.get(idx, []), day)
+        if not rows or not any(t >= hm for t, _ in rows):
+            return False
+    return True
+
+
+def _bars_on(days, day):
+    """某指数某一天的 30 分钟线 → [(时刻, bar), …]（没有 → 空表）。"""
+    for d, rows in days:
+        if d == day:
+            return rows
+    return []
+
+
+def _due_bar(now, o_ref):
+    """本档需要的那根 30 分钟线 → (日期, 时刻)。"""
+    today, hm = now.strftime("%Y-%m-%d"), now.strftime("%H:%M")
+    if today in o_ref.CAL_SET:
+        due = [t for t in BAR_TIMES if t <= hm]
+        if due:
+            return today, due[-1]
+    return (o_ref.prev_td(today) or today), "15:00"
+
+
+def _o_ref():
+    """`opinion.ref_price` —— briefing 是独立部署单元，兜底把仓根补进 sys.path。"""
+    try:
+        from opinion import ref_price as o_ref
+    except ImportError:
+        if not any(os.path.abspath(p) == os.path.abspath(paths.REPO_ROOT) for p in sys.path):
+            sys.path.insert(0, paths.REPO_ROOT)
+        from opinion import ref_price as o_ref
+    return o_ref
+
+
+def _last_daily_date():
+    """日线文件的末根交易日（读不到 → 空串）。"""
+    try:
+        with open(os.path.join(paths.MARKET_DIR, "market_data.json"), encoding="utf-8") as f:
+            rows = (json.load(f) or {}).get("上证指数") or []
+        return rows[-1]["日期"] if rows else ""
+    except Exception:
+        return ""

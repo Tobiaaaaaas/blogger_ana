@@ -123,9 +123,10 @@ def _render(blogger, posts, bodies=None, style="head", limit=1200, notes=None):
     - 推送走 head（前 1200 字，一帖观点可承载）
     - 报告走 middle（保留头尾，长文结论常在尾部；limit 提到 4000 即长帖全文口径）
 
-    notes：与 posts 对齐的可选逐帖注记列表（None 或空项 → 不加），如 report 端注入的
+    notes：与 posts 对齐的可选逐帖注记列表（None 或空项 → 不加），即
     「[行情@发帖 …] 发帖时刻指数现值」（见 opinion.ref_price.pub_note）。注记追加在每帖段末，
-    属**模型可见文本**（同时入 visible，与 quote 逐字门同源）。推送调用不带 → 零影响。
+    属**模型可见文本**（同时入 visible，与 quote 逐字门同源）。**推送与报告两条链都注入** ——
+    规则文本里「未点名指数时按上证现值判带外」要的就是这个现值。
 
     返回 (lines, visible)：lines 为整块渲染行（【博主】头 + （N 条帖，新→旧） + 每帖段）；
     visible[i] = 第 i 帖的**模型可见整段**（[i] 发帖 pd｜标题\\n正文〔\\n注记〕）——quote 逐字门与
@@ -283,7 +284,7 @@ def _clean_no_view(nv_raw, pns, n_posts):
 
 
 def annotate_blogger(blogger, posts, bodies=None, prompt=None, style="head", limit=1200,
-                     label="", disposition=True):
+                     label="", disposition=True, notes=None):
     """一位博主一组窗口帖 → 至多两次 DeepSeek 调用 → 规范行列表（共享 ANNOTATION prompt）。
 
     2026-09-08 解析加固（真实 DeepSeek 抽查 B/C/D 后定稿，硬契约只剩一条）：
@@ -303,9 +304,11 @@ def annotate_blogger(blogger, posts, bodies=None, prompt=None, style="head", lim
 
     返回 (rows, raw)；rows=None = 调用失败/结构异常/到案仍缺（不缓存，调用方计入 errors）。
     rows 为 to_canonical 校验后的规范行（可空列表 = 该博主窗口真无方向观点，同样可缓存）。
+    notes：与 posts 对齐的逐帖行情注记（None → 不加），透传 _render。
     """
     prompt = prompt or prompts.ANNOTATION_SYSTEM_PROMPT
-    msg_lines, visible = _render(blogger, posts, bodies=bodies, style=style, limit=limit)
+    msg_lines, visible = _render(blogger, posts, bodies=bodies, style=style, limit=limit,
+                                 notes=notes)
     msg = "\n".join(msg_lines)
     if disposition:
         msg += DISPOSITION_SUFFIX

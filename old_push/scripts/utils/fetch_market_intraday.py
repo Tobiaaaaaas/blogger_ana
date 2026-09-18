@@ -50,7 +50,7 @@ SCALE = "30"
 DATALEN = 5000  # 30 分钟 × 5000 根 ≈ 625 交易日（2024 → 今），覆盖全 2026
 
 
-def fetch_intraday(symbol, retries=3):
+def fetch_intraday(symbol, retries=3, verbose=True):
     """拉取单个指数 30 分钟线，返回 [{time,open,high,low,close,volume}] 或 None"""
     url = f"{SINA_URL}?symbol={symbol}&scale={SCALE}&ma=no&datalen={DATALEN}"
     headers = {"User-Agent": UA, "Referer": "https://finance.sina.com.cn/"}
@@ -77,7 +77,8 @@ def fetch_intraday(symbol, retries=3):
                 raise ValueError("无可解析的 bar")
             return out
         except Exception as e:
-            print(f"    尝试{i + 1}/{retries} 失败: {str(e)[:100]}")
+            if verbose:
+                print(f"    尝试{i + 1}/{retries} 失败: {str(e)[:100]}")
             time.sleep(2 + i * 2)
     return None
 
@@ -106,39 +107,37 @@ def coverage_gap(present_dates, market_file, since):
     return [d for d in trading if d not in present]
 
 
-def main():
-    parser = argparse.ArgumentParser(description="获取 A 股指数 30 分钟线（新浪）")
-    parser.add_argument("--test", action="store_true", help="只拉第 1 个指数")
-    parser.add_argument("--out", default=INTRADAY_DIR, help=f"输出目录（默认 {INTRADAY_DIR}）")
-    parser.add_argument("--since", default=DEFAULT_SINCE, help=f"覆盖 QC 起点（默认 {DEFAULT_SINCE}）")
-    args = parser.parse_args()
+def refresh(indices=None, out_dir=INTRADAY_DIR, since=DEFAULT_SINCE, verbose=True):
+    """增量抓 30 分钟线 → `<out_dir>/<指数>_30min.json`（按 time 去重合并，新行覆盖旧行）。
 
-    os.makedirs(args.out, exist_ok=True)
-    indices = INDICES[:1] if args.test else INDICES
+    手动 CLI（main）与推送链起档（briefing.market.refresh_history）共用这一份。
+    返回 (成功指数名, 失败指数名)；失败指数保留旧文件不动。
+    """
+    indices = INDICES if indices is None else indices
+    os.makedirs(out_dir, exist_ok=True)
+    ok, failed = [], []
 
-    print("=" * 62)
-    print(f"  新浪 30 分钟线下载 | {len(indices)} 指数 | scale={SCALE} datalen={DATALEN}")
-    print(f"  输出: {args.out}/")
-    print("=" * 62)
-
-    results = []
     for i, (symbol, name) in enumerate(indices):
-        print(f"[{i + 1}/{len(indices)}] {name} ({symbol})")
-        out_file = os.path.join(args.out, f"{name}_30min.json")
+        out_file = os.path.join(out_dir, f"{name}_30min.json")
+        if verbose:
+            print(f"[{i + 1}/{len(indices)}] {name} ({symbol})")
 
         existing = []
         if os.path.exists(out_file):
             try:
                 with open(out_file, encoding="utf-8") as f:
                     existing = (json.load(f) or {}).get("bars", [])
-                print(f"  已有旧数据 {len(existing)} 根，增量合并")
+                if verbose:
+                    print(f"  已有旧数据 {len(existing)} 根，增量合并")
             except Exception as e:
-                print(f"  旧文件读取失败（将重建）: {str(e)[:80]}")
+                if verbose:
+                    print(f"  旧文件读取失败（将重建）: {str(e)[:80]}")
 
-        rows = fetch_intraday(symbol)
+        rows = fetch_intraday(symbol, verbose=verbose)
         if rows is None:
-            print(f"  ❌ 抓取失败（保留旧数据）")
-            results.append((name, False, len(existing)))
+            if verbose:
+                print("  ❌ 抓取失败（保留旧数据）")
+            failed.append(name)
             if i < len(indices) - 1:
                 time.sleep(3)
             continue
@@ -158,17 +157,34 @@ def main():
             json.dump(result, f, ensure_ascii=False, indent=2)
 
         # 2026 覆盖 QC（以上证交易日历为基准）
-        gap = coverage_gap(dates, MARKET_FILE, args.since) if not args.test else None
-        gap_txt = f" | 2026 缺失交易日 {len(gap)} 个" if gap is not None else ""
-        print(f"  ✅ {len(bars)} 根 / {len(dates)} 天 | {dates[0]} ~ {dates[-1]}{gap_txt}")
-        results.append((name, True, len(bars)))
+        gap = coverage_gap(dates, MARKET_FILE, since) if len(indices) > 1 else None
+        if verbose:
+            gap_txt = f" | 2026 缺失交易日 {len(gap)} 个" if gap is not None else ""
+            print(f"  ✅ {len(bars)} 根 / {len(dates)} 天 | {dates[0]} ~ {dates[-1]}{gap_txt}")
+        ok.append(name)
         if i < len(indices) - 1:
             time.sleep(3)
 
+    return ok, failed
+
+
+def main():
+    parser = argparse.ArgumentParser(description="获取 A 股指数 30 分钟线（新浪）")
+    parser.add_argument("--test", action="store_true", help="只拉第 1 个指数")
+    parser.add_argument("--out", default=INTRADAY_DIR, help=f"输出目录（默认 {INTRADAY_DIR}）")
+    parser.add_argument("--since", default=DEFAULT_SINCE, help=f"覆盖 QC 起点（默认 {DEFAULT_SINCE}）")
+    args = parser.parse_args()
+
+    indices = INDICES[:1] if args.test else INDICES
+    print("=" * 62)
+    print(f"  新浪 30 分钟线下载 | {len(indices)} 指数 | scale={SCALE} datalen={DATALEN}")
+    print(f"  输出: {args.out}/")
+    print("=" * 62)
+
+    ok, failed = refresh(indices=indices, out_dir=args.out, since=args.since)
+
     print("-" * 62)
-    failed = [r for r in results if not r[1]]
-    ok = [r for r in results if r[1]]
-    print(f"成功 {len(ok)}/{len(results)} 指数 | 失败: {', '.join(r[0] for r in failed) or '无'}")
+    print(f"成功 {len(ok)}/{len(ok) + len(failed)} 指数 | 失败: {', '.join(failed) or '无'}")
     sys.exit(1 if failed else 0)
 
 

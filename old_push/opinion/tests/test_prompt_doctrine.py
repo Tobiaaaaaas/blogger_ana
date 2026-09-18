@@ -166,10 +166,29 @@ _has(D_REV,                                  # 复核镜像：fix→nweek / 复�
 _has(V_PUSH, "「本周」已走完时发的 `week` 行", label="推送 verify 条目 9 同达")
 _has(V_REPORT, "「本周」已走完时发的 `week` 行", label="报告 verify 条目 9 同达")
 
-# ── 具体日期口径（D3 一致）：不产 d:YYYY-MM-DD，自然日差落 tN / 远期 long ──
-_has(P, "不写 d:YYYY-MM-DD", "自然日差", "t10", label="共享 prompt 具体日期落档位")
-_not_has(P, "→ d:YYYY-MM-DD", label="共享 prompt 无具体日期→d: 旧指令")
-_has(SUFFIX, "不写 d:YYYY-MM-DD", "自然日差", label="报告后缀具体日期同口径")
+# ── 具体日期口径（2026-09-17 放开）：直接落 d:YYYY-MM-DD；带周期词跟词走；远期 long ──
+_has(P, "直接落 `d:YYYY-MM-DD`", "不要折算成 tN", "跟词走",
+     label="共享 prompt 具体日期落 d:")
+_not_has(P, "不写 d:YYYY-MM-DD", label="共享 prompt 无「不写 d:」旧指令")
+_has(SUFFIX, "直接落 `d:YYYY-MM-DD`", "不要折算成 tN",
+     label="报告后缀具体日期同口径")
+
+# ── 2026-09-17 规则扩面：核心预测句 / 扩大认定四条 / 该 drop 的新几类 / 带外不产 ──
+_has(P, "先定位核心预测句", "只有核心预测句才看三元组", label="共享 prompt 核心预测句")
+_has(P, "否定式", "委婉式", "戒备式", "筑顶式", "形态词带上方向补语就是方向",
+     label="共享 prompt 扩大认定四条＋形态补语")
+_has(P, "量能修饰的形态词", "观察句", "开盘形态", "机制／目的推演", "跨句指代",
+     "表态度不给动作", "立场自述",
+     label="共享 prompt 该 drop 的新几类")
+_has(D_NO, "骑墙不产", "状态假设不产（与条件式同类）", "从句一律不产（不分主从）",
+     label="共享教义 骑墙／状态假设／从句")
+_has(P, "带外一律不产", "不靠点位反查归到别的指数", label="共享 prompt 未点名指数带外不产")
+_not_has(P, "按带宽重判对象", label="共享 prompt 无「重判到别只指数」旧指令")
+_has(P, "半导体/芯片", label="共享 prompt 半导体/芯片 归 科创50")
+_not_has(P, "恒科/半导体/电池", label="共享 prompt 半导体 不在不可映射板块清单")
+_has(D_REV, "12. **该 keep 的五类", "13. **该 drop 的十类",
+     "14. **未点名指数 + 点位带外", "15. **`d:YYYY-MM-DD` 不是编码错",
+     label="DOCTRINE_REVIEW 2026-09-17 扩面四条")
 
 # ── 推送复核：条件/形态主句硬凑 d → drop/fix；净方向 keep；操作 vs 状态 ──
 _has(V_PUSH,

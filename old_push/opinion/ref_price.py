@@ -57,10 +57,32 @@ def _load_intraday():
     return out
 
 
+def _load_cal(market, intraday):
+    """交易日历 = 日线交易日 ∪ 有 30 分钟线的日子。
+
+    并集是必须的：日线当天收盘前不含今天，只看日线的话**今天发的帖永远算不出交易日**，
+    `_prev_ok` 会把它当「数据末日之后的工作日」拒发注记 —— 而 30 分钟线当天盘中就有了。
+    两边都是「市场开过门」的硬证据，并起来只会更全。"""
+    days = {str(r.get('日期')) for r in market.get('上证指数', [])}
+    days |= {d for d, _ in intraday.get('上证指数', [])}
+    return sorted(days)
+
+
 MARKET = _load_market()
-CAL = sorted(r['日期'] for r in MARKET['上证指数'])   # 交易日历（上证指数为基准）
-CAL_SET = set(CAL)
 INTRADAY = _load_intraday()
+CAL = _load_cal(MARKET, INTRADAY)     # 交易日历（上证指数为基准）
+CAL_SET = set(CAL)
+
+
+def reload():
+    """重新装载行情 —— 抓取器把文件补到今天之后必须调一次（本模块**导入即装载**）。
+
+    与 blogger/common/market.py 的 reload() 同一件事，供推送链起档补完行情后刷新。"""
+    global MARKET, CAL, CAL_SET, INTRADAY
+    MARKET = _load_market()
+    INTRADAY = _load_intraday()
+    CAL = _load_cal(MARKET, INTRADAY)
+    CAL_SET = set(CAL)
 
 
 def _prev_ok(pd_):
