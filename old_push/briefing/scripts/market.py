@@ -248,7 +248,11 @@ def _bars_on(days, day):
 
 
 def _due_bar(now, o_ref):
-    """本档需要的那根 30 分钟线 → (日期, 时刻)。"""
+    """本档需要的那根 30 分钟线 → (日期, 时刻)。
+
+    **门要的不是注记取价那根**（02§2.1：盘中取结束时刻严格晚于发帖时刻的第一根）—— 门只问
+    「本档时刻的数据到没到」，按取价那根核，每个盘中档都会当场判「本档不推」（06§5.3）。
+    """
     today, hm = now.strftime("%Y-%m-%d"), now.strftime("%H:%M")
     if today in o_ref.CAL_SET:
         due = [t for t in BAR_TIMES if t <= hm]

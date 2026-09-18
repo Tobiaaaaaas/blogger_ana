@@ -44,7 +44,7 @@ BAR_ENDS = ("10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:0
 
 def run(board: str, init: bool = False, dry_run: bool = False, force: bool = False,
         log=print) -> int:
-    """推一档（或建一次窗口）。返回 0 成功、1 这一档没推成、2 出错。"""
+    """推一档（或建一次窗口）。返回 0 成功、1 本档没推成、2 出错。"""
     cfg = conf.load(board)
     if not cfg["pool"]:
         log(f"`push.pools.{board}` 里一位都没有 —— 没得推。")
@@ -144,7 +144,7 @@ def _tick(cfg, stamp, day, hhmm, trading, init, dry_run, log) -> int:
 
     log("[⑨ 推送]")
     if not feishu.send(cfg, text, log):
-        feishu.alert(cfg, f"【{cfg['name']}板】{stamp} 这一档卡片没发出去，本档作废，"
+        feishu.alert(cfg, f"【{cfg['name']}板】{stamp} 本档卡片没发出去，本档作废，"
                           f"下一档带的是最新的分布。")
         return 1
 
@@ -160,7 +160,7 @@ def _calendar(log) -> bool:
     """日历过期就先补一张（01§10.3）。**补不上 → 数不出日子，整条命令到此为止。**
 
     这一下必须在**①之前** —— 拿一张过期的日历判「今天是不是交易日」，会把交易日
-    当成休市日、用错时刻表，甚至把这一档静悄悄地跳过去。
+    当成休市日、用错时刻表，甚至把本档静悄悄地跳过去。
     """
     if not fetch.calendar_stale():
         return True
@@ -232,7 +232,9 @@ def _baseline(day: str, hhmm: str, trading: bool) -> tuple[str, str]:
     **一句话：要「结束时刻不晚于本档时刻」的最后一根。** 本档时刻落在当天第一根收出来
     之前（`09:30` 档、盘前、非交易日）就退到上一交易日末根。
 
-    这与 02§2.1 取现值是同一条规则 —— 核的就是「拿本档时刻当发帖时刻，注记取不取得到」。
+    **这与注记取价不是同一根** —— 02§2.1 取的是「覆盖本档时刻」的那一根（盘中取结束时刻
+    严格晚于发帖时刻的第一根），与本档的收盘价那根在盘中档差一根。门问的只是「本档时刻的
+    数据到没到」，按取价那根核，每个盘中档都会当场判「本档不推」。
     """
     hm = _minutes(hhmm)
     if trading and hm is not None and hm >= market.SESSION_AM[0]:
@@ -313,7 +315,7 @@ def _scrape(cfg: dict, log, wstart: str = "", window_only: bool = False) -> None
                 _restore_scrape_time(name, before)
             if not got:
                 log(f"  {name}：没抓成 —— 只影响他自己")
-            # 抓完就地校验（01§9）—— 硬失败算他这一档抓失败，只影响他自己
+            # 抓完就地校验（01§9）—— 硬失败算他本档抓失败，只影响他自己
             elif verify.verify(got, start, log=log) != 0:
                 log(f"  {name}：校验有硬失败 —— 只影响他自己")
         except Exception as e:
@@ -363,7 +365,7 @@ def _judge(cfg: dict, wstart: str, log) -> dict:
     就会把它们整批漏掉，卡上少人（06§5.6）。并进状态是幂等的，取回来多并一遍
     没有代价。
 
-    **窗口之外的一条不判、不取** —— 与这一档的分布无关，判了白花模型钱；真要判
+    **窗口之外的一条不判、不取** —— 与本档的分布无关，判了白花模型钱；真要判
     它们，报告链自己会判（03§2.2）。判不成的博主不进结果 —— 他那一条旧条目在
     状态里照留（06§7）。
     """
@@ -446,10 +448,10 @@ def _merge(cfg: dict, book: dict, rows: dict, now: str, wstart: str, log) -> Non
 # ── ⑧ 计数 ──────────────────────────────────────────────────────────────
 
 def _pick(cfg: dict, book: dict, now: str, wstart: str, log) -> list[dict]:
-    """每位取**最新**的那条（06§5.6 第 3 步的三级判据）—— 就是他这一档的立场。
+    """每位取**最新**的那条（06§5.6 第 3 步的三级判据）—— 就是他本档的立场。
 
     按**池子里的顺序**返回 —— 名单顺序就是卡面上的显示顺序，不重排。
-    取不到的那位这一档不显示、不计数；他下次发了新帖再回来（06§5.7）。
+    取不到的那位本档不显示、不计数；他下次发了新帖再回来（06§5.7）。
     """
     picked = []
     for name in cfg["pool"]:

@@ -80,12 +80,12 @@ def derive(sig: dict) -> dict:
 
 
 def candidate(rec: dict, now: str, wstart: str) -> dict | None:
-    """这一档里，这条信号还算不算数。算就原样返回，不算返回 None。`rec` 是 `derive` 过的。
+    """本档里，这条信号还算不算数。算就原样返回，不算返回 None。`rec` 是 `derive` 过的。
 
     三条淘汰按 §5.7 的次序走：滑出窗口 → 终点没开市 → 终点已过。
     """
     pub = rec.get("pub") or ""
-    if not pub or pub > now:              # **前视**：这一档只看 pub ≤ 本档时刻的帖（05§3）
+    if not pub or pub > now:              # **前视**：本档只看 pub ≤ 本档时刻的帖（05§3）
         return None
     if not in_window(pub, wstart):
         return None

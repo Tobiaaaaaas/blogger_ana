@@ -376,7 +376,7 @@ def _process_board(key, anchored, counts, posters, mkt_text, now, date_str, hm):
     """
     c = counts[key]
     log.info("[%s] %d多/%d空（%d/%d 表态）", key, c["bull"], c["bear"], c["shown"], c["members"])
-    # 2026-09-10：每档上卡行溯源——事后核对"这一档到底上了谁的哪条行"（板/帖/spec/horizon/
+    # 2026-09-10：每档上卡行溯源——事后核对"本档到底上了谁的哪条行"（板/帖/spec/horizon/
     # 验证终点/anchor）。此前排查"某博主某档有、某档无"时缺这层可观测性，只能靠反推。
     for name, r in (anchored or {}).items():
         ep = r.get("endpoint")

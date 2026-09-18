@@ -25,7 +25,7 @@ def address(cfg: dict) -> str:
 def send(cfg: dict, text: str, log=print) -> bool:
     """把卡片发到**本板块自己的群**。失败重试 `push.retries` 次，间隔从 `retry_delay` 秒起递增。
 
-    **重试仍失败 → 不补发**：这一档就丢了，下一档带的是最新的分布（06§5.10）。
+    **重试仍失败 → 不补发**：本档就丢了，下一档带的是最新的分布（06§5.10）。
     发提醒这件事由调用方决定（`alert`）。
     """
     url = address(cfg)

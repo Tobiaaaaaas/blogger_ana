@@ -29,7 +29,7 @@ def fallback(counts: tuple[int, int]) -> str:
 
 
 def write(cfg: dict, picked: list[dict], counts: tuple[int, int], log=print) -> str:
-    """写总结。**调不通不算这一档失败** —— 兜底成一行计数，卡照发。"""
+    """写总结。**调不通不算本档失败** —— 兜底成一行计数，卡照发。"""
     n_long, n_short = counts
     body = [f"板块：{cfg['name']}板块", f"计数：{n_long}多 / {n_short}空", ""]
     body.append("上卡的条数（按池子顺序）：")
