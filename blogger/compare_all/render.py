@@ -85,7 +85,7 @@ def board_section(b: dict) -> list[str]:
 
 
 def _table(rows: list[dict], drop_sides: bool) -> list[str]:
-    """**加粗的那一列 = 平均分** —— 三张榜一律按它降序（04§5.1）。"""
+    """**加粗的那一列 = 平均分** —— 各榜一律按它降序（04§5.1）。"""
     cols = COLUMNS + (() if drop_sides else SIDES)
     L = ["| " + " | ".join(cols) + " |",
          "|:---:|:---|---:|---:|---:|---:|---:|"

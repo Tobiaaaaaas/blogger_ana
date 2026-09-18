@@ -70,7 +70,7 @@ def to_signal(raw: dict, post: dict) -> tuple[dict | None, str | None]:
     spec = str(raw.get("spec") or "")
     if not market.spec_ok(spec):
         return None, f"周期 spec 不在档位表里或语义荒谬（{spec!r}）"
-    # `d:` 是**未来**的具体日期（02§4.3）—— 早于发帖日的是回顾，不是预测
+    # `d:` 是**未来**的具体日期（02§4.1）—— 早于发帖日的是回顾，不是预测
     if spec.startswith("d:") and spec[2:] < post["pub"][:10]:
         return None, f"具体日期 {spec[2:]} 早于发帖日，是回顾不是预测"
 
